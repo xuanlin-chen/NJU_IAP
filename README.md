@@ -1,5 +1,5 @@
 # 南京大学信息聚合平台（NJU Information Aggregation Platform)
-懒得写readme初稿了，用cac的后面在根据需求和进展改吧
+懒得写readme初稿了，用cac的后面再根据需求和进展改吧
 
 面向本科生的信息渠道太多了，如果不能及时关注所有的渠道，可能会出现信息错漏的情况
 
