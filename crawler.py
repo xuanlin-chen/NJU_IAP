@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import re
-
+import random
 
 def read_csv_links(csv_file):
     """从 CSV 文件中读取链接"""
@@ -101,7 +101,8 @@ def crawl_and_save(link, link_index):
 
     try:
         driver.get(link)
-        time.sleep(3)
+        sleep_time = random.uniform(1, 3)
+        time.sleep(sleep_time)
         html = driver.page_source
 
         # 处理文字内容
