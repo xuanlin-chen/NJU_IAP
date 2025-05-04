@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 import re
 import random
 
+
 def read_csv_links(csv_file):
     """从 CSV 文件中读取链接"""
     links = []
@@ -22,25 +23,25 @@ def read_csv_links(csv_file):
 
 def create_output_folders():
     """创建输出文件夹"""
-    if not os.path.exists("output"):
-        os.makedirs("output")
-    if not os.path.exists("output/text"):
-        os.makedirs("output/text")
-    if not os.path.exists("output/images"):
-        os.makedirs("output/images")
+    if not os.path.exists("output1"):
+        os.makedirs("output1")
+    if not os.path.exists("output1/markdown"):  # 修改文件夹名称
+        os.makedirs("output1/markdown")
+    if not os.path.exists("output1/images"):
+        os.makedirs("output1/images")
 
 
 def save_text_as_text(text_content, link_index):
-    """将文字内容保存为普通文本文件"""
-    file_path = f"output/text/text_{link_index}.txt"
+    """将文字内容保存为 Markdown 文件"""
+    file_path = f"output1/markdown/markdown_{link_index}.md"  # 修改文件扩展名为 .md
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(text_content)
-    print(f"文字内容已保存：{file_path}")
+    print(f"Markdown 内容已保存：{file_path}")
 
 
 def save_images(img_urls, link_index):
     """保存图片到对应的文件夹"""
-    img_folder = f"output/images/images_{link_index}"
+    img_folder = f"output1/images/images_{link_index}"
     if not os.path.exists(img_folder):
         os.makedirs(img_folder)
     for i, img_url in enumerate(img_urls):
@@ -56,35 +57,71 @@ def save_images(img_urls, link_index):
 
 
 def process_text_content(html):
-    """处理 HTML 内容，提取并格式化文字"""
+    """处理 HTML 内容，提取并格式化文字为 Markdown"""
     soup = BeautifulSoup(html, "html.parser")
 
-    # 提取文章标题
-    title = soup.find("h1")
-    if title:
-        title_text = f"{title.get_text()}\n\n"
-    else:
-        title_text = ""
+    # 提取所有文本内容
+    text_content = []
 
-    # 提取文章内容
-    content = ""
-    for element in soup.find_all(["p", "h2", "h3", "ul", "ol", "li"]):
-        if element.name == "p":
-            content += f"{element.get_text()}\n\n"
-        elif element.name == "h2":
-            content += f"=== {element.get_text()} ===\n\n"
-        elif element.name == "h3":
-            content += f"--- {element.get_text()} ---\n\n"
-        elif element.name in ["ul", "ol"]:
-            list_items = element.find_all("li")
+    # 遍历所有标签，提取文本并转换为 Markdown
+    for element in soup.find_all(True):
+        if element.name == 'p':
+            # 段落文本
+            text = element.get_text(strip=True)
+            if text:
+                text_content.append(text)
+        elif element.name == 'h1':
+            # 一级标题
+            text = element.get_text(strip=True)
+            if text:
+                text_content.append(f"# {text}")
+        elif element.name == 'h2':
+            # 二级标题
+            text = element.get_text(strip=True)
+            if text:
+                text_content.append(f"## {text}")
+        elif element.name == 'h3':
+            # 三级标题
+            text = element.get_text(strip=True)
+            if text:
+                text_content.append(f"### {text}")
+        elif element.name == 'img':
+            # 图片（图片的 URL 会在 save_images 中处理）
+            continue
+        elif element.name == 'ul' or element.name == 'ol':
+            # 列表
+            list_items = element.find_all('li')
             for item in list_items:
-                content += f"- {item.get_text()}\n"
-            content += "\n"
+                text = item.get_text(strip=True)
+                if text:
+                    if element.name == 'ul':
+                        text_content.append(f"- {text}")
+                    else:
+                        text_content.append(f"1. {text}")
+        elif element.name == 'a':
+            # 链接
+            text = element.get_text(strip=True)
+            href = element.get('href')
+            if text and href:
+                text_content.append(f"[{text}]({href})")
+        elif element.name == 'strong':
+            # 加粗
+            text = element.get_text(strip=True)
+            if text:
+                text_content.append(f"**{text}**")
+        elif element.name == 'em':
+            # 斜体
+            text = element.get_text(strip=True)
+            if text:
+                text_content.append(f"*{text}*")
 
-    content = re.sub(r"\n{2,}", "\n\n", content)
-    content = content.replace('\xa0', " ")
-
-    return title_text + content
+    # 将文本内容合并为一个字符串
+    markdown_content = "\n\n".join(text_content)
+    index = markdown_content.find("精彩荐读")
+    if index != -1:
+        return markdown_content[:index]
+    else:
+        return markdown_content
 
 
 def crawl_and_save(link, link_index):

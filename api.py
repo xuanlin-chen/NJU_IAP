@@ -3,6 +3,7 @@ import requests
 import time
 import random
 import csv
+import os
 headers = {
     "cookie":'',
     "user-agent":''
@@ -38,13 +39,25 @@ def page(num=1):                             #要请求的文章页数
     return create_time,title,link
 
 if __name__ == '__main__':
-    (time,tle,lik) = page(5)
-    with open('articles.csv', 'w', newline='', encoding='utf-8-sig') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(['时间','标题', '链接'])  # 写入表头
-        for x, y, z in zip(time, tle, lik):
-            writer.writerow([x, y, z])  # 逐行写入数据
+    existing_links = set()
+    if os.path.exists('articles.csv'):
+        with open('articles.csv', 'r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                existing_links.add(row['链接'])
 
+    # 获取最新文章数据
+    create_times, titles, links = page(5)
+
+    # 生成标签数据
+    labels = [0 if link in existing_links else 1 for link in links]
+
+    # 写入更新后的CSV文件
+    with open('articles.csv', 'w', encoding='utf-8-sig', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['时间', '标题', '链接', '标签'])
+        for ct, tt, lk, lb in zip(create_times, titles, links, labels):
+            writer.writerow([ct, tt, lk, lb])
     # 可选：保留原有打印输出
-    for x, y, z in zip(time, tle, lik):
-        print(x, y, z)
+    for ct, tt, lk, lb in zip(create_times, titles, links, labels):
+        print(ct, tt, lk, lb)
