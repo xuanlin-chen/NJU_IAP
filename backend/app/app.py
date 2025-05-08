@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)
 
 # 数据库配置
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://crawler:*********@47.122.71.85:3306/information_for_students'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://crawler:241880625@47.122.71.85:3306/information_for_students?charset=utf8mb4'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # OpenAI配置（需替换为您的API密钥）
