@@ -1,0 +1,18 @@
+[project]
+name = "nju-iap"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.13.4",
+    "curl-cffi>=0.10.0",
+    "datetime>=5.5",
+    "flask>=3.1.0",
+    "openai>=1.78.0",
+    "pillow>=11.2.1",
+    "playwright>=1.52.0",
+    "pymysql>=1.1.1",
+    "requests>=2.32.3",
+    "selenium>=4.32.0",
+]
