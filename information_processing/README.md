@@ -15,7 +15,7 @@ graph LR
 | `db_importer.py`         | json导入模块，包含：<br>- `save_to_database()` 数据插入函数<br>- `generate_sql()` SQL生成函数<br>- `process_item()`  `parse_datetime()` 数据清洗函数 |
 
 # 相关配置
-1. 接口路径MARKDOWN_PATH
+1. 接口路径MARKDOWN_PATH，要求接收md格式的文档，且文档最后要**附上原文链接**
 2. 大模型API设置
 3. 数据库配置DB_CONFIG
 
