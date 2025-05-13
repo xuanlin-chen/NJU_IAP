@@ -1,44 +1,25 @@
-import json
+# 导入数据库的几个函数
 import pymysql
 from datetime import datetime
 
 
-def process_json_to_db(json_path, db_config):
-    """
-    处理JSON文件并导入数据库
-    :param json_path: JSON文件路径
-    :param db_config: 数据库配置字典
-    """
-    # 读取JSON文件
-    with open(json_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-
-    # 建立数据库连接
+def save_to_database(json_data, db_config):
     conn = pymysql.connect(**db_config)
     cursor = conn.cursor()
 
     try:
-        # 获取类型并确定表名
-        table_name = data['类型']
-
-        # 预处理数据：转换数组和特殊字段
-        processed = process_item(data)
-
-        # 动态生成插入语句
+        table_name = json_data['类型']
+        processed = process_item(json_data)
         sql, values = generate_insert_sql(table_name, processed)
-
-        # 执行SQL
         cursor.execute(sql, values)
-
         conn.commit()
-        print(f"成功插入数据")
+        return True
     except Exception as e:
         conn.rollback()
-        print(f"数据插入失败: {str(e)}")
+        raise RuntimeError(f"数据库错误: {e}")
     finally:
         cursor.close()
         conn.close()
-
 
 def process_item(item):
     # 处理单个数据项：类型转换和格式化
@@ -88,17 +69,3 @@ def generate_insert_sql(table_name, data):
 
     sql = f"INSERT INTO `{table_name}` ({columns_str}) VALUES ({placeholders_str})"
     return sql, values
-
-
-if __name__ == "__main__":
-    # 数据库配置
-    db_config = {
-        'host': '47.122.71.85',
-        'user': 'crawler',
-        'password': '241880625',
-        'database': 'information_for_students',
-        'charset': 'utf8mb4'
-    }
-
-    # 使用示例
-    process_json_to_db('./data_test/test.json', db_config)
