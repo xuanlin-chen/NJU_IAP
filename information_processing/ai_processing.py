@@ -15,6 +15,7 @@ MARKDOWN_PATH = "C:/Users/ASUS/Desktop/input"
 # JSON_STORAGE_PATH = "C:/Users/ASUS/Desktop/JSON"  # JSON文件存入路径，仅用于保证代码完整性，整合到数据库导入部分时注释掉
 
 # 数据库配置信息
+# 可以用本地数据库测试一下
 DB_CONFIG = {
     'host': '47.122.71.85',
     'user': '******',
