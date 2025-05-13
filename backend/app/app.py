@@ -10,16 +10,16 @@ def create_app():
     CORS(app)
     
     # Load configuration
-    from config.settings import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
+    from .config.settings import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
     
     # Initialize database
-    from models.db import init_app as init_db
+    from .models.db import init_app as init_db
     init_db(app)
     
     # Register routes
-    from routes import init_app as init_routes
+    from .routes import init_app as init_routes
     init_routes(app)
     
     return app
