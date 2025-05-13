@@ -1,5 +1,4 @@
 import csv
-import os
 import time
 import requests
 from selenium import webdriver
@@ -7,8 +6,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
-import re
 import random
+import sys
+import os
+
+# 添加父目录到系统路径
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+# 导入信息处理模块
+from information_processing.information_filter import process_single_article
 
 
 def read_csv_links(csv_file):
@@ -19,41 +25,6 @@ def read_csv_links(csv_file):
         for row in reader:
             links.append(row['链接'])
     return links
-
-
-def create_output_folders():
-    """创建输出文件夹"""
-    if not os.path.exists("output1"):
-        os.makedirs("output1")
-    if not os.path.exists("output1/markdown"):  # 修改文件夹名称
-        os.makedirs("output1/markdown")
-    if not os.path.exists("output1/images"):
-        os.makedirs("output1/images")
-
-
-def save_text_as_text(text_content, link_index):
-    """将文字内容保存为 Markdown 文件"""
-    file_path = f"output1/markdown/markdown_{link_index}.md"  # 修改文件扩展名为 .md
-    with open(file_path, 'w', encoding='utf-8') as file:
-        file.write(text_content)
-    print(f"Markdown 内容已保存：{file_path}")
-
-
-def save_images(img_urls, link_index):
-    """保存图片到对应的文件夹"""
-    img_folder = f"output1/images/images_{link_index}"
-    if not os.path.exists(img_folder):
-        os.makedirs(img_folder)
-    for i, img_url in enumerate(img_urls):
-        try:
-            response = requests.get(img_url, stream=True)
-            if response.status_code == 200:
-                img_path = f"{img_folder}/image_{i}.jpg"
-                with open(img_path, 'wb') as f:
-                    f.write(response.content)
-                print(f"图片已保存：{img_path}")
-        except Exception as e:
-            print(f"保存图片失败：{e}")
 
 
 def process_text_content(html):
@@ -124,8 +95,8 @@ def process_text_content(html):
         return markdown_content
 
 
-def crawl_and_save(link, link_index):
-    """爬取并保存内容"""
+def crawl_and_process(link):
+    """爬取并处理内容"""
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     options.add_argument("--disable-gpu")
@@ -144,32 +115,43 @@ def crawl_and_save(link, link_index):
 
         # 处理文字内容
         text_content = process_text_content(html)
-        save_text_as_text(text_content, link_index)
+        
+        # 使用信息处理模块处理文章内容
+        if text_content:
+            structured_data = process_single_article(text_content)
+            if structured_data:
+                print(f"文章处理成功，类型：{structured_data.get('type', '未知')}")
+                return structured_data
+            else:
+                print("文章处理失败或被判定为无用信息")
+                return None
 
-        # 提取图片 URL
-        soup = BeautifulSoup(html, "html.parser")
-        img_tags = soup.find_all("img")
-        img_urls = []
-        for img in img_tags:
-            img_url = img.get("data-src") or img.get("src")
-            if img_url:
-                img_urls.append(img_url)
-        save_images(img_urls, link_index)
 
     except Exception as e:
         print(f"处理链接 {link} 时出错：{e}")
+        return None
     finally:
         driver.quit()
 
 
-def main():
-    csv_file = "articles.csv"  # CSV 文件路径
+def crawl_all_articles(csv_file="articles.csv"):
+    """爬取并处理所有文章，返回处理结果列表"""
     links = read_csv_links(csv_file)
-    create_output_folders()
+    results = []
 
     for i, link in enumerate(links):
         print(f"处理链接 {i + 1}/{len(links)}: {link}")
-        crawl_and_save(link, i + 1)
+        result = crawl_and_process(link)
+        if result:
+            results.append(result)
+    
+    return results
+
+def main():
+    csv_file = "articles.csv"  # CSV 文件路径
+    results = crawl_all_articles(csv_file)
+    print(f"成功处理")
+    return results
 
 
 if __name__ == "__main__":

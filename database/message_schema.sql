@@ -102,7 +102,7 @@ CREATE TABLE `学业相关政策` (
     `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
-CREATE TABLE `奖励/资助政策` (
+CREATE TABLE `奖励_资助政策` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `类型` VARCHAR(50) NOT NULL,
     `政策名称` VARCHAR(255) NOT NULL,
@@ -152,7 +152,7 @@ CREATE TABLE `校园安全` (
     `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
-CREATE TABLE `讲座/分享会信息` (
+CREATE TABLE `讲座_分享会信息` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `类型` VARCHAR(50) NOT NULL,
     `讲座标题` VARCHAR(255) NOT NULL,

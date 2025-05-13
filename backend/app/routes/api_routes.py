@@ -1,4 +1,4 @@
-# API routes
+# API路由
 from flask import Blueprint, request
 from . import api_response
 import json
@@ -7,28 +7,28 @@ from app.services.query_service import query_messages, query_by_question
 from app.services.ai_service import extract_tags_with_ai, generate_answer_with_ai
 from app.services.news_service import generate_daily_news, generate_ddl_events
 
-# Create a Blueprint for API routes
+# 为API路由创建Blueprint
 api_bp = Blueprint('api', __name__)
 
 @api_bp.route('/messages', methods=['GET'])
 def get_messages():
-    """Direct query for messages (advanced users)"""
+    """直接查询消息（高级用户使用）"""
     try:
-        # Get query parameters
+        # 获取查询参数
         message_type = request.args.get('message_type')
         query_conditions_str = request.args.get('query_conditions', '{}')
         
-        # Validate message type
+        # 验证消息类型
         if not message_type:
-            return api_response(message="Message type is required", code=400)
+            return api_response(message="消息类型是必需的", code=400)
         
-        # Parse query conditions
+        # 解析查询条件
         try:
             query_conditions = json.loads(query_conditions_str)
         except json.JSONDecodeError:
-            return api_response(message="Query conditions must be valid JSON", code=400)
+            return api_response(message="查询条件必须是有效的JSON格式", code=400)
         
-        # Execute query
+        # 执行查询
         results = query_messages(message_type, query_conditions)
         
         return api_response(results)
@@ -37,9 +37,9 @@ def get_messages():
 
 @api_bp.route('/news/today', methods=['GET'])
 def get_today_news():
-    """Get daily news summary"""
+    """获取每日新闻摘要"""
     try:
-        # Call generate daily news function
+        # 调用生成每日新闻函数
         news_data = generate_daily_news()
         return api_response(news_data)
     except Exception as e:
@@ -47,9 +47,9 @@ def get_today_news():
 
 @api_bp.route('/ddl-events', methods=['GET'])
 def get_ddl_events():
-    """Get recent important DDL event list"""
+    """获取近期重要截止日期事件列表"""
     try:
-        # Call generate DDL events function
+        # 调用生成DDL事件函数
         events_data = generate_ddl_events()
         return api_response(events_data)
     except Exception as e:
@@ -57,34 +57,34 @@ def get_ddl_events():
 
 @api_bp.route('/knowledge/query', methods=['POST'])
 def ask_question():
-    """Complete process for handling user questions"""
+    """处理用户问题的完整流程"""
     try:
-        # Get user question
+        # 获取用户问题
         data = request.get_json()
         if not data or 'question' not in data:
-            return api_response(message="Question cannot be empty", code=400)
+            return api_response(message="问题不能为空", code=400)
             
         question = data.get('question', '')
         
-        # Use AI to extract query tags
+        # 使用AI提取查询标签
         extracted_tags = extract_tags_with_ai(question)
         
-        # Query relevant information - using flexible query function
+        # 查询相关信息 - 使用灵活查询函数
         results = query_by_question(question, extracted_tags)
         
-        # Generate answer
+        # 生成答案
         answer = generate_answer_with_ai(question, results)
         
-        # Build response data - include more information
+        # 构建响应数据 - 包含更多信息
         references = []
         for i, r in enumerate(results):
-            # Extract summary information of tags and content
+            # 提取标签和内容的摘要信息
             tags_summary = ", ".join([f"{k}: {v}" for k, v in r.get('tags', {}).items() if k != 'time'])
             content_preview = str(r.get('content', {}))[:50] + '...' if r.get('content') else ''
             
             reference = {
                 'id': i+1,
-                'type': r.get('message_type', 'Unknown type'),
+                'type': r.get('message_type', '未知类型'),
                 'tags': tags_summary,
                 'content_preview': content_preview
             }
@@ -92,7 +92,7 @@ def ask_question():
         
         response_data = {
             'question': question,
-            'extracted_tags': extracted_tags,  # Add extracted tags
+            'extracted_tags': extracted_tags,  # 添加提取的标签
             'answer': answer,
             'references': references
         }
@@ -103,28 +103,28 @@ def ask_question():
 
 @api_bp.route('/docs', methods=['GET'])
 def api_docs():
-    """Return API documentation"""
+    """返回API文档"""
     from ..config.settings import MESSAGE_TYPES
     
     docs = {
         "api_version": "1.0",
         "message_types": {
-            "description": "Message types supported by the system",
+            "description": "系统支持的消息类型",
             "types": list(MESSAGE_TYPES.keys())
         },
         "endpoints": [
             {
                 "path": "/api/news/today",
                 "method": "GET",
-                "description": "Get daily message summary",
+                "description": "获取每日消息摘要",
                 "parameters": [],
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "成功",
                         "schema": {
-                            "date": "Date (ISO format)",
-                            "content": "Message content (text or JSON)",
-                            "format": "Content format (text or json)"
+                            "date": "日期（ISO格式）",
+                            "content": "消息内容（文本或JSON）",
+                            "format": "内容格式（文本或json）"
                         }
                     }
                 }
@@ -132,14 +132,14 @@ def api_docs():
             {
                 "path": "/api/ddl-events",
                 "method": "GET",
-                "description": "Get list of upcoming important DDL events",
+                "description": "获取即将到来的重要截止日期事件列表",
                 "parameters": [],
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "成功",
                         "schema": {
-                            "name": "Event name",
-                            "ddl": "Deadline date (YYYY-MM-DD)"
+                            "name": "事件名称",
+                            "ddl": "截止日期（YYYY-MM-DD）"
                         }
                     }
                 }
@@ -147,23 +147,23 @@ def api_docs():
             {
                 "path": "/api/knowledge/query",
                 "method": "POST",
-                "description": "Intelligent Q&A",
+                "description": "智能问答",
                 "parameters": [
                     {
                         "name": "question",
                         "type": "string",
                         "required": True,
-                        "description": "User question"
+                        "description": "用户问题"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "成功",
                         "schema": {
-                            "question": "User question",
-                            "extracted_tags": "Query tags extracted by AI",
-                            "answer": "Answer generated by AI",
-                            "references": "References, including message type, tag summary and content preview"
+                            "question": "用户问题",
+                            "extracted_tags": "AI提取的查询标签",
+                            "answer": "AI生成的答案",
+                            "references": "参考资料，包括消息类型、标签摘要和内容预览"
                         }
                     }
                 }
@@ -171,29 +171,29 @@ def api_docs():
             {
                 "path": "/api/messages",
                 "method": "GET",
-                "description": "Direct message query (advanced users)",
+                "description": "直接消息查询（高级用户）",
                 "parameters": [
                     {
                         "name": "message_type",
                         "type": "string",
                         "required": True,
-                        "description": "Message type, refer to message_types field"
+                        "description": "消息类型，参考message_types字段"
                     },
                     {
                         "name": "query_conditions",
                         "type": "json",
                         "required": False,
-                        "description": "Query conditions, JSON format, including tags and content parts"
+                        "description": "查询条件，JSON格式，包括标签和内容部分"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "成功",
                         "schema": {
-                            "id": "Message ID",
-                            "tags": "Tags JSON object",
-                            "content": "Content JSON object",
-                            "message_type": "Message type"
+                            "id": "消息ID",
+                            "tags": "标签JSON对象",
+                            "content": "内容JSON对象",
+                            "message_type": "消息类型"
                         }
                     }
                 }
