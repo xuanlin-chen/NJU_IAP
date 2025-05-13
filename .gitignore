@@ -1,0 +1,12 @@
+# 忽略 Python 编译文件
+*.pyc
+__pycache__/
+
+# 忽略日志和临时文件
+*.log
+*.tmp
+
+# 忽略依赖目录
+node_modules/
+venv/
+.venv/

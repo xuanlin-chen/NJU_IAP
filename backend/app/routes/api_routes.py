@@ -3,9 +3,9 @@ from flask import Blueprint, request
 from . import api_response
 import json
 
-from ..services.query_service import query_messages, query_by_question
-from ..services.ai_service import extract_tags_with_ai, generate_answer_with_ai
-from ..services.news_service import generate_daily_news, generate_ddl_events
+from app.services.query_service import query_messages, query_by_question
+from app.services.ai_service import extract_tags_with_ai, generate_answer_with_ai
+from app.services.news_service import generate_daily_news, generate_ddl_events
 
 # Create a Blueprint for API routes
 api_bp = Blueprint('api', __name__)
