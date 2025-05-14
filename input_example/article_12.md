@@ -1,4 +1,4 @@
-原文链接: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494427&idx=1&sn=b77558fd748d68b938101b4c86ebd6e1&chksm=c0c8287cf7bfa16a28a8aacea2a080ed6cd77efb7f100b885ca9c5848c4b5c08b4516adce2ed#rd
+|原文链接|: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494427&idx=1&sn=b77558fd748d68b938101b4c86ebd6e1&chksm=c0c8287cf7bfa16a28a8aacea2a080ed6cd77efb7f100b885ca9c5848c4b5c08b4516adce2ed#rd
 
 # 探秘学术资源，驾驭科研工具 | “启新工作坊”第六期——“破茧”信息素养讲师团助你启航早期科研之旅！
 

@@ -69,3 +69,37 @@ def generate_insert_sql(table_name, data):
 
     sql = f"INSERT INTO `{table_name}` ({columns_str}) VALUES ({placeholders_str})"
     return sql, values
+
+
+def get_all_table_names(db_config):
+    # 获得所有的表名
+    conn = pymysql.connect(**db_config)
+    cursor = conn.cursor()
+    cursor.execute("SHOW TABLES")
+    tables = [row[0] for row in cursor.fetchall()]
+    cursor.close()
+    return tables
+
+
+def is_url_exists(url, db_config):
+    # 检查url是否已经存在，防止重复导入
+    if url is None:
+        return False
+    tables = get_all_table_names(db_config)
+    conn = pymysql.connect(**db_config)
+    cursor = conn.cursor()
+    exists = False
+    for table in tables:
+        try:
+            query = f"SELECT 1 FROM `{table}` WHERE 原文链接 = %s LIMIT 1"
+            cursor.execute(query, (url,))
+            if cursor.fetchone():
+                print("避免1个文件重复导入")
+                exists = True
+                break
+        except Exception as e:
+            print(f"查询表 {table} 失败: {e}")
+            continue
+    cursor.close()
+    conn.close()
+    return exists

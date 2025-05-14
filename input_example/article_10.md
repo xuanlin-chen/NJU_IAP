@@ -1,4 +1,4 @@
-原文链接: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494565&idx=1&sn=b725d2caffeaeebfc4560cfac8d5750a&chksm=c0c828c2f7bfa1d4acdd0426e4608e236b732505490ff8bd6d5e5c5939acc393d626694c55c5#rd
+|原文链接|: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494565&idx=1&sn=b725d2caffeaeebfc4560cfac8d5750a&chksm=c0c828c2f7bfa1d4acdd0426e4608e236b732505490ff8bd6d5e5c5939acc393d626694c55c5#rd
 
 # 亦师亦友，携手同行 | 健雄书院2024级朋辈导师工作简报第二期
 

@@ -1,4 +1,4 @@
-原文链接: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494367&idx=1&sn=76599e64074abe0c9ef38ad777478c53&chksm=c0c829b8f7bfa0ae11d97a0410b2395d0f15075c0b20852ef9e2edaeaf7115929cc7b34661af#rd
+|原文链接|: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494367&idx=1&sn=76599e64074abe0c9ef38ad777478c53&chksm=c0c829b8f7bfa0ae11d97a0410b2395d0f15075c0b20852ef9e2edaeaf7115929cc7b34661af#rd
 
 # 哲思传文脉，科技拓新程 | 2025春季学期青少年国学启蒙班志愿者招募开始啦～
 

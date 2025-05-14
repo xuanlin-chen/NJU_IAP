@@ -1,4 +1,4 @@
-原文链接: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494537&idx=1&sn=2f322a7b13a044a8b47b9e8efe3e0e37&chksm=c0c828eef7bfa1f83a483e1f4603564f633f9784c12fa8b8ca7c48fc5b4ec644b104b2a3d0ca#rd
+|原文链接|: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494537&idx=1&sn=2f322a7b13a044a8b47b9e8efe3e0e37&chksm=c0c828eef7bfa1f83a483e1f4603564f633f9784c12fa8b8ca7c48fc5b4ec644b104b2a3d0ca#rd
 
 # 探觅文献，智驭工具 | 健雄书院“启新工作坊”第六期主题分享会顺利开展
 

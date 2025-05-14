@@ -1,4 +1,4 @@
-原文链接: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494802&idx=1&sn=09ce9f9fd4cea44925028f72a170fac0&chksm=c0c82ff5f7bfa6e365c0f13cbfcf46256b1fce81e65273d347102d999ae3832c4141c0c9f28c#rd
+|原文链接|: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494802&idx=1&sn=09ce9f9fd4cea44925028f72a170fac0&chksm=c0c82ff5f7bfa6e365c0f13cbfcf46256b1fce81e65273d347102d999ae3832c4141c0c9f28c#rd
 
 # 南青奋进，实践挺膺——南京大学2024-2025学年社会实践、实习进学院活动健雄书院专场
 

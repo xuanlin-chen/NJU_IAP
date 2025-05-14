@@ -1,4 +1,4 @@
-原文链接: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494776&idx=1&sn=d0e23b26f3f3baf41502233dac1a3efc&chksm=c0c82f1ff7bfa60971718f74f0cbeca728da62297ff1809915546858250d1af31b4c7b12c949#rd
+|原文链接|: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494776&idx=1&sn=d0e23b26f3f3baf41502233dac1a3efc&chksm=c0c82f1ff7bfa60971718f74f0cbeca728da62297ff1809915546858250d1af31b4c7b12c949#rd
 
 # 代码成画，算法生花 | 健雄书院算法与生成艺术美育活动邀你共赴数字美学之约
 

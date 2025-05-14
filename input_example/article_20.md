@@ -1,4 +1,4 @@
-原文链接: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494218&idx=1&sn=547320995efb79adb8e48e2d51cea4cc&chksm=c0c8292df7bfa03b243abe83d5bc16306769c94b3e51f8bd184b399cdd35f24514ea5d7e2015#rd
+|原文链接|: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494218&idx=1&sn=547320995efb79adb8e48e2d51cea4cc&chksm=c0c8292df7bfa03b243abe83d5bc16306769c94b3e51f8bd184b399cdd35f24514ea5d7e2015#rd
 
 # 师生共话，情暖冬至 | 健雄书院师生包饺子餐叙会活动回顾
 

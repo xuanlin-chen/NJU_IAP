@@ -1,4 +1,4 @@
-原文链接: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494607&idx=1&sn=4a14e18d37d2ee07425004d19bc0d2d4&chksm=c0c828a8f7bfa1be301279cdab68b1e506bcc01769f55a842c31f651cb49adcfe44dd6b6adea#rd
+|原文链接|: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494607&idx=1&sn=4a14e18d37d2ee07425004d19bc0d2d4&chksm=c0c828a8f7bfa1be301279cdab68b1e506bcc01769f55a842c31f651cb49adcfe44dd6b6adea#rd
 
 # 向新行读课堂第五期 | 对话中国芯，践行强国志——南京大学健雄书院师生参访龙芯中科（南京）技术有限公司
 

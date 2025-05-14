@@ -1,4 +1,4 @@
-原文链接: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494336&idx=1&sn=3183c0e9d4ef8033f5a7c29f44fb426f&chksm=c0c829a7f7bfa0b108e76258f418227f85dac1bbb7b5fe98b8bc91232622cbbf14bc70ebbd59#rd
+|原文链接|: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494336&idx=1&sn=3183c0e9d4ef8033f5a7c29f44fb426f&chksm=c0c829a7f7bfa0b108e76258f418227f85dac1bbb7b5fe98b8bc91232622cbbf14bc70ebbd59#rd
 
 # 推明德教 泽溉万方——致敬“大先生”系列展之走近吴健雄开幕
 

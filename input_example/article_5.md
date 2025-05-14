@@ -1,4 +1,4 @@
-原文链接: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494623&idx=1&sn=88b930d518c0c3cd1fe92138ffe0b45f&chksm=c0c828b8f7bfa1ae341c3f4173a4cfb06c58a144ea9430f9ec1aa2e179f11e39f5e449143121#rd
+|原文链接|: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494623&idx=1&sn=88b930d518c0c3cd1fe92138ffe0b45f&chksm=c0c828b8f7bfa1ae341c3f4173a4cfb06c58a144ea9430f9ec1aa2e179f11e39f5e449143121#rd
 
 # 家国长安，你我共护 | 健雄书院顺利开展国家安全教育学习实践活动暨“N+计划”团学骨干培训
 

@@ -1,4 +1,4 @@
-原文链接: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494609&idx=1&sn=cc83b32b5b50758f0f3d007ad4cdbbfd&chksm=c0c828b6f7bfa1a06188f6b8a86c4760b06359ca9c9803da8c6bacb43cb27b20955eaf5fb582#rd
+|原文链接|: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494609&idx=1&sn=cc83b32b5b50758f0f3d007ad4cdbbfd&chksm=c0c828b6f7bfa1a06188f6b8a86c4760b06359ca9c9803da8c6bacb43cb27b20955eaf5fb582#rd
 
 # 活动回顾 | “南大—泾源”青少年国学启蒙班春季开班仪式暨开班第一课
 

@@ -1,4 +1,4 @@
-原文链接: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494249&idx=1&sn=21847f7b7276e78dd11f994940ccf2c3&chksm=c0c8290ef7bfa018a178d693f911923150ca01dd416cb07b53de524e2c9d09bd2e614d14ba6b#rd
+|原文链接|: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494249&idx=1&sn=21847f7b7276e78dd11f994940ccf2c3&chksm=c0c8290ef7bfa018a178d693f911923150ca01dd416cb07b53de524e2c9d09bd2e614d14ba6b#rd
 
 # 选课指南 | “科学之光”（青年学者系列）
 

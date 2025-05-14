@@ -1,4 +1,4 @@
-原文链接: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494613&idx=1&sn=33d792f8ce4e3cbc068ffe68f767cbb3&chksm=c0c828b2f7bfa1a4715c7abe9ef06fe07b60b453bbad94ea5345c7f89ae45c00e835bd1e8cef#rd
+|原文链接|: http://mp.weixin.qq.com/s?__biz=MzkwODQwMDEzNg==&mid=2247494613&idx=1&sn=33d792f8ce4e3cbc068ffe68f767cbb3&chksm=c0c828b2f7bfa1a4715c7abe9ef06fe07b60b453bbad94ea5345c7f89ae45c00e835bd1e8cef#rd
 
 # 活动预告 | EL程序设计大赛算法组赛前辅导暨经验分享会来啦！
 
