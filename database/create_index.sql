@@ -1,3 +1,5 @@
+# 创建url索引的SQL语句
+
 CREATE INDEX `idx_比赛通知_原文链接` ON `比赛通知` (`原文链接`);
 CREATE INDEX `idx_学习资源_原文链接` ON `学习资源` (`原文链接`);
 CREATE INDEX `idx_校园通知_原文链接` ON `校园通知` (`原文链接`);
