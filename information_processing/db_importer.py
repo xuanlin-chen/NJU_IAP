@@ -1,4 +1,4 @@
-# 导入数据库的几个函数
+# 导入数据库的函数
 import pymysql
 from datetime import datetime
 
