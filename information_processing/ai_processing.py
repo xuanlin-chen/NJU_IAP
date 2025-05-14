@@ -3,26 +3,18 @@ import requests
 import json
 import time
 import re
-from db_importer import save_to_database # 数据库导入函数
 
 # 配置参数
-API_KEY_FILTER = "sk-******************************************" # 数据清洗的大模型API密钥
-API_KEY_STRUCTURING = "sk-******************************************" # 数据结构化的大模型API密钥
-API_URL_FILTER = "https://api.siliconflow.cn/v1/chat/completions"
-API_URL_STRUCTURING = "https://api.siliconflow.cn/v1/chat/completions"
-MARKDOWN_PATH = "C:/Users/ASUS/Desktop/input"
-# DESTINATION_PATH = "C:/Users/ASUS/Desktop/output" # 这是经清洗后的文章存放的地址
-# JSON_STORAGE_PATH = "C:/Users/ASUS/Desktop/JSON"  # JSON文件存入路径，仅用于保证代码完整性，整合到数据库导入部分时注释掉
+API_KEY_FILTER = "sk-f1197f3e182144aca44aa5b13a2ee46b" # 数据清洗的大模型API密钥
+API_KEY_STRUCTURING = "sk-f1197f3e182144aca44aa5b13a2ee46b" # 数据结构化的大模型API密钥
+API_URL_FILTER = "https://api.deepseek.com/v1/chat/completions"
+API_URL_STRUCTURING = "https://api.deepseek.com/v1/chat/completions"
+MARKDOWN_PATH = "C:/Users/chenxuanlin/Desktop/input"
+JSON_STORAGE_PATH = "C:/Users/chenxuanlin/Desktop/JSON"  # JSON文件存入路径，仅用于保证代码完整性，整合到数据库导入部分时注释掉
 
-# 数据库配置信息
-# 可以用本地数据库测试一下
-DB_CONFIG = {
-    'host': '47.122.71.85',
-    'user': '******',
-    'password': '*********',
-    'database': 'information_for_students',
-    'charset': 'utf8mb4'
-}
+# 创建必要的目录
+os.makedirs(MARKDOWN_PATH, exist_ok=True)
+os.makedirs(JSON_STORAGE_PATH, exist_ok=True)
 
 def safe_json_parse(raw_str, max_retries=3):
     # 安全解析JSON加自动修复
@@ -33,7 +25,7 @@ def safe_json_parse(raw_str, max_retries=3):
             # 去除代码块包裹
             repaired = re.sub(r'^.*?```(?:json)?\s*({.*?})\s*```.*$', r'\1', raw_str, flags=re.DOTALL)
             # 替换中文引号
-            repaired = repaired.replace('“', '"').replace('”', '"')
+            repaired = repaired.replace('"', '"').replace('"', '"')
             # 处理尾随逗号
             repaired = re.sub(r',\s*([}\]])', r'\1', repaired)
             try:
@@ -65,28 +57,29 @@ def analyze_article(content):
   ○ 学业影响（课程通知、考试安排、选课信息等）
   ○ 生活必需（宿舍调整、校园活动、安全提醒等）
   ○ 发展机会（竞赛通知、实习机会、学术讲座等）
-3. 学生参与度判断（若有且对象为本科生，直接判断为“有用”）：
+3. 学生参与度判断（若有且对象为本科生，直接判断为"有用"）：
   ○ 需要学生采取具体行动
   ○ 影响学业进度或生活安排
   ○ 涉及资格/机会的获取条件
-4. 需排除的内容（直接判断为“无用”）：
+4. 需排除的内容（直接判断为"无用"）：
   ○ 纯工作部署类会议报道
   ○ 未落地的规划方案讨论
   ○ 无具体实施路径的政策宣导
   ○ 无本科生参与机制的教研活动
-5. 思考判断：若将文章判断为“无用”，请再次谨慎思考是否真的“无用”，以保证不遗漏信息
-6. 最终结论：仅输出“有用”或者“无用”
+5. 思考判断：若将文章判断为"无用"，请再次谨慎思考是否真的"无用"，以保证不遗漏信息
+6. 最终结论：仅输出"有用"或者"无用"
 重要提醒：
-除输出“有用”或者“无用”外不要输出其他任何文字
+除输出"有用"或者"无用"外不要输出其他任何文字
 
 文章内容如下：
 {content}"""
 
     payload = {
-        "model": "deepseek-ai/DeepSeek-V3",
+        "model": "deepseek-chat",
         "messages": [{"role": "user", "content": prompt_filter}],
         "temperature": 0.1,
-        "max_tokens": 10
+        "max_tokens": 10,
+        "stream": False
     }
 
     try:
@@ -104,13 +97,13 @@ def process_files_to_db():
         print(f"处理失败\n路径有误")
         return
 
-    # 测试用
-    # os.makedirs(DESTINATION_PATH, exist_ok=True)
-    # os.makedirs(JSON_STORAGE_PATH, exist_ok=True)
-
     base_temp = read_prompt_file()
 
-    for filename in os.listdir(MARKDOWN_PATH):
+    def natural_sort_key(s):
+        return [int(text) if text.isdigit() else text.lower()
+                for text in re.split('([0-9]+)', s)]
+
+    for filename in sorted(os.listdir(MARKDOWN_PATH), key=natural_sort_key):
         if not filename.endswith(".md"):
             print(f"处理失败\n文件格式需为markdown格式")
             return
@@ -135,10 +128,11 @@ def process_files_to_db():
                 prompt_structuring = base_temp + "/n" + content
 
                 payload_structuring = {
-                    "model": "deepseek-ai/DeepSeek-V3",
+                    "model": "deepseek-chat",
                     "messages": [{"role": "user", "content": prompt_structuring}],
                     "temperature": 0.1,
-                    "max_tokens": 2000
+                    "max_tokens": 2000,
+                    "stream": False
                 }
 
                 max_retries = 3
@@ -173,18 +167,12 @@ def process_files_to_db():
                 # 将原文信息加到json中
                 json_data["原文信息"] = content
 
-                try:
-                    if save_to_database(json_data, DB_CONFIG):
-                        print(f"文件 {filename} 成功导入数据库")
-                except Exception as e:
-                    print(f"文件 {filename}导入数据库失败: {str(e)}")
-                # 存储验证通过的JSON 这里是测试代码
-                # json_filename = os.path.splitext(filename)[0] + ".json"
-                # json_path = os.path.join(JSON_STORAGE_PATH, json_filename)
-
-                # with open(json_path, 'w', encoding='utf-8') as json_file:
-                #    json.dump(json_data, json_file, ensure_ascii=False, indent=4)
-                # print(f"成功结构化并储存文件 {filename}")
+                # 只保存到JSON文件夹
+                json_filename = os.path.splitext(filename)[0] + ".json"
+                json_path = os.path.join(JSON_STORAGE_PATH, json_filename)
+                with open(json_path, 'w', encoding='utf-8') as json_file:
+                    json.dump(json_data, json_file, ensure_ascii=False, indent=4)
+                print(f"成功结构化并储存文件 {filename} 到 JSON 文件夹")
 
         except Exception as e:
             print(f"处理文件 {filename} 时出错: {str(e)}")
