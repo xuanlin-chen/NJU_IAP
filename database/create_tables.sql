@@ -1,4 +1,4 @@
-# 创建数据库的SQL语句
+# 创建数据库中所需表格的SQL语句
   
 CREATE TABLE `比赛通知` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
