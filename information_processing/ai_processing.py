@@ -8,8 +8,8 @@ from db_importer import save_to_database, is_url_exists # 数据库导入函数
 # 每次调用 api 后休眠时间，避免短时间请求次数过多
 SLEEP_TIME = 7
 # 配置参数
-API_KEY_FILTER = "sk-jkxiokcqdihbjfyeupkcfiobxflasxdgofzdtxgmuzkiynkz" # 数据清洗的大模型API密钥
-API_KEY_STRUCTURING = "sk-jkxiokcqdihbjfyeupkcfiobxflasxdgofzdtxgmuzkiynkz" # 数据结构化的大模型API密钥
+API_KEY_FILTER = "sk-************************************" # 数据清洗的大模型API密钥
+API_KEY_STRUCTURING = "sk-************************************" # 数据结构化的大模型API密钥
 API_URL_FILTER = "https://api.siliconflow.cn/v1/chat/completions"
 API_URL_STRUCTURING = "https://api.siliconflow.cn/v1/chat/completions"
 MARKDOWN_PATH = "C:/Users/ASUS/Desktop/input"
@@ -20,7 +20,7 @@ MARKDOWN_PATH = "C:/Users/ASUS/Desktop/input"
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'user_test',
-    'password': '241880484',
+    'password': '************',
     'database': 'information_for_students',
     'charset': 'utf8mb4'
 }
@@ -67,7 +67,7 @@ def analyze_article(content):
         "Content-Type": "application/json"
     }
 
-    prompt = f"""你是一个高校信息过滤助手，你需要完成的任务是判断文章含有信息对本科生是否有用。请按照以下步骤进行判断：
+    prompt_filter = f"""你是一个高校信息过滤助手，你需要完成的任务是判断文章含有信息对本科生是否有用。请按照以下步骤进行判断：
 1. 内容分析：提取关键要素（核心内容/时间/对象）
 2. 有用性定义（这里的有用主要判断依据是学生参与度，是由本科生在阅读完这篇文章是否会产生明确的需要完成的任务来决定，即该文章是否能达到类似于行动指南的效果）：
   a. 具有行动指引功能（如报名、准备材料、参加活动等学生需要采取行动的内容）
@@ -91,7 +91,7 @@ def analyze_article(content):
 
     payload = {
         "model": "deepseek-ai/DeepSeek-V3",
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [{"role": "user", "content": prompt_filter}],
         "temperature": 0.1,
         "max_tokens": 10
     }
