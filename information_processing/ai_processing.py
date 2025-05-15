@@ -31,6 +31,7 @@ def extract_original_link(content):
     if match:
         return match.group(1)
     else:
+        print("缺少原文链接或原文链接格式错误。格式必须为：“|原文链接|: http://xxx”或“|原文链接|: https://xxx”")
         return None
 def safe_json_parse(raw_str, max_retries=3):
     # 安全解析JSON加自动修复
