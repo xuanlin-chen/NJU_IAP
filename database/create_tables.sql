@@ -1,5 +1,5 @@
 # 创建数据库中所需表格的SQL语句
-  
+
 CREATE TABLE `比赛通知` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `类型` VARCHAR(50) NOT NULL,
@@ -17,6 +17,7 @@ CREATE TABLE `比赛通知` (
   `比赛奖励` VARCHAR(255),
   `报名费用` VARCHAR(50),
   `原文信息` TEXT,
+  `发布日期` DATE,
   `关键词` VARCHAR(255),
   `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -39,6 +40,7 @@ CREATE TABLE `学习资源` (
   `技术支持` VARCHAR(255),
   `关联服务` VARCHAR(255),
   `原文信息` TEXT,
+  `发布日期` DATE,
   `关键词` VARCHAR(255),
   `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -55,6 +57,7 @@ CREATE TABLE `校园通知` (
   `核心内容摘要` TEXT,
   `责任部门` VARCHAR(255),
   `原文信息` TEXT,
+  `发布日期` DATE,
   `关键词` VARCHAR(255),
   `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -63,7 +66,6 @@ CREATE TABLE `学业申请` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `类型` VARCHAR(50) NOT NULL,
   `政策名称` VARCHAR(255) NOT NULL,
-  `发布时间` DATETIME,
   `生效时间` DATETIME,
   `过期时间` DATETIME,
   `适用对象` VARCHAR(255),
@@ -80,6 +82,7 @@ CREATE TABLE `学业申请` (
   `相关材料` VARCHAR(255),
   `相关政策` VARCHAR(255),
   `原文信息` TEXT,
+  `发布日期` DATE,
   `关键词` VARCHAR(255),
   `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -88,7 +91,6 @@ CREATE TABLE `学业相关政策` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `类型` VARCHAR(50) NOT NULL,
   `政策名称` VARCHAR(255) NOT NULL,
-  `发布时间` DATETIME,
   `生效时间` DATETIME,
   `过期时间` DATETIME,
   `发布部门` VARCHAR(255),
@@ -98,6 +100,7 @@ CREATE TABLE `学业相关政策` (
   `关联系统` VARCHAR(255),
   `系统操作指南链接` VARCHAR(255),
   `原文信息` TEXT,
+  `发布日期` DATE,
   `关键词` VARCHAR(255),
   `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -117,112 +120,118 @@ CREATE TABLE `奖励/资助政策` (
   `硬性否决条件_学业` VARCHAR(255),
   `硬性否决条件_纪律` VARCHAR(255),
   `是否需要答辩` BIT(1),
-    `材料清单` VARCHAR(255),
-    `原文信息` TEXT,
-    `关键词` VARCHAR(255),
-    `原文链接` VARCHAR(255)
+  `材料清单` VARCHAR(255),
+  `原文信息` TEXT,
+  `发布日期` DATE,
+  `关键词` VARCHAR(255),
+  `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 CREATE TABLE `惩罚制度` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `类型` VARCHAR(50) NOT NULL,
-    `政策名称` VARCHAR(255) NOT NULL,
-    `政策类别` VARCHAR(255),
-    `适用对象` VARCHAR(255),
-    `处罚等级体系` VARCHAR(255),
-    `影响范围_评奖评优` VARCHAR(255),
-    `影响范围_保研资格` VARCHAR(255),
-    `关联政策` VARCHAR(255),
-    `原文信息` TEXT,
-    `关键词` VARCHAR(255),
-    `原文链接` VARCHAR(255)
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `类型` VARCHAR(50) NOT NULL,
+  `政策名称` VARCHAR(255) NOT NULL,
+  `政策类别` VARCHAR(255),
+  `适用对象` VARCHAR(255),
+  `处罚等级体系` VARCHAR(255),
+  `影响范围_评奖评优` VARCHAR(255),
+  `影响范围_保研资格` VARCHAR(255),
+  `关联政策` VARCHAR(255),
+  `原文信息` TEXT,
+  `发布日期` DATE,
+  `关键词` VARCHAR(255),
+  `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 CREATE TABLE `校园安全` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `类型` VARCHAR(50) NOT NULL,
-    `政策名称` VARCHAR(255) NOT NULL,
-    `政策类别` VARCHAR(255),
-    `管理对象类型` VARCHAR(255),
-    `责任主体_主管单位` VARCHAR(255),
-    `责任主体_直接责任人` VARCHAR(255),
-    `适用对象` VARCHAR(255),
-    `原文信息` TEXT,
-    `关键词` VARCHAR(255),
-    `原文链接` VARCHAR(255)
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `类型` VARCHAR(50) NOT NULL,
+  `政策名称` VARCHAR(255) NOT NULL,
+  `政策类别` VARCHAR(255),
+  `管理对象类型` VARCHAR(255),
+  `责任主体_主管单位` VARCHAR(255),
+  `责任主体_直接责任人` VARCHAR(255),
+  `适用对象` VARCHAR(255),
+  `原文信息` TEXT,
+  `发布日期` DATE,
+  `关键词` VARCHAR(255),
+  `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 CREATE TABLE `讲座/分享会信息` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `类型` VARCHAR(50) NOT NULL,
-    `讲座标题` VARCHAR(255) NOT NULL,
-    `讲座起始时间` DATETIME,
-    `讲座结束时间` DATETIME,
-    `地点` VARCHAR(255),
-    `线上参会链接/腾讯会议号` VARCHAR(255),
-    `讲座类型` VARCHAR(255),
-    `讲座领域` VARCHAR(255),
-    `是否需要报名` BIT(1),
-    `五育认定类型` VARCHAR(50),
-    `报名截止时间` DATETIME,
-    `主讲人_姓名` VARCHAR(100),
-    `主讲人_头衔` VARCHAR(100),
-    `主讲人_部门` VARCHAR(255),
-    `适用年级` VARCHAR(255),
-    `原文信息` TEXT,
-    `关键词` VARCHAR(255),
-    `原文链接` VARCHAR(255)
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `类型` VARCHAR(50) NOT NULL,
+  `讲座标题` VARCHAR(255) NOT NULL,
+  `讲座起始时间` DATETIME,
+  `讲座结束时间` DATETIME,
+  `地点` VARCHAR(255),
+  `线上参会链接/腾讯会议号` VARCHAR(255),
+  `讲座类型` VARCHAR(255),
+  `讲座领域` VARCHAR(255),
+  `是否需要报名` BIT(1),
+  `五育认定类型` VARCHAR(50),
+  `报名截止时间` DATETIME,
+  `主讲人_姓名` VARCHAR(100),
+  `主讲人_头衔` VARCHAR(100),
+  `主讲人_部门` VARCHAR(255),
+  `适用年级` VARCHAR(255),
+  `原文信息` TEXT,
+  `发布日期` DATE,
+  `关键词` VARCHAR(255),
+  `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 CREATE TABLE `志愿活动` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `类型` VARCHAR(50) NOT NULL,
-    `活动标题` VARCHAR(255) NOT NULL,
-    `主办单位` VARCHAR(255),
-    `服务起始时间` DATETIME,
-    `服务结束时间` DATETIME,
-    `服务地点类型` VARCHAR(50),
-    `详细地址` VARCHAR(255),
-    `线上服务方式` VARCHAR(255),
-    `志愿类型` VARCHAR(255),
-    `志愿时长_小时` VARCHAR(50),
-    `招募人数` INT,
-    `单次/长期` VARCHAR(50),
-    `技能要求` VARCHAR(255),
-    `是否培训` BIT(1),
-    `报名截止时间` DATETIME,
-    `面向群体` VARCHAR(255),
-    `是否提供证书` BIT(1),
-    `特殊福利` VARCHAR(255),
-    `原文信息` TEXT,
-    `关键词` VARCHAR(255),
-    `原文链接` VARCHAR(255)
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `类型` VARCHAR(50) NOT NULL,
+  `活动标题` VARCHAR(255) NOT NULL,
+  `主办单位` VARCHAR(255),
+  `服务起始时间` DATETIME,
+  `服务结束时间` DATETIME,
+  `服务地点类型` VARCHAR(50),
+  `详细地址` VARCHAR(255),
+  `线上服务方式` VARCHAR(255),
+  `志愿类型` VARCHAR(255),
+  `志愿时长_小时` VARCHAR(50),
+  `招募人数` INT,
+  `单次/长期` VARCHAR(50),
+  `技能要求` VARCHAR(255),
+  `是否培训` BIT(1),
+  `报名截止时间` DATETIME,
+  `面向群体` VARCHAR(255),
+  `是否提供证书` BIT(1),
+  `特殊福利` VARCHAR(255),
+  `原文信息` TEXT,
+  `发布日期` DATE,
+  `关键词` VARCHAR(255),
+  `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 CREATE TABLE `社会实践` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `类型` VARCHAR(50) NOT NULL,
-    `标题` VARCHAR(255) NOT NULL,
-    `活动开始时间` DATETIME,
-    `活动结束时间` DATETIME,
-    `报名截止时间` DATETIME,
-    `主办单位` VARCHAR(255),
-    `活动地点` VARCHAR(255),
-    `活动主题` VARCHAR(255),
-    `实践形式` VARCHAR(255),
-    `组队要求` VARCHAR(255),
-    `参与对象` VARCHAR(255),
-    `学分认定` VARCHAR(50),
-    `成果要求` VARCHAR(255),
-    `经费支持` VARCHAR(255),
-    `报名方式` VARCHAR(255),
-    `技能需求` VARCHAR(255),
-    `考核标准` VARCHAR(255),
-    `关联课程` VARCHAR(255),
-    `咨询方式` VARCHAR(255),
-    `原文信息` TEXT,
-    `关键词` VARCHAR(255),
-    `原文链接` VARCHAR(255)
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `类型` VARCHAR(50) NOT NULL,
+  `标题` VARCHAR(255) NOT NULL,
+  `活动开始时间` DATETIME,
+  `活动结束时间` DATETIME,
+  `报名截止时间` DATETIME,
+  `主办单位` VARCHAR(255),
+  `活动地点` VARCHAR(255),
+  `活动主题` VARCHAR(255),
+  `实践形式` VARCHAR(255),
+  `组队要求` VARCHAR(255),
+  `参与对象` VARCHAR(255),
+  `学分认定` VARCHAR(50),
+  `成果要求` VARCHAR(255),
+  `经费支持` VARCHAR(255),
+  `报名方式` VARCHAR(255),
+  `技能需求` VARCHAR(255),
+  `考核标准` VARCHAR(255),
+  `关联课程` VARCHAR(255),
+  `咨询方式` VARCHAR(255),
+  `原文信息` TEXT,
+  `发布日期` DATE,
+  `关键词` VARCHAR(255),
+  `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 CREATE TABLE `国际交流项目` (
@@ -254,6 +263,7 @@ CREATE TABLE `国际交流项目` (
     `风险提示` VARCHAR(255),
     `官方咨询渠道` VARCHAR(255),
     `原文信息` TEXT,
+    `发布日期` DATE,
     `关键词` VARCHAR(255),
     `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -271,6 +281,7 @@ CREATE TABLE `社团消息` (
     `特色标签` VARCHAR(255),
     `联系方式` VARCHAR(255),
     `原文信息` TEXT,
+    `发布日期` DATE,
     `关键词` VARCHAR(255),
     `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -294,6 +305,7 @@ CREATE TABLE `文体活动` (
     `线上参与链接` VARCHAR(255),
     `组队人数` VARCHAR(255),
     `原文信息` TEXT,
+    `发布日期` DATE,
     `关键词` VARCHAR(255),
     `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -321,6 +333,7 @@ CREATE TABLE `实践培训活动` (
     `课程亮点` VARCHAR(255),
     `报名方式` VARCHAR(255),
     `原文信息` TEXT,
+    `发布日期` DATE,
     `关键词` VARCHAR(255),
     `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -343,6 +356,7 @@ CREATE TABLE `作品征集` (
     `奖励设置` VARCHAR(255),
     `成果应用` VARCHAR(255),
     `原文信息` TEXT,
+    `发布日期` DATE,
     `关键词` VARCHAR(255),
     `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -367,6 +381,7 @@ CREATE TABLE `其他活动` (
     `五育认定类型` VARCHAR(255),
     `携带材料` VARCHAR(255),
     `原文信息` TEXT,
+    `发布日期` DATE,
     `关键词` VARCHAR(255),
     `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -391,8 +406,8 @@ CREATE TABLE `实习就业` (
     `是否提供转正机会` BIT(1),
     `笔试要求` VARCHAR(255),
     `面试要求` VARCHAR(255),
-    `紧急程度` VARCHAR(100),
     `原文信息` TEXT,
+    `发布日期` DATE,
     `关键词` VARCHAR(255),
     `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -406,11 +421,11 @@ CREATE TABLE `其他类型` (
     `涉及对象` VARCHAR(255),
     `生效时间` DATETIME,
     `失效时间` VARCHAR(50),
-    `发布时间` DATETIME,
     `行动截止时间` VARCHAR(50),
     `来源部门` VARCHAR(255),
     `来源层级` VARCHAR(50),
     `原文信息` TEXT,
+    `发布日期` DATE,
     `关键词` VARCHAR(255),
     `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;

@@ -8,8 +8,8 @@ from db_importer import save_to_database, is_url_exists # 数据库导入函数
 # 每次调用 api 后休眠时间，避免短时间请求次数过多
 SLEEP_TIME = 7
 # 配置参数
-API_KEY_FILTER = "sk-************************************" # 数据清洗的大模型API密钥
-API_KEY_STRUCTURING = "sk-************************************" # 数据结构化的大模型API密钥
+API_KEY_FILTER = "sk-*****************************************" # 数据清洗的大模型API密钥
+API_KEY_STRUCTURING = "sk-*****************************************" # 数据结构化的大模型API密钥
 API_URL_FILTER = "https://api.siliconflow.cn/v1/chat/completions"
 API_URL_STRUCTURING = "https://api.siliconflow.cn/v1/chat/completions"
 MARKDOWN_PATH = "C:/Users/ASUS/Desktop/input"
@@ -20,19 +20,33 @@ MARKDOWN_PATH = "C:/Users/ASUS/Desktop/input"
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'user_test',
-    'password': '************',
+    'password': '*************',
     'database': 'information_for_students',
     'charset': 'utf8mb4'
 }
 
-def extract_original_link(content):
+def extract_and_remove_original_link(content):
     pattern = r'\|原文链接\|:\s*(https?://\S+)'
     match = re.search(pattern, content)
     if match:
-        return match.group(1)
+        original_link = match.group(1)
+        content = re.sub(r'\|原文链接\|:\s*https?://\S+\s*', '', content)
+        return original_link, content.strip()
     else:
         print("缺少原文链接或原文链接格式错误。格式必须为：“|原文链接|: http://xxx”或“|原文链接|: https://xxx”")
-        return None
+        return None, content
+
+def extract_and_remove_publish_date(content):
+    pattern = r'\|发布日期\|:\s*\d{4}-\d{1,2}-\d{1,2}\s*'
+    match = re.search(pattern, content)
+    if match:
+        date_str = re.search(r'\d{4}-\d{1,2}-\d{1,2}', match.group(0)).group(0)
+        content = re.sub(pattern, '', content)
+        return date_str, content.strip()
+    else:
+        print("缺少发布日期或发布日期格式错误。格式必须为：“|发布日期|: YYYY-M-D”")
+        return None, content
+
 def safe_json_parse(raw_str, max_retries=3):
     # 安全解析JSON加自动修复
     for _ in range(max_retries):
@@ -127,8 +141,9 @@ def process_files_to_db():
 
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
-                content = f.read()
-                url = extract_original_link(content)
+                original_content = f.read()
+                url, content_temp = extract_and_remove_original_link(original_content)
+                date, content = extract_and_remove_publish_date(content_temp)
                 if is_url_exists(url, DB_CONFIG):
                     continue
 
@@ -185,8 +200,9 @@ def process_files_to_db():
                         print(f"文件 {filename} 经过 {max_retries} 次重试仍无法生成有效JSON，跳过处理")
                     continue
 
-                # 将原文信息和原文链接加到json中
+                # 将原文信息、发布日期和原文链接加到json中
                 json_data["原文信息"] = content
+                json_data["发布日期"] = date
                 json_data["原文链接"] = url
 
                 try:
