@@ -48,9 +48,41 @@ def page(account_name, num=1):                #要请求的文章页数
             link.append(i['link'])        #去 key键 为'link'的 value值
     return create_time, title, link
 
+def reset_all_labels():
+    """重置所有CSV文件中的标签为0"""
+    if not os.path.exists('articles'):
+        return
+    
+    for filename in os.listdir('articles'):
+        if not filename.endswith('.csv'):
+            continue
+            
+        csv_file = os.path.join('articles', filename)
+        temp_rows = []
+        
+        # 读取现有数据
+        with open(csv_file, 'r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            # 保存表头
+            fieldnames = reader.fieldnames
+            # 读取所有行，将标签改为0
+            for row in reader:
+                row['标签'] = '0'
+                temp_rows.append(row)
+        
+        # 写回文件
+        with open(csv_file, 'w', encoding='utf-8-sig', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(temp_rows)
+
 if __name__ == '__main__':
     # 为每个公众号创建单独的存储目录
     os.makedirs('articles', exist_ok=True)
+    
+    # 每日重置所有文章的标签为0
+    reset_all_labels()
+    print('已重置所有文章标签为0')
     
     for account_name in accounts.keys():
         print(f'正在爬取公众号：{account_name}')

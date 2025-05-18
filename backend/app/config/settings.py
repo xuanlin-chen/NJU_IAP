@@ -1,32 +1,32 @@
-# Configuration settings for the application
+# 应用程序配置设置
 
-# Flask and Database settings
+# Flask和数据库设置
 SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://crawler:241880625@47.122.71.85:3306/information_for_students?charset=utf8mb4'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-# OpenAI configuration
+# OpenAI配置
 OPENAI_API_KEY = "your-openai-key"
 
-# Message type definitions
+# 消息类型定义
 MESSAGE_TYPES = {
-    # Sample message type configuration
+    # 示例消息类型配置
     "通知": {
         "table_name": "notifications",
         "tags_schema": {
-            # Tag structure definition
+            # 标签结构定义
         },
         "content_schema": {
-            # Content structure definition
+            # 内容结构定义
         }
     },
     "规章制度": {
         "table_name": "regulations",
         "tags_schema": {
-            # Tag structure definition
+            # 标签结构定义
         },
         "content_schema": {
-            # Content structure definition
+            # 内容结构定义
         }
     }
-    # Add more message types as needed
+    # 根据需要添加更多消息类型
 }

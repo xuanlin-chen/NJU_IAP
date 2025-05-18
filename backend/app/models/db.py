@@ -1,9 +1,9 @@
-# Database models and interaction
+# 数据库模型和交互
 from flask_sqlalchemy import SQLAlchemy
 
-# Initialize SQLAlchemy without binding to app yet
+# 初始化SQLAlchemy，暂不绑定到应用
 db = SQLAlchemy()
 
 def init_app(app):
-    """Initialize the database with the app"""
+    """使用应用初始化数据库"""
     db.init_app(app)
