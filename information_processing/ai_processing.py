@@ -146,6 +146,10 @@ def process_files_to_db():
                 date, content = extract_and_remove_publish_date(content_temp)
                 if is_url_exists(url, DB_CONFIG):
                     continue
+                if url is None:
+                    continue
+                if date is None:
+                    continue
 
 
             if analyze_article(content):
