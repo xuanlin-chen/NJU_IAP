@@ -1,5 +1,5 @@
 from app.app import app
-from app.models.db import engine, db
+from backend.app.db import engine, db
 
 def test_database_connection():
     try:

@@ -1,7 +1,7 @@
 # 数据库模型和交互
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
-from ..config.settings import SQLALCHEMY_DATABASE_URI
+from .settings import SQLALCHEMY_DATABASE_URI
 
 # 初始化SQLAlchemy，暂不绑定到应用
 db = SQLAlchemy()

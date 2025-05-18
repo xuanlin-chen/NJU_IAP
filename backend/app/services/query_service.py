@@ -1,7 +1,10 @@
 # 数据库交互查询服务
 import json
-from ..models.db import db
-from ..config.settings import MESSAGE_TYPES
+from sqlalchemy import text
+from ..app import app
+from ..db import db
+from ..settings import MESSAGE_TYPES
+
 
 def query_messages(message_type, query_conditions=None):
     """通用消息查询函数
@@ -37,29 +40,30 @@ def query_messages(message_type, query_conditions=None):
     
     try:
         # 使用SQLAlchemy执行查询
-        result = db.session.execute(query, params)
-        messages = result.fetchall()
-        
-        # 格式化结果
-        messages_data = []
-        for msg in messages:
-            try:
-                # 解析JSON字段
-                tags = json.loads(msg.tags_json) if msg.tags_json else {}
-                content = json.loads(msg.content_json) if msg.content_json else {}
-                
-                message_data = {
-                    'id': msg.id,
-                    'tags': tags,
-                    'content': content,
-                    'message_type': message_type
-                }
-                messages_data.append(message_data)
-            except (json.JSONDecodeError, AttributeError) as e:
-                print(f"处理消息{msg.id}时出错：{e}")
-                continue
-        
-        return messages_data
+        with app.app_context():
+            result = db.session.execute(text(query), params)
+            messages = result.fetchall()  # 在上下文内获取结果
+            
+            # 格式化结果
+            messages_data = []
+            for msg in messages:
+                try:
+                    # 解析JSON字段
+                    tags = json.loads(msg.tags_json) if msg.tags_json else {}
+                    content = json.loads(msg.content_json) if msg.content_json else {}
+                    
+                    message_data = {
+                        'id': msg.id,
+                        'tags': tags,
+                        'content': content,
+                        'message_type': message_type
+                    }
+                    messages_data.append(message_data)
+                except (json.JSONDecodeError, AttributeError) as e:
+                    print(f"处理消息{msg.id}时出错：{e}")
+                    continue
+                    
+        return messages_data  # 上下文结束后返回已完全处理的数据
     except Exception as e:
         print(f"数据库查询错误：{e}")
         return []

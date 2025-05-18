@@ -2,7 +2,7 @@
 import datetime
 import json
 import openai
-from ..config.settings import MESSAGE_TYPES
+from ..settings import MESSAGE_TYPES
 from ..services.query_service import query_messages
 
 def generate_daily_news():
@@ -33,14 +33,21 @@ def generate_daily_news():
     # 调用AI生成摘要
     prompt = f"请根据以下今日({today.isoformat()})发布的内容，生成一个简洁的每日消息总结，以JSON格式返回，要求：\n1. 总结要包含'标题'和'内容'两个字段\n2. 内容要简明扼要地概括所有消息的重点\n3. 注意保持JSON格式的正确性\n\n原始消息：\n{json.dumps(all_messages, ensure_ascii=False)}"
     
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}]
     )
     
+    content = response.choices[0].message.content
+    if not content:
+        return {
+            'date': today.isoformat(),
+            'summary': "今日暂无更新",
+            'raw_messages': []
+        }
     try:
         # 解析AI返回的JSON
-        ai_summary = json.loads(response.choices[0].message['content'])
+        ai_summary = json.loads(content)
         return {
             'date': today.isoformat(),
             'summary': ai_summary,
@@ -50,6 +57,6 @@ def generate_daily_news():
         # 如果解析失败，直接返回AI的文本
         return {
             'date': today.isoformat(),
-            'summary': response.choices[0].message['content'],
+            'summary': content,
             'raw_messages': all_messages
         }

@@ -1,13 +1,10 @@
 import csv
 import os
 import time
-import requests
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
-import re
 import random
 from datetime import datetime
 links = []
@@ -57,49 +54,59 @@ def save_text_as_text(text_content, link_index, link, today_str):
 
 def process_text_content(html):
     """处理 HTML 内容，提取并格式化文字为 Markdown"""
+    from bs4 import Tag
+    
     soup = BeautifulSoup(html, "html.parser")
     text_content = []
+    
+    # 定义处理各种元素的映射函数
+    def handle_basic_element(elem: Tag, format_str="{}"):
+        """处理基本元素，提取文本并应用格式"""
+        text = elem.get_text(strip=True)
+        if text:
+            text_content.append(format_str.format(text))
+    
+    # 处理链接元素
+    def handle_link_element(elem: Tag):
+        """处理链接元素，提取文本和href"""
+        text = elem.get_text(strip=True)
+        href = elem.get('href')
+        if text and href:
+            text_content.append(f"[{text}]({href})")
+    
+    # 处理列表元素
+    def handle_list_element(elem: Tag):
+        """处理有序和无序列表"""
+        list_items = elem.find_all('li')
+        list_format = "- {}" if elem.name == 'ul' else "1. {}"
+        for item in list_items:
+            text = item.get_text(strip=True)
+            if text:
+                text_content.append(list_format.format(text))
+    
+    # 元素处理映射表
+    element_handlers = {
+        'p': lambda e: handle_basic_element(e),
+        'h1': lambda e: handle_basic_element(e, "# {}"),
+        'h2': lambda e: handle_basic_element(e, "## {}"),
+        'h3': lambda e: handle_basic_element(e, "### {}"),
+        'img': lambda e: None,  # 跳过图片
+        'ul': handle_list_element,
+        'ol': handle_list_element,
+        'a': handle_link_element,
+        'strong': lambda e: handle_basic_element(e, "**{}**"),
+        'em': lambda e: handle_basic_element(e, "*{}*")
+    }
+    
     for element in soup.find_all(True):
-        if element.name == 'p':
-            text = element.get_text(strip=True)
-            if text:
-                text_content.append(text)
-        elif element.name == 'h1':
-            text = element.get_text(strip=True)
-            if text:
-                text_content.append(f"# {text}")
-        elif element.name == 'h2':
-            text = element.get_text(strip=True)
-            if text:
-                text_content.append(f"## {text}")
-        elif element.name == 'h3':
-            text = element.get_text(strip=True)
-            if text:
-                text_content.append(f"### {text}")
-        elif element.name == 'img':
+        # 确保元素是Tag类型并且有name属性
+        if not isinstance(element, Tag):
             continue
-        elif element.name == 'ul' or element.name == 'ol':
-            list_items = element.find_all('li')
-            for item in list_items:
-                text = item.get_text(strip=True)
-                if text:
-                    if element.name == 'ul':
-                        text_content.append(f"- {text}")
-                    else:
-                        text_content.append(f"1. {text}")
-        elif element.name == 'a':
-            text = element.get_text(strip=True)
-            href = element.get('href')
-            if text and href:
-                text_content.append(f"[{text}]({href})")
-        elif element.name == 'strong':
-            text = element.get_text(strip=True)
-            if text:
-                text_content.append(f"**{text}**")
-        elif element.name == 'em':
-            text = element.get_text(strip=True)
-            if text:
-                text_content.append(f"*{text}*")
+            
+        # 通过映射表调用对应的处理函数
+        handler = element_handlers.get(element.name)
+        if handler:
+            handler(element)
     markdown_content = "\n\n".join(text_content)
     index = markdown_content.find("精彩荐读")
     if index != -1:

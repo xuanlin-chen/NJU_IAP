@@ -40,7 +40,11 @@ def extract_and_remove_publish_date(content):
     pattern = r'\|发布日期\|:\s*\d{4}-\d{1,2}-\d{1,2}\s*'
     match = re.search(pattern, content)
     if match:
-        date_str = re.search(r'\d{4}-\d{1,2}-\d{1,2}', match.group(0)).group(0)
+        date_str = re.search(r'\d{4}-\d{1,2}-\d{1,2}', match.group(0))
+        if date_str is None:
+            print("发布日期格式错误。格式必须为：“|发布日期|: YYYY-M-D”")
+            return None, content
+        date_str = date_str.group(0)
         content = re.sub(pattern, '', content)
         return date_str, content.strip()
     else:
@@ -61,15 +65,16 @@ def safe_json_parse(raw_str, max_retries=3):
             repaired = re.sub(r',\s*([}\]])', r'\1', repaired)
             try:
                 return json.loads(repaired)
-            except:
+            except Exception as e:
                 raw_str = repaired
+                print(f"尝试修复JSON格式失败: {str(e)}")
 
     # 若上述手段都不行，暴力提取第一个完整JSON
-    try:
-        json_str = re.search(r'\{.*\}', raw_str, flags=re.DOTALL).group()
-        return json.loads(json_str)
-    except:
-        raise ValueError("无法提取有效JSON内容")
+    match = re.search(r'\{.*\}', raw_str, flags=re.DOTALL)
+    if match is None:
+        raise ValueError("找不到有效的JSON内容")
+    json_str = match.group()
+    return json.loads(json_str)
 
 # 读取提示词
 def read_prompt_file():
@@ -123,7 +128,7 @@ def analyze_article(content):
 
 def process_files_to_db():
     if not os.path.exists(MARKDOWN_PATH):
-        print(f"处理失败\n路径有误")
+        print("处理失败\n路径有误")
         return
 
     # 测试用
@@ -134,7 +139,7 @@ def process_files_to_db():
 
     for filename in os.listdir(MARKDOWN_PATH):
         if not filename.endswith(".md"):
-            print(f"处理失败\n文件格式需为markdown格式")
+            print("处理失败\n文件格式需为markdown格式")
             return
 
         filepath = os.path.join(MARKDOWN_PATH, filename)
@@ -202,6 +207,11 @@ def process_files_to_db():
                 if not valid_json:
                     if not flag_api:
                         print(f"文件 {filename} 经过 {max_retries} 次重试仍无法生成有效JSON，跳过处理")
+                    continue
+
+                # 确保json_data不为None
+                if json_data is None:
+                    print(f"文件 {filename} 的JSON数据为空，跳过处理")
                     continue
 
                 # 将原文信息、发布日期和原文链接加到json中

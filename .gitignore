@@ -7,6 +7,7 @@ __pycache__/
 *.tmp
 
 # 忽略依赖目录
+.vscode/
 node_modules/
 venv/
 .venv/

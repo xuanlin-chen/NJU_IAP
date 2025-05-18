@@ -2,7 +2,7 @@
 import datetime
 import json
 import openai
-from ..config.settings import MESSAGE_TYPES
+from ..settings import MESSAGE_TYPES
 from ..services.query_service import query_messages
 
 def generate_ddl_events():

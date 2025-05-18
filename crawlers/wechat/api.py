@@ -71,6 +71,9 @@ def reset_all_labels():
             reader = csv.DictReader(f)
             # 保存表头
             fieldnames = reader.fieldnames
+            # 如果fieldnames为None，使用默认字段
+            if fieldnames is None:
+                fieldnames = ['时间', '标题', '链接', '标签', '公众号']
             # 读取所有行，将标签改为0
             for row in reader:
                 row['标签'] = '0'

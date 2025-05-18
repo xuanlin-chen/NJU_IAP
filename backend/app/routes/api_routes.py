@@ -119,7 +119,7 @@ def ask_question():
 @api_bp.route('/docs', methods=['GET'])
 def api_docs():
     """返回API文档"""
-    from ..config.settings import MESSAGE_TYPES
+    from ..settings import MESSAGE_TYPES
     
     docs = {
         "api_version": "1.0",

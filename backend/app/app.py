@@ -10,12 +10,12 @@ def create_app():
     CORS(app)
     
     # 加载配置
-    from .config.settings import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
+    from .settings import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
     
     # 初始化数据库
-    from .models.db import init_app as init_db
+    from .db import init_app as init_db
     init_db(app)
     
     # 注册路由
