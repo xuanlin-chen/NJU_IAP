@@ -24,6 +24,9 @@ def create_app():
     
     return app
 
+# 创建应用实例供导入使用
+app = create_app()
+
 
 # 直接执行时运行
 if __name__ == '__main__':

@@ -5,7 +5,8 @@ import json
 
 from app.services.query_service import query_messages, query_by_question
 from app.services.ai_service import extract_tags_with_ai, generate_answer_with_ai
-from app.services.news_service import generate_daily_news, generate_ddl_events
+from app.services.news_service import generate_daily_news
+from app.services.ddl_service import generate_ddl_events
 
 # 为API路由创建Blueprint
 api_bp = Blueprint('api', __name__)
@@ -41,9 +42,16 @@ def get_today_news():
     try:
         # 调用生成每日新闻函数
         news_data = generate_daily_news()
-        return api_response(news_data)
+        if not news_data['raw_messages']:
+            return api_response({
+                'date': news_data['date'],
+                'summary': '今日暂无更新',
+                'raw_messages': []
+            }, message='今日暂无新闻更新')
+        return api_response(news_data, message='获取新闻成功')
     except Exception as e:
-        return api_response(message=str(e), code=500)
+        print(f'获取每日新闻失败: {str(e)}')
+        return api_response(message='获取新闻失败，请稍后重试', code=500)
 
 @api_bp.route('/ddl-events', methods=['GET'])
 def get_ddl_events():
@@ -51,9 +59,16 @@ def get_ddl_events():
     try:
         # 调用生成DDL事件函数
         events_data = generate_ddl_events()
-        return api_response(events_data)
+        if not events_data['raw_messages']:
+            return api_response({
+                'date': events_data['date'],
+                'summary': [],
+                'raw_messages': []
+            }, message='今日暂无DDL事件')
+        return api_response(events_data, message='获取DDL事件成功')
     except Exception as e:
-        return api_response(message=str(e), code=500)
+        print(f'获取DDL事件失败: {str(e)}')
+        return api_response(message='获取DDL事件失败，请稍后重试', code=500)
 
 @api_bp.route('/knowledge/query', methods=['POST'])
 def ask_question():
@@ -123,8 +138,13 @@ def api_docs():
                         "description": "成功",
                         "schema": {
                             "date": "日期（ISO格式）",
-                            "content": "消息内容（文本或JSON）",
-                            "format": "内容格式（文本或json）"
+                            "summary": "每日新闻摘要，包含标题和内容",
+                            "raw_messages": "原始消息数据"
+                        },
+                        "messages": {
+                            "success": "获取新闻成功",
+                            "empty": "今日暂无新闻更新",
+                            "error": "获取新闻失败，请稍后重试"
                         }
                     }
                 }
@@ -138,8 +158,14 @@ def api_docs():
                     "200": {
                         "description": "成功",
                         "schema": {
-                            "name": "事件名称",
-                            "ddl": "截止日期（YYYY-MM-DD）"
+                            "date": "日期（ISO格式）",
+                            "summary": "DDL事件列表，每个事件包含事件名称、截止日期和重要程度",
+                            "raw_messages": "原始消息数据"
+                        },
+                        "messages": {
+                            "success": "获取DDL事件成功",
+                            "empty": "今日暂无DDL事件",
+                            "error": "获取DDL事件失败，请稍后重试"
                         }
                     }
                 }

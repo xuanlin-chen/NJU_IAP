@@ -1,7 +1,7 @@
 # 应用程序配置设置
 
 # Flask和数据库设置
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://crawler:241880625@47.122.71.85:3306/information_for_students?charset=utf8mb4'
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://user_w:241880484@47.122.71.85:3306/information_for_students?charset=utf8mb4'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # OpenAI配置

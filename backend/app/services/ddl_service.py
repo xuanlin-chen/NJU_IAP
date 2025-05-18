@@ -1,37 +1,33 @@
-# 新闻服务
+# DDL事件服务
 import datetime
 import json
 import openai
 from ..config.settings import MESSAGE_TYPES
 from ..services.query_service import query_messages
 
-def generate_daily_news():
-    """从数据库获取今日更新内容并生成每日新闻摘要"""
+def generate_ddl_events():
+    """从数据库获取今日发布的消息并生成截止日期事件列表"""
     # 获取今天的日期
     today = datetime.date.today()
     
-    # 构建查询条件 - 查询今天发布的消息
-    query_conditions = {
-        "发布日期": today.isoformat()
-    }
-    
-    # 收集今天所有类型的更新
+    # 收集所有类型的数据
     all_messages = []
     for message_type in MESSAGE_TYPES.keys():
-        messages = query_messages(message_type, query_conditions)
+        # 只获取今日发布的消息
+        messages = query_messages(message_type, {"发布日期": today.isoformat()})
         if messages:
             all_messages.extend(messages)
     
-    # 如果今天没有更新，返回默认消息
+    # 如果没有消息，返回默认结果
     if not all_messages:
         return {
             'date': today.isoformat(),
-            'summary': "今日暂无更新",
+            'summary': [],
             'raw_messages': []
         }
     
-    # 调用AI生成摘要
-    prompt = f"请根据以下今日({today.isoformat()})发布的内容，生成一个简洁的每日消息总结，以JSON格式返回，要求：\n1. 总结要包含'标题'和'内容'两个字段\n2. 内容要简明扼要地概括所有消息的重点\n3. 注意保持JSON格式的正确性\n\n原始消息：\n{json.dumps(all_messages, ensure_ascii=False)}"
+    # 调用AI提取截止日期事件
+    prompt = f"请从以下消息中提取所有截止日期(DDL)事件，生成一个JSON格式的今日DDL总结，要求：\n1. 每个事件必须包含'事件名称'、'截止日期'、'重要程度'（高、中、低）字段\n2. 按截止日期升序排序\n3. 注意保持JSON格式的正确性\n\n原始消息：\n{json.dumps(all_messages, ensure_ascii=False)}"
     
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -47,9 +43,9 @@ def generate_daily_news():
             'raw_messages': all_messages
         }
     except:
-        # 如果解析失败，直接返回AI的文本
+        # 如果解析失败，返回空结果但保留原始数据
         return {
             'date': today.isoformat(),
-            'summary': response.choices[0].message['content'],
+            'summary': [],
             'raw_messages': all_messages
         }
