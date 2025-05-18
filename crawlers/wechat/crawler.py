@@ -12,23 +12,37 @@ import random
 from datetime import datetime
 links = []
 # 配置输出路径
-MARKDOWN_PATH = "C:/Users/chenxuanlin/Desktop/input"
+MARKDOWN_PATH = "C:\\Users\\chenxuanlin\\Desktop\\njuIAP\\NJU_IAP\\input_example"
+#改成你们自己的路径
 
-def read_csv_links(csv_file):
-    """从 CSV 文件中读取标签为1的链接"""
+def read_csv_links(account_name):
+    """从 CSV 文件中读取标签为1的链接
+    :param account_name: 公众号名称，用于构建文件路径
+    """
     filtered_links = []
-    with open(csv_file, 'r', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if '标签' in row and row['标签'] == '1':
-                filtered_links.append(row['链接'])
+    csv_path = os.path.join(os.path.dirname(__file__), "..", "..", "article_link", f"{account_name}.csv")
+    try:
+        with open(csv_path, 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if '标签' in row and row['标签'] == '1':
+                    filtered_links.append(row['链接'])
+    except FileNotFoundError:
+        print(f"警告: 未找到 {account_name} 的CSV文件")
     return filtered_links
 
 
-def create_output_folders():
-    """创建输出文件夹"""
+def create_output_folders(account_name=None):
+    """创建输出文件夹
+    :param account_name: 公众号名称，用于创建子文件夹
+    """
     if not os.path.exists(MARKDOWN_PATH):
         os.makedirs(MARKDOWN_PATH)
+        
+    if account_name:
+        account_path = os.path.join(MARKDOWN_PATH, account_name)
+        if not os.path.exists(account_path):
+            os.makedirs(account_path)
 
 
 def save_text_as_text(text_content, link_index, link, today_str):
@@ -116,13 +130,21 @@ def crawl_and_save(link, link_index, today_str):
         driver.quit()
 
 def main():
-    csv_file = "articles.csv"  # CSV 文件路径
+    import os
     today_str = datetime.now().strftime("%Y-%m-%d")
-    links = read_csv_links(csv_file)
     create_output_folders()
-    for i, link in enumerate(links):
-        print(f"处理链接 {i + 1}/{len(links)}: {link}")
-        crawl_and_save(link, i + 1, today_str)
+    
+    # 遍历article_link文件夹中的所有CSV文件
+    article_link_dir = os.path.join(os.path.dirname(__file__), "..", "..", "article_link")
+    for csv_file in os.listdir(article_link_dir):
+        if csv_file.endswith('.csv'):
+            account_name = os.path.splitext(csv_file)[0]
+            print(f"正在处理账号: {account_name}")
+            create_output_folders(account_name)
+            links = read_csv_links(account_name)
+            for i, link in enumerate(links):
+                print(f"处理链接 {i + 1}/{len(links)}: {link}")
+                crawl_and_save(link, i + 1, today_str)
 
 if __name__ == "__main__":
     main()
