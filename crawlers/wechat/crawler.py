@@ -46,8 +46,8 @@ def save_text_as_text(text_content, link_index, link, today_str):
     """将文字内容保存为 Markdown 文件，第二行写入日期"""
     file_path = os.path.join(MARKDOWN_PATH, f"article_{link_index}.md")
     with open(file_path, 'w', encoding='utf-8') as file:
-        file.write(f"|原文链接|: {link}\n")
-        file.write(f"|{today_str}|\n\n")
+        file.write(f"|原文链接|:{link}\n")
+        file.write(f"|发布日期|:{today_str}\n")
         file.write(text_content)
     print(f"Markdown 内容已保存：{file_path}")
 
