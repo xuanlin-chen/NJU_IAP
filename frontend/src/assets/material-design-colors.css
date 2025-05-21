@@ -1,0 +1,77 @@
+/* Material Design Colors - Using @material/material-color-utilities */
+
+:root {
+  /* 通过 material-color-utilities 自动设置的系统颜色
+     这些变量会由 themeUtils.ts 中的 applyMaterialTheme() 函数自动设置 */
+  
+  /* 映射原有变量到 material-color-utilities 生成的变量 */
+  --md-primary: var(--md-sys-color-primary);
+  --md-primary-light: var(--md-sys-color-primary-container);
+  --md-primary-dark: var(--md-sys-color-primary-dark, var(--md-sys-color-primary));
+  --md-background-light: var(--md-sys-color-surface-variant);
+  --md-surface: var(--md-sys-color-surface);
+  --md-error: var(--md-sys-color-error);
+  
+  /* 保留原有的蓝色和灰色变量，作为备用和向后兼容 */
+  /* Blue */
+  --md-blue-50: #e3f2fd;
+  --md-blue-100: #bbdefb;
+  --md-blue-200: #90caf9;
+  --md-blue-300: #64b5f6;
+  --md-blue-400: #42a5f5;
+  --md-blue-500: #2196f3;
+  --md-blue-600: #1e88e5;
+  --md-blue-700: #1976d2;
+  --md-blue-800: #1565c0;
+  --md-blue-900: #0d47a1;
+  --md-blue-a100: #82b1ff;
+  --md-blue-a200: #448aff;
+  --md-blue-a400: #2979ff;
+  --md-blue-a700: #2962ff;
+
+  /* Grey */
+  --md-grey-50: #fafafa;
+  --md-grey-100: #f5f5f5;
+  --md-grey-200: #eeeeee;
+  --md-grey-300: #e0e0e0;
+  --md-grey-400: #bdbdbd;
+  --md-grey-500: #9e9e9e;
+  --md-grey-600: #757575;
+  --md-grey-700: #616161;
+  --md-grey-800: #424242;
+  --md-grey-900: #212121;
+}
+
+/* Helper classes for common color uses */
+.md-bg-primary {
+  background-color: var(--md-primary);
+  color: var(--md-sys-color-on-primary, white);
+}
+
+.md-bg-primary-light {
+  background-color: var(--md-primary-light);
+  color: var(--md-sys-color-on-primary-container, black);
+}
+
+.md-text-primary {
+  color: var(--md-primary);
+}
+
+.md-border-primary {
+  border-color: var(--md-primary);
+}
+
+/* 新增的一些辅助类 */
+.md-surface {
+  background-color: var(--md-surface);
+  color: var(--md-sys-color-on-surface, black);
+}
+
+.md-error {
+  color: var(--md-error);
+}
+
+.md-bg-error {
+  background-color: var(--md-error);
+  color: var(--md-sys-color-on-error, white);
+}
