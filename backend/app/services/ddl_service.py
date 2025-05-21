@@ -1,16 +1,16 @@
 # DDL事件服务
 import datetime
 import json
-import requests
-import time
 import re
-from ..settings import MESSAGE_TYPES
-from ..services.query_service import query_messages
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from settings import MESSAGE_TYPES
+from sqlalchemy import text
+from db import db
+from app import app
 
-# API配置
-API_KEY = "sk-*****************************************"
-API_URL = "https://api.siliconflow.cn/v1/chat/completions"
-SLEEP_TIME = 7  # API调用间隔时间
+# DDL字段映射配置
 
 def safe_json_parse(raw_str, max_retries=3):
     # 安全解析JSON加自动修复
@@ -38,58 +38,57 @@ def safe_json_parse(raw_str, max_retries=3):
     return json.loads(json_str)
 
 def generate_ddl_events():
-    """从数据库获取今日发布的消息并生成截止日期事件列表"""
-    # 获取今天的日期
-    today = datetime.date.today()
-    
-    # 收集所有类型的数据
-    all_messages = []
-    for message_type in MESSAGE_TYPES.keys():
-        # 只获取今日发布的消息
-        messages = query_messages(message_type, {"发布日期": today.isoformat()})
-        if messages:
-            all_messages.extend(messages)
-    
-    # 如果没有消息，返回默认结果
-    if not all_messages:
-        return {
-            'date': today.isoformat(),
-            'summary': [],
-            'raw_messages': []
-        }
-    
-    # 调用AI提取截止日期事件
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
-    }
+    """从数据库获取5月20日发布的消息并提取DDL信息"""
+    target_date = datetime.date(2025, 5, 20)
+    ddl_events = []
 
-    prompt = f"请从以下消息中提取所有截止日期(DDL)事件，生成一个JSON格式的今日DDL总结，要求：\n1. 每个事件必须包含'事件名称'、'截止日期'、'重要程度'（高、中、低）字段\n2. 按截止日期升序排序\n3. 注意保持JSON格式的正确性\n\n原始消息：\n{json.dumps(all_messages, ensure_ascii=False)}"
+    with app.app_context():
+        for message_type, config in MESSAGE_TYPES.items():
+            table_name = config["table_name"]
+            
+            # 根据表结构设计不同查询字段
+            ddl_fields = {
+                '比赛通知': ['报名截止时间', '比赛结束时间'],
+                '学业申请': ['申请截止时间'],
+                '国际交流项目': ['项目时间_申请截止时间'],
+                '志愿活动': ['报名截止时间'],
+                '社会实践': ['报名截止时间'],
+                '文体活动': ['报名截止时间'],
+                '实习就业': ['申请截止日期']
+            }
 
-    payload = {
-        "model": "deepseek-ai/DeepSeek-V3",
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.1,
-        "max_tokens": 2000
-    }
+            fields = ', '.join(ddl_fields.get(table_name, ['报名截止时间']))
+            
+            query = text(f"""
+                SELECT 类型, 标题, 原文信息, {fields} 
+                FROM {table_name} 
+                WHERE 发布日期 = :target_date
+                AND ({fields} IS NOT NULL)
+            """)
+            
+            try:
+                result = db.session.execute(query, {"target_date": target_date})
+                for row in result:
+                    event = {
+                        '类型': row[0],
+                        '标题': row[1],
+                        '原文信息': row[2],
+                        '截止时间': max([row[i] for i in range(3, len(row)) if row[i]]).isoformat()
+                    }
+                    ddl_events.append(event)
+            except Exception as e:
+                 # print(f"查询{message_type}失败")
+                 continue
 
-    try:
-        response = requests.post(API_URL, headers=headers, json=payload)
-        response.raise_for_status()
-        time.sleep(SLEEP_TIME)
-        
-        raw_output = response.json()['choices'][0]['message']['content'].strip()
-        ai_summary = safe_json_parse(raw_output)
-        
-        return {
-            'date': today.isoformat(),
-            'summary': ai_summary,
-            'raw_messages': all_messages
-        }
-    except Exception as e:
-        print(f"API调用或解析失败: {str(e)}")
-        return {
-            'date': today.isoformat(),
-            'summary': [],
-            'raw_messages': all_messages
-        }
+    # 构建符合要求的JSON列表
+    formatted_events = [{
+        'date': target_date.isoformat(),
+        'summary': {
+            '类型': event['类型'],
+            '标题': event['标题'],
+            '截止时间': event['截止时间']
+        },
+        'abstract': event['原文信息']
+    } for event in sorted(ddl_events, key=lambda x: x['截止时间'])]
+
+    return formatted_events

@@ -4,13 +4,18 @@ import json
 import requests
 import time
 import re
-from ..settings import MESSAGE_TYPES
-from ..services.query_service import query_messages
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from app import app
+from settings import MESSAGE_TYPES
+from sqlalchemy import text
+from db import db
 
 # API配置
-API_KEY = "sk-*****************************************"
-API_URL = "https://api.siliconflow.cn/v1/chat/completions"
-SLEEP_TIME = 7  # API调用间隔时间
+# API_KEY = "sk-*****************************************"
+# API_URL = "https://api.siliconflow.cn/v1/chat/completions"
+# SLEEP_TIME = 7  # API调用间隔时间
 
 def safe_json_parse(raw_str, max_retries=3):
     # 安全解析JSON加自动修复
@@ -38,62 +43,59 @@ def safe_json_parse(raw_str, max_retries=3):
     return json.loads(json_str)
 
 def generate_daily_news():
-    """从数据库获取今日更新内容并生成每日新闻摘要"""
-    # 获取今天的日期
-    today = datetime.date.today()
+    """从数据库获取2025年5月20日的所有消息并返回格式化的新闻摘要"""
+    target_date = datetime.date(2025, 5, 20)
     
-    # 构建查询条件 - 查询今天发布的消息
-    query_conditions = {
-        "发布日期": today.isoformat()
-    }
-    
-    # 收集今天所有类型的更新
+    # 收集所有类型的更新
     all_messages = []
-    for message_type in MESSAGE_TYPES.keys():
-        messages = query_messages(message_type, query_conditions)
-        if messages:
-            all_messages.extend(messages)
     
-    # 如果今天没有更新，返回默认消息
+    # 创建应用上下文
+    with app.app_context():
+        # 遍历所有消息类型
+        for message_type, config in MESSAGE_TYPES.items():
+            table_name = config["table_name"]
+            # 构建查询SQL，直接查询所需字段
+            query = text(f"SELECT 类型, 标题, 关键词, 原文信息 FROM {table_name} WHERE 发布日期 = :target_date")
+            try:
+            # 执行查询
+                result = db.session.execute(query, {"target_date": target_date})
+                rows = result.fetchall()
+        
+        # 处理查询结果
+                for row in rows:
+                    message = {
+                        "类型": row[0],
+                        "标题": row[1],
+                        "关键词": row[2],
+                        "原文信息": row[3]
+                    }
+                    all_messages.append(message)
+            except Exception as e:
+                # print(f"查询{message_type}失败")
+                continue
+    
+    # 如果没有数据，返回默认消息
     if not all_messages:
         return {
-            'date': today.isoformat(),
-            'summary': "今日暂无更新",
-            'raw_messages': []
+            'date': target_date.isoformat(),
+            'summary': [],
+            'abstract': []
         }
     
-    # 调用AI生成摘要
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
-    }
+    # 格式化消息内容
+    summary = [{
+        '类型': msg['类型'],
+        '标题': msg['标题'],
+        '关键词': msg['关键词']
+    } for msg in all_messages]
+    
+    abstract = [msg['原文信息'] for msg in all_messages]
+    
+    # 为每条消息生成独立JSON对象
+    news_list = [{
+        'date': target_date.isoformat(),
+        'summary': item,
+        'abstract': abstract[i]
+    } for i, item in enumerate(summary)]
 
-    prompt = f"请根据以下今日({today.isoformat()})发布的内容，生成一个简洁的每日消息总结，以JSON格式返回，要求：\n1. 总结要包含'标题'和'内容'两个字段\n2. 内容要简明扼要地概括所有消息的重点\n3. 注意保持JSON格式的正确性\n\n原始消息：\n{json.dumps(all_messages, ensure_ascii=False)}"
-
-    payload = {
-        "model": "deepseek-ai/DeepSeek-V3",
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.1,
-        "max_tokens": 2000
-    }
-
-    try:
-        response = requests.post(API_URL, headers=headers, json=payload)
-        response.raise_for_status()
-        time.sleep(SLEEP_TIME)
-        
-        raw_output = response.json()['choices'][0]['message']['content'].strip()
-        ai_summary = safe_json_parse(raw_output)
-        
-        return {
-            'date': today.isoformat(),
-            'summary': ai_summary,
-            'raw_messages': all_messages
-        }
-    except Exception as e:
-        print(f"API调用或解析失败: {str(e)}")
-        return {
-            'date': today.isoformat(),
-            'summary': "今日暂无更新",
-            'raw_messages': all_messages
-        }
+    return news_list
