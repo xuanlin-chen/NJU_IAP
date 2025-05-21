@@ -48,7 +48,14 @@ def generate_ddl_events():
             
             # 根据表结构设计不同查询字段
             ddl_fields = {
-                '比赛通知': ['报名截止时间', '比赛结束时间'],
+                '校园通知': ['截止时间'],
+                '讲座/分享会信息': ['报名截止时间'],
+                '社团消息': ['活动时间'],
+                '实践培训活动': ['报名截止时间'],
+                '作品征集': ['提交截止时间'],
+                '其他活动': ['报名截止时间'],
+                '其他类型': ['行动截止时间'],
+                '比赛通知': ['报名截止时间'],
                 '学业申请': ['申请截止时间'],
                 '国际交流项目': ['项目时间_申请截止时间'],
                 '志愿活动': ['报名截止时间'],
@@ -57,13 +64,15 @@ def generate_ddl_events():
                 '实习就业': ['申请截止日期']
             }
 
-            fields = ', '.join(ddl_fields.get(table_name, ['报名截止时间']))
+            if table_name not in ddl_fields :
+                continue
+            fields = ddl_fields[table_name]
             
             query = text(f"""
-                SELECT 类型, 标题, 原文信息, {fields} 
+                SELECT 类型, 标题, 原文信息, 原文链接, {', '.join(fields)} 
                 FROM {table_name} 
                 WHERE 发布日期 = :target_date
-                AND ({fields} IS NOT NULL)
+                AND ({' OR '.join([f'{f} IS NOT NULL' for f in fields])})
             """)
             
             try:
@@ -73,7 +82,8 @@ def generate_ddl_events():
                         '类型': row[0],
                         '标题': row[1],
                         '原文信息': row[2],
-                        '截止时间': max([row[i] for i in range(3, len(row)) if row[i]]).isoformat()
+                        '原文链接': row[3],
+                        '截止时间': row[4]
                     }
                     ddl_events.append(event)
             except Exception as e:
@@ -86,9 +96,10 @@ def generate_ddl_events():
         'summary': {
             '类型': event['类型'],
             '标题': event['标题'],
-            '截止时间': event['截止时间']
+            '截止时间': event['截止时间'],
+            '原文链接': event['原文链接']
         },
-        'abstract': event['原文信息']
-    } for event in sorted(ddl_events, key=lambda x: x['截止时间'])]
+        # 'abstract': event['原文信息']
+    } for event in ddl_events]
 
     return formatted_events

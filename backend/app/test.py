@@ -50,7 +50,7 @@ def test_generate_ddl_events():
         
         # 验证数据结构
         if len(result) > 0:
-            print(result[0])
+            print(result)
             
         print("DDL事件生成测试通过！")
         return True

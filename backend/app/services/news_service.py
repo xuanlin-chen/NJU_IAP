@@ -55,7 +55,7 @@ def generate_daily_news():
         for message_type, config in MESSAGE_TYPES.items():
             table_name = config["table_name"]
             # 构建查询SQL，直接查询所需字段
-            query = text(f"SELECT 类型, 标题, 关键词, 原文信息 FROM {table_name} WHERE 发布日期 = :target_date")
+            query = text(f"SELECT 类型, 标题, 关键词, 原文信息, 原文链接 FROM {table_name} WHERE 发布日期 = :target_date")
             try:
             # 执行查询
                 result = db.session.execute(query, {"target_date": target_date})
@@ -67,7 +67,8 @@ def generate_daily_news():
                         "类型": row[0],
                         "标题": row[1],
                         "关键词": row[2],
-                        "原文信息": row[3]
+                        "原文信息": row[3],
+                        "原文链接": row[4]
                     }
                     all_messages.append(message)
             except Exception as e:
@@ -86,7 +87,8 @@ def generate_daily_news():
     summary = [{
         '类型': msg['类型'],
         '标题': msg['标题'],
-        '关键词': msg['关键词']
+        '关键词': msg['关键词'],
+        '原文链接': msg['原文链接']
     } for msg in all_messages]
     
     abstract = [msg['原文信息'] for msg in all_messages]

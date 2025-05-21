@@ -22,8 +22,8 @@ def create_app():
     init_db(app)
     
     # 注册路由
-    # from routes import init_app as init_routes
-    # init_routes(app)
+    from routes import init_app as init_routes
+    init_routes(app)
     
     return app
 
