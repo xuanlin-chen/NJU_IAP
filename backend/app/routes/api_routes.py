@@ -3,38 +3,38 @@ from flask import Blueprint, request
 from . import api_response
 import json
 
-from app.services.query_service import query_messages, query_by_question
-from app.services.ai_service import extract_tags_with_ai, generate_answer_with_ai
-from app.services.news_service import generate_daily_news
-from app.services.ddl_service import generate_ddl_events
+# from services.query_service import query_messages, query_by_question
+# from ..services.ai_service import extract_tags_with_ai, generate_answer_with_ai
+from ..services.news_service import generate_daily_news
+from ..services.ddl_service import generate_ddl_events
 
 # 为API路由创建Blueprint
 api_bp = Blueprint('api', __name__)
 
-@api_bp.route('/messages', methods=['GET'])
-def get_messages():
-    """直接查询消息（高级用户使用）"""
-    try:
-        # 获取查询参数
-        message_type = request.args.get('message_type')
-        query_conditions_str = request.args.get('query_conditions', '{}')
+# @api_bp.route('/messages', methods=['GET'])
+# def get_messages():
+#     """直接查询消息（高级用户使用）"""
+#     try:
+#         # 获取查询参数
+#         message_type = request.args.get('message_type')
+#         query_conditions_str = request.args.get('query_conditions', '{}')
         
-        # 验证消息类型
-        if not message_type:
-            return api_response(message="消息类型是必需的", code=400)
+#         # 验证消息类型
+#         if not message_type:
+#             return api_response(message="消息类型是必需的", code=400)
         
-        # 解析查询条件
-        try:
-            query_conditions = json.loads(query_conditions_str)
-        except json.JSONDecodeError:
-            return api_response(message="查询条件必须是有效的JSON格式", code=400)
+#         # 解析查询条件
+#         try:
+#             query_conditions = json.loads(query_conditions_str)
+#         except json.JSONDecodeError:
+#             return api_response(message="查询条件必须是有效的JSON格式", code=400)
         
-        # 执行查询
-        results = query_messages(message_type, query_conditions)
+#         # 执行查询
+#         results = query_messages(message_type, query_conditions)
         
-        return api_response(results)
-    except Exception as e:
-        return api_response(message=str(e), code=500)
+#         return api_response(results)
+#     except Exception as e:
+#         return api_response(message=str(e), code=500)
 
 @api_bp.route('/news/today', methods=['GET'])
 def get_today_news():
@@ -70,51 +70,51 @@ def get_ddl_events():
         print(f'获取DDL事件失败: {str(e)}')
         return api_response(message='获取DDL事件失败，请稍后重试', code=500)
 
-@api_bp.route('/knowledge/query', methods=['POST'])
-def ask_question():
-    """处理用户问题的完整流程"""
-    try:
-        # 获取用户问题
-        data = request.get_json()
-        if not data or 'question' not in data:
-            return api_response(message="问题不能为空", code=400)
+# @api_bp.route('/knowledge/query', methods=['POST'])
+# def ask_question():
+#     """处理用户问题的完整流程"""
+#     try:
+#         # 获取用户问题
+#         data = request.get_json()
+#         if not data or 'question' not in data:
+#             return api_response(message="问题不能为空", code=400)
             
-        question = data.get('question', '')
+#         question = data.get('question', '')
         
-        # 使用AI提取查询标签
-        extracted_tags = extract_tags_with_ai(question)
+#         # 使用AI提取查询标签
+#         extracted_tags = extract_tags_with_ai(question)
         
-        # 查询相关信息 - 使用灵活查询函数
-        results = query_by_question(question, extracted_tags)
+#         # 查询相关信息 - 使用灵活查询函数
+#         results = query_by_question(question, extracted_tags)
         
-        # 生成答案
-        answer = generate_answer_with_ai(question, results)
+#         # 生成答案
+#         answer = generate_answer_with_ai(question, results)
         
-        # 构建响应数据 - 包含更多信息
-        references = []
-        for i, r in enumerate(results):
-            # 提取标签和内容的摘要信息
-            tags_summary = ", ".join([f"{k}: {v}" for k, v in r.get('tags', {}).items() if k != 'time'])
-            content_preview = str(r.get('content', {}))[:50] + '...' if r.get('content') else ''
+#         # 构建响应数据 - 包含更多信息
+#         references = []
+#         for i, r in enumerate(results):
+#             # 提取标签和内容的摘要信息
+#             tags_summary = ", ".join([f"{k}: {v}" for k, v in r.get('tags', {}).items() if k != 'time'])
+#             content_preview = str(r.get('content', {}))[:50] + '...' if r.get('content') else ''
             
-            reference = {
-                'id': i+1,
-                'type': r.get('message_type', '未知类型'),
-                'tags': tags_summary,
-                'content_preview': content_preview
-            }
-            references.append(reference)
+#             reference = {
+#                 'id': i+1,
+#                 'type': r.get('message_type', '未知类型'),
+#                 'tags': tags_summary,
+#                 'content_preview': content_preview
+#             }
+#             references.append(reference)
         
-        response_data = {
-            'question': question,
-            'extracted_tags': extracted_tags,  # 添加提取的标签
-            'answer': answer,
-            'references': references
-        }
+#         response_data = {
+#             'question': question,
+#             'extracted_tags': extracted_tags,  # 添加提取的标签
+#             'answer': answer,
+#             'references': references
+#         }
         
-        return api_response(response_data)
-    except Exception as e:
-        return api_response(message=str(e), code=500)
+#         return api_response(response_data)
+#     except Exception as e:
+#         return api_response(message=str(e), code=500)
 
 @api_bp.route('/docs', methods=['GET'])
 def api_docs():
