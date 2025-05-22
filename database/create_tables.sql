@@ -174,7 +174,7 @@ CREATE TABLE `讲座/分享会信息` (
   `是否需要报名` BIT(1),
   `五育认定类型` VARCHAR(50),
   `报名截止时间` DATETIME,
-  `主讲人信息` VARCHAR(100),
+  `主讲人信息` TEXT,
   `适用年级` VARCHAR(255),
   `原文信息` TEXT,
   `发布日期` DATE,
