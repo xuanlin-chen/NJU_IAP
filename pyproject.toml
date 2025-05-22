@@ -12,6 +12,7 @@ dependencies = [
     "flask>=3.1.0",
     "flask-cors>=5.0.1",
     "flask-sqlalchemy>=3.1.1",
+    "html2text>=2025.4.15",
     "openai>=1.78.0",
     "pillow>=11.2.1",
     "playwright>=1.52.0",
