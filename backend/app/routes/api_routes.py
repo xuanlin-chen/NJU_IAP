@@ -3,38 +3,14 @@ from flask import Blueprint, request
 from . import api_response
 import json
 
-# from services.query_service import query_messages, query_by_question
-# from ..services.ai_service import extract_tags_with_ai, generate_answer_with_ai
+# from services.query_service import query_by_question
 from ..services.news_service import generate_daily_news
 from ..services.ddl_service import generate_ddl_events
 
 # 为API路由创建Blueprint
 api_bp = Blueprint('api', __name__)
 
-# @api_bp.route('/messages', methods=['GET'])
-# def get_messages():
-#     """直接查询消息（高级用户使用）"""
-#     try:
-#         # 获取查询参数
-#         message_type = request.args.get('message_type')
-#         query_conditions_str = request.args.get('query_conditions', '{}')
-        
-#         # 验证消息类型
-#         if not message_type:
-#             return api_response(message="消息类型是必需的", code=400)
-        
-#         # 解析查询条件
-#         try:
-#             query_conditions = json.loads(query_conditions_str)
-#         except json.JSONDecodeError:
-#             return api_response(message="查询条件必须是有效的JSON格式", code=400)
-        
-#         # 执行查询
-#         results = query_messages(message_type, query_conditions)
-        
-#         return api_response(results)
-#     except Exception as e:
-#         return api_response(message=str(e), code=500)
+
 
 @api_bp.route('/news/today', methods=['GET'])
 def get_today_news():
@@ -194,36 +170,7 @@ def api_docs():
                     }
                 }
             },
-            {
-                "path": "/api/messages",
-                "method": "GET",
-                "description": "直接消息查询（高级用户）",
-                "parameters": [
-                    {
-                        "name": "message_type",
-                        "type": "string",
-                        "required": True,
-                        "description": "消息类型，参考message_types字段"
-                    },
-                    {
-                        "name": "query_conditions",
-                        "type": "json",
-                        "required": False,
-                        "description": "查询条件，JSON格式，包括标签和内容部分"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "id": "消息ID",
-                            "tags": "标签JSON对象",
-                            "content": "内容JSON对象",
-                            "message_type": "消息类型"
-                        }
-                    }
-                }
-            }
+            
         ]
     }
     return api_response(docs)
