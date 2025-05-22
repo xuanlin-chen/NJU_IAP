@@ -355,6 +355,7 @@ CREATE TABLE `作品征集` (
     `成果应用` VARCHAR(255),
     `原文信息` TEXT,
     `发布日期` DATE,
+    `关键词` VARCHAR(255),
     `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
