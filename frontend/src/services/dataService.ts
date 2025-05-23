@@ -1,3 +1,12 @@
+const api_url = 'https://localhost:5000/api/' as const;
+
+const api_router = {
+  today: `${api_url}news/today`,
+  ddl: `${api_url}ddl-events`,
+  docs: `${api_url}docs`,
+  query: `${api_url}konwledge/query`,
+} as const;
+
 import { ref } from 'vue'
 
 export interface SummaryData {
@@ -93,10 +102,7 @@ const ddlData = ref<DdlItem[]>([
   { title: 'Python数据分析课程论文', date: '2025-05-01', group: 2 }
 ]);
 
-let a = fetch('http://localhost:5000/api/ddl-events')
-// 此处暂时需要使用http协议
-
-console.log(a)
+const ddl = fetch('https://localhost:5000/api/ddl')
 
 ddlData.value.push(
   { title: '提交人工智能课程作业', date: '2025-05-07', group: 0 },)
