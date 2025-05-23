@@ -88,6 +88,6 @@ def save_to_markdown(news_item, index, folder_path):
 
 
 if __name__ == "__main__":
-    news_list = get_news(10)  # 获取3条新闻
+    news_list = get_news(10)  # 获取10条新闻
     for index, new in enumerate(news_list):
         save_to_markdown(new, index, folder_path)
