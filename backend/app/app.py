@@ -11,6 +11,9 @@ def create_app():
     # 启用CORS以支持跨域请求
     CORS(app)
     
+    # 设置JSON编码
+    app.config['JSON_AS_ASCII'] = False
+    
     # 加载配置
     from app.settings import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI

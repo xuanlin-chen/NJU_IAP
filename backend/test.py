@@ -1,7 +1,10 @@
 
-from db import engine
-
+from flask import app
+from app.db import engine
+from app.app import create_app
 from sqlalchemy import text
+
+
 
 def test_database_connection():
     try:
@@ -38,8 +41,8 @@ def test_fetch_data():
         print(f"数据获取测试失败：{str(e)}")
         return False
 
-from services.news_service import generate_daily_news
-from services.ddl_service import generate_ddl_events
+from app.services.news_service import generate_daily_news
+from app.services.ddl_service import generate_ddl_events
 
 
 def test_generate_ddl_events():
@@ -75,10 +78,12 @@ def test_generate_daily_news():
         return False
 
 
-if __name__ == '__main__':
-    # 测试数据库连接
-    if test_database_connection():
-        # 如果连接成功，执行其他测试
+if __name__ == "__main__":
+    from app.app import create_app
+    app = create_app()
+    with app.app_context():
+    # 调用需要上下文的函数
+        test_database_connection()
         test_fetch_data()
         test_generate_daily_news()
         test_generate_ddl_events()

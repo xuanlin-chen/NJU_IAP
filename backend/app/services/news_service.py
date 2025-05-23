@@ -5,12 +5,10 @@ import requests
 import time
 import re
 import sys
-from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parent.parent))
 from app import app
-from settings import MESSAGE_TYPES
+from app.settings import MESSAGE_TYPES
 from sqlalchemy import text
-from db import db
+from app.db import db
 
 # API配置
 # API_KEY = "sk-*****************************************"
@@ -48,32 +46,31 @@ def generate_daily_news():
     
     # 收集所有类型的更新
     all_messages = []
-    
     # 创建应用上下文
-    with app.app_context():
+    
         # 遍历所有消息类型
-        for message_type, config in MESSAGE_TYPES.items():
-            table_name = config["table_name"]
-            # 构建查询SQL，直接查询所需字段
-            query = text(f"SELECT 类型, 标题, 关键词, 原文信息, 原文链接 FROM {table_name} WHERE 发布日期 = :target_date")
-            try:
-            # 执行查询
-                result = db.session.execute(query, {"target_date": target_date})
-                rows = result.fetchall()
-        
-        # 处理查询结果
-                for row in rows:
-                    message = {
-                        "类型": row[0],
-                        "标题": row[1],
-                        "关键词": row[2],
-                        "原文信息": row[3],
-                        "原文链接": row[4]
-                    }
-                    all_messages.append(message)
-            except Exception as e:
-                # print(f"查询{message_type}失败")
-                continue
+    for message_type, config in MESSAGE_TYPES.items():
+        table_name = config["table_name"]
+        # 构建查询SQL，直接查询所需字段
+        query = text(f"SELECT 类型, 标题, 关键词, 原文信息, 原文链接 FROM {table_name} WHERE 发布日期 = :target_date")
+        try:
+        # 执行查询
+            result = db.session.execute(query, {"target_date": target_date})
+            rows = result.fetchall()
+    
+    # 处理查询结果
+            for row in rows:
+                message = {
+                    "类型": row[0],
+                    "标题": row[1],
+                    "关键词": row[2],
+                    "原文信息": row[3],
+                    "原文链接": row[4]
+                }
+                all_messages.append(message)
+        except Exception as e:
+            # print(f"查询{message_type}失败")
+            continue
     
     # 如果没有数据，返回默认消息
     if not all_messages:
