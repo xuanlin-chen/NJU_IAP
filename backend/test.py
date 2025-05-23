@@ -43,6 +43,7 @@ def test_fetch_data():
 
 from app.services.news_service import generate_daily_news
 from app.services.ddl_service import generate_ddl_events
+from app.services.query_service import query_by_question
 
 
 def test_generate_ddl_events():
@@ -53,7 +54,7 @@ def test_generate_ddl_events():
         
         # 验证数据结构
         if len(result) > 0:
-            print(result)
+            print(result[0])
             
         print("DDL事件生成测试通过！")
         return True
@@ -78,13 +79,34 @@ def test_generate_daily_news():
         return False
 
 
+def test_query_service():
+    try:
+        # 测试正常查询
+        question = ""
+        result = query_by_question(question)
+        print("\n查询服务测试 - 正常查询：")
+        print(f"问题：{question}")
+        print(f"回答：{result}")
+        
+        # 测试空字符串查询
+        empty_result = query_by_question("")
+        print("\n查询服务测试 - 空字符串查询：")
+        print(f"结果：{empty_result}")
+        
+        print("查询服务测试通过！")
+        return True
+    except Exception as e:
+        print(f"查询服务测试失败：{str(e)}")
+        return False
+
 if __name__ == "__main__":
     from app.app import create_app
     app = create_app()
     with app.app_context():
-    # 调用需要上下文的函数
+        # 调用需要上下文的函数
         test_database_connection()
-        test_fetch_data()
-        test_generate_daily_news()
-        test_generate_ddl_events()
+        # test_fetch_data()
+        # test_generate_daily_news()
+        # test_generate_ddl_events()
+        test_query_service()  # 添加查询服务测试
         

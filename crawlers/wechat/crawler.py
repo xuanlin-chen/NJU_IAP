@@ -13,7 +13,7 @@ MARKDOWN_PATH = "C:\\Users\\chenxuanlin\\Desktop\\njuIAP\\NJU_IAP\\input_example
 #改成你们自己的路径
 
 def read_csv_links(account_name):
-    """从 CSV 文件中读取标签为1的链接
+    """从 CSV 文件中读取标签为1的链接，为了保证只爬当日爬到的链接
     :param account_name: 公众号名称，用于构建文件路径
     """
     filtered_links = []
@@ -22,7 +22,7 @@ def read_csv_links(account_name):
         with open(csv_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                if '标签' in row and row['标签'] == '1':
+                if '标签' in row and row['标签'] == '0':
                     filtered_links.append(row['链接'])
     except FileNotFoundError:
         print(f"警告: 未找到 {account_name} 的CSV文件")
@@ -130,6 +130,13 @@ def crawl_and_save(link, link_index, today_str):
         time.sleep(sleep_time)
         html = driver.page_source
         text_content = process_text_content(html)
+        
+        # 从文本内容中提取第一个被*包裹的内容作为日期
+        import re
+        date_match = re.search(r'\*(.*?)\*', text_content)
+        if date_match:
+            today_str = date_match.group(1)
+            
         save_text_as_text(text_content, link_index, link, today_str)
     except Exception as e:
         print(f"处理链接 {link} 时出错：{e}")
