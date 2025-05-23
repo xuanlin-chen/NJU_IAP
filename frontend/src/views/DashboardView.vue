@@ -2,8 +2,6 @@
   <div>
     <!-- 调试信息 -->
     <div class="debug-info" v-if="debugMode">
-      <p>{{ dashboardText.debug.totalUsers }}: {{ summaryData?.totalUsers }}</p>
-      <p>{{ dashboardText.debug.coursesCount }}: {{ tableData?.length }}</p>
       <p>{{ dashboardText.debug.newsCount }}: {{ ddlData?.length }}</p>
     </div>
     
@@ -71,22 +69,19 @@ import {
   NGrid,
   NGridItem,
   NSpin,
-  NCard,
   createDiscreteApi
 } from 'naive-ui'
 import SimpleCalendar from '../components/SimpleCalendar.vue'
 import BaseCard from '../components/BaseCard.vue'
-import { useDashboardData } from '../services/dataService'
 import dashboardText from '../resource/dashboard'
-import { useCalendarStore } from '@/stores/calendarStore.ts';
+import { useDashboardData } from '../stores/dashboardStore';
 
 // 调试模式开关
 const debugMode = ref(false)
 
 // 获取数据
-const { summaryData, tableData, ddlData, todayMessages, historyMessages } = useDashboardData()
+const { ddlData, todayMessages, historyMessages } = useDashboardData()
 const loading = ref(false)
-const calendarStore = useCalendarStore();
 const selectedDate = ref(new Date())
 
 // 创建离散API，可以在组件外使用
@@ -100,7 +95,7 @@ function handleDateSelect(date: Date) {
 // 根据选中日期过滤 DDL 数据
 const ddlBySelectedDate = computed(() => {
   const sd = selectedDate.value.toISOString().slice(0, 10) // YYYY-MM-DD
-  return ddlData.value.filter(item => item.date === sd)
+  return ddlData.filter(item => item.date === sd)
 })
 
 // 处理"查看更多"点击事件
@@ -118,12 +113,7 @@ function handleViewMoreDdl() {
 
 // 确保在页面加载后数据可用
 onMounted(() => {
-  console.log('Dashboard mounted, data available:', { 
-    summaryData: summaryData.value,
-    newsData: ddlData.value,
-    todayMessages: todayMessages.value,
-    historyMessages: historyMessages.value
-  });
+  
 })
 </script>
 

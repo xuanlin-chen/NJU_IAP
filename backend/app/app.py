@@ -30,7 +30,7 @@ def create_app():
     return app
 
 # 创建应用实例供导入使用
-# app = create_app() # 此行已注释，以避免循环导入，app实例由run.py或下面的__main__块创建
+app = create_app() # 此行已注释，以避免循环导入，app实例由run.py或下面的__main__块创建
 
 
 # 直接执行时运行

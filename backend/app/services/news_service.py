@@ -1,11 +1,7 @@
 # 新闻服务
 import datetime
 import json
-import requests
-import time
 import re
-import sys
-from app import app
 from app.settings import MESSAGE_TYPES
 from sqlalchemy import text
 from app.db import db
@@ -40,7 +36,7 @@ def safe_json_parse(raw_str, max_retries=3):
     json_str = match.group()
     return json.loads(json_str)
 
-def generate_daily_news():
+def generate_daily_news():# -> dict[str, Any] | list[dict[str, Any]]:
     """从数据库获取2025年5月20日的所有消息并返回格式化的新闻摘要"""
     target_date = datetime.date(2025, 5, 20)
     

@@ -1,8 +1,8 @@
 # Routes package initialization
-from flask import Blueprint, jsonify
+from flask import Response, jsonify
 
 # Common API response format
-def api_response(data=None, message="success", code=200, errors=None):
+def api_response(data=None, message="success", code=200, errors=None) -> Response:
     response = {
         "code": code,
         "message": message,

@@ -2,11 +2,9 @@
 import datetime
 import json
 import re
-import sys
 from app.settings import MESSAGE_TYPES
 from sqlalchemy import text
 from app.db import db
-from app import app
 
 # DDL字段映射配置
 

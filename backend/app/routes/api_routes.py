@@ -1,7 +1,6 @@
 # API路由
-from flask import Blueprint, request
+from flask import Blueprint
 from . import api_response
-import json
 
 # from services.query_service import query_by_question
 from ..services.news_service import generate_daily_news

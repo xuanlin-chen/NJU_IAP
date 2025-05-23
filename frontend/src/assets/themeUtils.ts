@@ -9,7 +9,7 @@ import {
  * @param sourceColorHex 源颜色的十六进制值（如 '#1976d2'）
  * @param isDark 是否为暗色模式
  */
-export function applyMaterialTheme(sourceColorHex: string = '#1976d2', isDark: boolean = false) {
+export function applyMaterialTheme(sourceColorHex = '#1976d2', isDark = false) {
   // 从十六进制颜色转换为 ARGB
   const sourceColor = argbFromHex(sourceColorHex);
   

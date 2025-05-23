@@ -12,7 +12,7 @@ def query_by_question(question: str):
         api_key="sk-abf733f33ea64dcd9362d96bcfb77b6f",  # 建议改为从环境变量获取
         app_id='7c8a24304e1f4f4e943d4472904294de',  # 替换为实际的应用 ID
         prompt=question  # 直接使用 question 作为 prompt
-    )
+        )
     
     # 处理大模型服务的响应
     if response.status_code != HTTPStatus.OK:
