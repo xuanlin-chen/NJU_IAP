@@ -82,7 +82,7 @@ def test_generate_daily_news():
 def test_query_service():
     try:
         # 测试正常查询
-        question = ""
+        question = "告诉我5月南京大学所有的比赛"
         result = query_by_question(question)
         print("\n查询服务测试 - 正常查询：")
         print(f"问题：{question}")

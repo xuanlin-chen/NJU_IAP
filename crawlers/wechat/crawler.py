@@ -131,17 +131,23 @@ def crawl_and_save(link, link_index, today_str):
         html = driver.page_source
         text_content = process_text_content(html)
         
-        # 从文本内容中提取第一个被*包裹的内容作为日期
+        # 从文本内容中提取第一个被**包裹的内容作为日期
         import re
         date_match = re.search(r'\*(.*?)\*', text_content)
         if date_match:
-            today_str = date_match.group(1)
+            date_str = date_match.group(1)
+            # 尝试将日期格式从"YYYY年MM月DD日 HH:mm"转换为"YYYY-M-D"
+            date_format_match = re.search(r'(\d{4})年(\d{1,2})月(\d{1,2})日', date_str)
+            if date_format_match:
+                year, month, day = date_format_match.groups()
+                today_str = f"{year}-{int(month):02d}-{int(day):02d}"
             
         save_text_as_text(text_content, link_index, link, today_str)
     except Exception as e:
         print(f"处理链接 {link} 时出错：{e}")
     finally:
-        driver.quit()
+        driver.quit()                
+
 
 def main():
     import os
