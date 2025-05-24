@@ -1,5 +1,7 @@
 import { defineStore } from "pinia";
 import { convertKey } from "@/utils/convert";
+import dayjs from "dayjs";
+type Dayjs = dayjs.Dayjs;
 
 // API URLs
 const api_url = "http://localhost:5000/api/" as const;
@@ -11,67 +13,48 @@ const api_router = {
 } as const;
 
 type ApiUrl = (typeof api_router)[keyof typeof api_router];
+type Summary = ddlSummary | newsSummary;
 
 // Types
-interface DdlOriginal {
+interface original {
 	date: string;
 	summary: Summary;
+	abstract?: string;
 }
 
-interface Summary {
+interface newsSummary {
 	type: string;
 	title: string;
-	time: string;
-	source: string;
+	keywords: string[];
+	source: URL;
+}
+
+interface ddlSummary {
+	type: string;
+	title: string;
+	time: Dayjs; // 格式: "HH:MM" 24小时制
+	source: URL;
 }
 
 export interface DdlItem {
 	title: string;
-	date: string; // 格式: "YYYY-MM-DD"
-	time: string; // 格式: "HH:MM" 24小时制
+	date: Dayjs; // 格式: "YYYY-MM-DD"
+	time: Dayjs; // 格式: "HH:MM" 24小时制
 }
 
-export interface TodayMessage {
+export interface Message {
 	title: string;
 	time: string;
-	source: string;
-}
-
-export interface HistoryMessage {
-	title: string;
-	date: string;
-	views: number;
+	source: URL;
 }
 
 // State interface
 interface DashboardState {
 	ddlData: DdlItem[];
-	todayMessages: TodayMessage[];
-	historyMessages: HistoryMessage[];
+	todayMessages: Message[];
+	historyMessages: Message[];
 	isLoading: boolean;
 	error: string | null;
-}
-
-/**
- * 将时间格式化为 "HH:MM" 格式
- */
-function formatTimeString(timeString: string): string {
-	// 如果已经是 HH:MM 格式，直接返回
-	if (/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(timeString)) {
-		return timeString;
-	}
-
-	try {
-		// 尝试解析时间
-		const date = new Date(`1970-01-01T${timeString}`);
-		if (!Number.isNaN(date.getTime())) {
-			return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
-		}
-	} catch (e) {
-		console.warn("无法解析时间格式:", timeString);
-	}
-
-	return "00:00"; // 默认时间
 }
 
 // Dashboard Store
@@ -84,29 +67,6 @@ export const useDashboardStore = defineStore("dashboard", {
 		isLoading: false,
 		error: null,
 	}),
-
-	// Getters
-	getters: {
-		getDdlByDate: (state) => (date: string) => {
-			return state.ddlData.filter((item) => item.date === date);
-		},
-
-		getTodayDdl: (state) => {
-			const today = new Date().toISOString().slice(0, 10);
-			return state.ddlData.filter((item) => item.date === today);
-		},
-
-		getRecentDdl: (state) => {
-			const today = new Date();
-			const oneWeekLater = new Date(today);
-			oneWeekLater.setDate(today.getDate() + 7);
-
-			return state.ddlData.filter((item) => {
-				const itemDate = new Date(item.date);
-				return itemDate > today && itemDate <= oneWeekLater;
-			});
-		},
-	},
 
 	// Actions
 	actions: {
@@ -139,13 +99,13 @@ export const useDashboardStore = defineStore("dashboard", {
 			try {
 				const data = await this.fetchData<{
 					code: number;
-					data: DdlOriginal[];
+					data: original[];
 				}>(api_router.ddl);
 
-				this.ddlData = data.data.map((item: DdlOriginal) => ({
+				this.ddlData = data.data.map((item: original) => ({
 					title: item.summary.title,
-					date: item.date,
-					time: formatTimeString(item.summary.time || "00:00"),
+					date: dayjs(item.date),
+					time: dayjs((item.summary as ddlSummary).time || "00:00", "HH:mm"),
 				}));
 			} catch (error) {
 				console.error("Failed to fetch DDL data:", error);
@@ -155,17 +115,15 @@ export const useDashboardStore = defineStore("dashboard", {
 		// 获取今日消息
 		async fetchTodayMessages() {
 			try {
-				const data = await this.fetchData<{ code: number; data: any[] }>(
+				const data = await this.fetchData<{ code: number; data: original[] }>(
 					api_router.today,
 				);
 
-				if (data.code === 200) {
-					this.todayMessages = data.data.map((item) => ({
-						title: item.title,
-						time: formatTimeString(item.time || "00:00"),
-						source: item.source || "未知来源",
-					}));
-				}
+				this.todayMessages = data.data.map((item: original) => ({
+          title: item.summary.title,
+          time: dayjs(item.date).format("YYYY-MM-DD HH:mm"),
+          source: new URL(item.summary.source.toString()),
+        }));
 			} catch (error) {
 				console.error("Failed to fetch today messages:", error);
 			}
@@ -195,12 +153,12 @@ export const useDashboardStore = defineStore("dashboard", {
 });
 
 // 导出简化版本的 useDashboardData 以保持向后兼容
-export function useDashboardData() {
+export async function useDashboardData() {
 	const store = useDashboardStore();
 
 	// 初始化 store 数据
 	if (store.ddlData.length === 0) {
-		store.initialize();
+		await store.initialize();
 	}
 
 	return {
