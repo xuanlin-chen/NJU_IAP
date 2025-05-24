@@ -44,6 +44,7 @@ def test_fetch_data():
 from app.services.news_service import generate_daily_news
 from app.services.ddl_service import generate_ddl_events
 from app.services.query_service import query_by_question
+from app.services.date_query_service import generate_date_data
 
 
 def test_generate_ddl_events():
@@ -99,14 +100,38 @@ def test_query_service():
         print(f"查询服务测试失败：{str(e)}")
         return False
 
+def test_date_query_service():
+    try:
+        # 测试正确的日期格式
+        date_str = "2025-05-20"
+        result = generate_date_data(date_str)
+        print("\n日期查询服务测试 - 正确日期格式：")
+        print(f"日期：{date_str}")
+        print(f"新闻数量：{len(result.get('news', []))}")
+        print(f"DDL事件数量：{len(result.get('ddl_events', []))}")
+        
+        # 测试错误的日期格式
+        invalid_date = "2025/05/20"
+        error_result = generate_date_data(invalid_date)
+        print("\n日期查询服务测试 - 错误日期格式：")
+        print(f"日期：{invalid_date}")
+        print(f"结果：{error_result}")
+        
+        print("日期查询服务测试通过！")
+        return True
+    except Exception as e:
+        print(f"日期查询服务测试失败：{str(e)}")
+        return False
+
 if __name__ == "__main__":
     from app.app import create_app
     app = create_app()
     with app.app_context():
         # 调用需要上下文的函数
-        test_database_connection()
+        # test_database_connection()
         # test_fetch_data()
         # test_generate_daily_news()
         # test_generate_ddl_events()
-        test_query_service()  # 添加查询服务测试
+        test_date_query_service()
+        # test_query_service()  # 添加查询服务测试
         

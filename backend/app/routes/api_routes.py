@@ -1,10 +1,11 @@
 # API路由
-from flask import Blueprint
+from flask import Blueprint, request
 from . import api_response
 
 # from services.query_service import query_by_question
 from ..services.news_service import generate_daily_news
 from ..services.ddl_service import generate_ddl_events
+from ..services.date_query_service import generate_date_data
 
 # 为API路由创建Blueprint
 api_bp = Blueprint('api', __name__)
@@ -88,6 +89,27 @@ def get_ddl_events():
     except Exception as e:
         print(f'获取DDL事件失败: {str(e)}')
         return api_response(message='获取DDL事件失败，请稍后重试', code=500)
+
+@api_bp.route('/date-query', methods=['GET'])
+def query_by_date():
+    """根据日期获取新闻和DDL事件"""
+    try:
+        # 从请求参数中获取日期
+        date_str = request.args.get('date')
+        if not date_str:
+            return api_response(message="日期参数不能为空", code=400)
+            
+        # 调用日期查询服务
+        result_data = generate_date_data(date_str)
+        
+        # 检查是否有错误
+        if 'error' in result_data:
+            return api_response(result_data, message=result_data['error'], code=400)
+            
+        return api_response(result_data, message='查询成功')
+    except Exception as e:
+        print(f'日期查询失败: {str(e)}')
+        return api_response(message='日期查询失败，请稍后重试', code=500)
 
 # @api_bp.route('/knowledge/query', methods=['POST'])
 # def ask_question():
@@ -199,6 +221,43 @@ def api_docs():
                         "schema": {
                             "code": 500,
                             "message": "获取DDL事件失败，请稍后重试"
+                        }
+                    }
+                },
+            },
+            {
+                "path": "/api/date-query",
+                "method": "GET",
+                "description": "根据日期获取新闻和DDL事件",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "type": "string",
+                        "required": True,
+                        "description": "查询日期，格式为YYYY-MM-DD"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "date": "查询日期（ISO格式，如：2024-01-20）",
+                            "news": "该日期的新闻列表",
+                            "ddl_events": "该日期的DDL事件列表"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "code": 400,
+                            "message": "日期参数不能为空或日期格式错误"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "code": 500,
+                            "message": "日期查询失败，请稍后重试"
                         }
                     }
                 },
