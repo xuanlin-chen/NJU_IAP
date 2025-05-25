@@ -10,7 +10,7 @@ class SearchModel(Enum):
     RAG = "RAG"
     MCP = "MCP"
 
-# 在query_by_question函数中添加model参数，在查询的时候选择查询方式
+# 在query_by_question函数中添加model参数，在查询的时候用户可以选择查询方式
 def query_by_question(question: str, model: SearchModel = SearchModel.RAG):
     with Session(engine) as session:
         model_configs = {
