@@ -10,7 +10,7 @@ CREATE TABLE `比赛通知` (
   `主办方` VARCHAR(100),
   `比赛地点` VARCHAR(255),
   `比赛名称` VARCHAR(255) NOT NULL,
-  `比赛级别/形式` VARCHAR(255),
+  `比赛级别、形式` VARCHAR(255),
   `比赛主题` VARCHAR(255),
   `参赛资格` VARCHAR(255),
   `技能需求` VARCHAR(255),
@@ -50,7 +50,7 @@ CREATE TABLE `校园通知` (
   `标题` VARCHAR(255) NOT NULL,
   `通知性质` VARCHAR(255),
   `核心对象` VARCHAR(255),
-  `相关服务/区域` VARCHAR(255),
+  `相关服务、区域` VARCHAR(255),
   `生效时间` DATETIME,
   `截止时间` VARCHAR(50),
   `责任部门` VARCHAR(255),
@@ -106,7 +106,7 @@ CREATE TABLE `学业相关政策` (
   `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
-CREATE TABLE `奖励/资助政策` (
+CREATE TABLE `奖励、资助政策` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `类型` VARCHAR(50) NOT NULL,
   `标题` VARCHAR(255) NOT NULL,
@@ -161,14 +161,14 @@ CREATE TABLE `校园安全` (
   `原文链接` VARCHAR(255)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
-CREATE TABLE `讲座/分享会信息` (
+CREATE TABLE `讲座或分享会信息` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `类型` VARCHAR(50) NOT NULL,
   `标题` VARCHAR(255) NOT NULL,
   `讲座起始时间` DATETIME,
   `讲座结束时间` DATETIME,
   `地点` VARCHAR(255),
-  `线上参会链接/腾讯会议号` VARCHAR(255),
+  `线上参会链接或腾讯会议号` VARCHAR(255),
   `讲座类型` VARCHAR(255),
   `讲座领域` VARCHAR(255),
   `是否需要报名` BIT(1),
@@ -195,7 +195,7 @@ CREATE TABLE `志愿活动` (
   `志愿类型` VARCHAR(255),
   `志愿时长_小时` VARCHAR(50),
   `招募人数` INT,
-  `单次/长期` VARCHAR(50),
+  `单次或长期` VARCHAR(50),
   `技能要求` VARCHAR(255),
   `是否培训` BIT(1),
   `报名截止时间` DATETIME,
@@ -320,7 +320,7 @@ CREATE TABLE `实践培训活动` (
     `活动形式` VARCHAR(255),
     `活动类型` VARCHAR(255),
     `实践内容` VARCHAR(255),
-    `指导老师/讲师` VARCHAR(255),
+    `指导老师、讲师` VARCHAR(255),
     `参与对象_年级` VARCHAR(255),
     `参与对象_专业` VARCHAR(255),
     `报名截止时间` DATETIME,
@@ -368,7 +368,7 @@ CREATE TABLE `其他活动` (
     `活动起始时间` DATETIME,
     `活动结束时间` DATETIME,
     `地点` VARCHAR(255),
-    `线上参会链接/腾讯会议号` VARCHAR(255),
+    `线上参会链接或腾讯会议号` VARCHAR(255),
     `活动类别` VARCHAR(255),
     `涉及领域` VARCHAR(255),
     `面向群体` VARCHAR(255),
