@@ -22,7 +22,7 @@ def read_csv_links(account_name):
         with open(csv_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                if '标签' in row and row['标签'] == '0':
+                if '标签' in row and row['标签'] == '1':
                     filtered_links.append(row['链接'])
     except FileNotFoundError:
         print(f"警告: 未找到 {account_name} 的CSV文件")
