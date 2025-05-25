@@ -234,7 +234,7 @@ def process_files_to_db():
                     time.sleep(SLEEP_TIME)
                     
                     # 在文章头部添加摘要
-                    content = f"|核心摘要|: {summary}\n\n{content}"
+                    content = f"|核心摘要: {summary}|\n\n{content}"
                 except Exception as e:
                     print(f"生成摘要失败: {str(e)}")
 
