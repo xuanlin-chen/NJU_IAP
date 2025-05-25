@@ -216,6 +216,28 @@ def process_files_to_db():
                     print(f"文件 {filename} 的JSON数据为空，跳过处理")
                     continue
 
+                # 生成文章摘要
+                prompt_summary = "请生成这篇文章的核心摘要：\n" + content
+                messages_summary = [
+                    {"role": "system", "content": "你是一个文章摘要生成助手，当你收到一篇关于校园信息的文章（比如关于志愿活动，比赛通知等等的消息）时，要概括文章的核心内容，重点聚焦在用户作为大学生可能感兴趣的地方。"},
+                    {"role": "user", "content": prompt_summary}
+                ]
+
+                try:
+                    completion_summary = client.chat.completions.create(
+                        model="qwen-plus",
+                        messages=messages_summary,
+                        temperature=0.1,
+                        max_tokens=500
+                    )
+                    summary = completion_summary.choices[0].message.content.strip()
+                    time.sleep(SLEEP_TIME)
+                    
+                    # 在文章头部添加摘要
+                    content = f"|核心摘要|: {summary}\n\n{content}"
+                except Exception as e:
+                    print(f"生成摘要失败: {str(e)}")
+
                 # 将原文信息、发布日期和原文链接加到json中
                 json_data["原文信息"] = content
                 json_data["发布日期"] = date
