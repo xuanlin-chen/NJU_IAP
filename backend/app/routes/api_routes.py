@@ -1,8 +1,8 @@
 # API路由
 from flask import Blueprint, request
 from . import api_response
-
-# from services.query_service import query_by_question
+from http import HTTPStatus
+from ..services.query_service import query_by_question, SearchModel
 from ..services.news_service import generate_daily_news
 from ..services.ddl_service import generate_ddl_events
 from ..services.date_query_service import generate_date_data
@@ -111,51 +111,52 @@ def query_by_date():
         print(f'日期查询失败: {str(e)}')
         return api_response(message='日期查询失败，请稍后重试', code=500)
 
-# @api_bp.route('/knowledge/query', methods=['POST'])
-# def ask_question():
-#     """处理用户问题的完整流程"""
-#     try:
-#         # 获取用户问题
-#         data = request.get_json()
-#         if not data or 'question' not in data:
-#             return api_response(message="问题不能为空", code=400)
+@api_bp.route('/knowledge/query', methods=['POST'])
+def query_knowledge():
+    """知识库问答接口"""
+#example of request:
+#header添加 Content-Type: application/json
+# - 设置请求体（Body）：
+# - 选择 raw 选项
+# - 格式选择 JSON
+# {
+#     'question': '最近有什么活动？',
+#     'model': 'RAG'
+# }
+    #example of response:
+# {
+#     'code': 200,
+#     'message': '查询成功',
+#     'data': {
+#         'recommendation': '根据最新信息，近期有以下活动：\n1. 人工智能与未来教育发展论坛（2025年5月20日）\n2. 2025春季校园招聘宣讲会（截止时间：2025-05-25）\n3. 2025年秋季学期交换生项目申请（截止时间：2025-06-01）'
+#     }
+# }
+    try:
+        # 从请求体中获取问题和查询模型
+        data = request.get_json()
+        if not data or 'question' not in data:
+            return api_response(message="问题不能为空", code=400)
             
-#         question = data.get('question', '')
+        question = data['question']
+        model = data.get('model', 'RAG')
         
-#         # 使用AI提取查询标签
-#         extracted_tags = extract_tags_with_ai(question)
+        # 转换模型类型
+        try:
+            search_model = SearchModel[model]
+        except KeyError:
+            return api_response(message=f"不支持的查询模型类型: {model}", code=400)
         
-#         # 查询相关信息 - 使用灵活查询函数
-#         results = query_by_question(question, extracted_tags)
+        # 调用查询服务
+        result = query_by_question(question, search_model)
         
-#         # 生成答案
-#         answer = generate_answer_with_ai(question, results)
-        
-#         # 构建响应数据 - 包含更多信息
-#         references = []
-#         for i, r in enumerate(results):
-#             # 提取标签和内容的摘要信息
-#             tags_summary = ", ".join([f"{k}: {v}" for k, v in r.get('tags', {}).items() if k != 'time'])
-#             content_preview = str(r.get('content', {}))[:50] + '...' if r.get('content') else ''
+        # 如果返回结果包含错误信息
+        if 'code' in result and result['code'] != HTTPStatus.OK:
+            return api_response(result, message=result['message'], code=result['code'])
             
-#             reference = {
-#                 'id': i+1,
-#                 'type': r.get('message_type', '未知类型'),
-#                 'tags': tags_summary,
-#                 'content_preview': content_preview
-#             }
-#             references.append(reference)
-        
-#         response_data = {
-#             'question': question,
-#             'extracted_tags': extracted_tags,  # 添加提取的标签
-#             'answer': answer,
-#             'references': references
-#         }
-        
-#         return api_response(response_data)
-#     except Exception as e:
-#         return api_response(message=str(e), code=500)
+        return api_response(result, message='查询成功')
+    except Exception as e:
+        print(f'知识查询失败: {str(e)}')
+        return api_response(message='知识查询失败，请稍后重试', code=500)
 
 @api_bp.route('/docs', methods=['GET'])
 def api_docs():
@@ -265,63 +266,49 @@ def api_docs():
             {
                 "path": "/api/knowledge/query",
                 "method": "POST",
-                "description": "智能问答",
+                "description": "知识库问答接口",
+                "content_type": "application/json",
+                "request_body": {
+                    "type": "raw",
+                    "format": "JSON"
+                },
                 "parameters": [
                     {
                         "name": "question",
                         "type": "string",
                         "required": True,
-                        "description": "用户问题"
+                        "description": "用户的问题"
+                    },
+                    {
+                        "name": "model",
+                        "type": "string",
+                        "required": False,
+                        "description": "查询模型类型，可选值：RAG（默认）、MCP"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "成功",
                         "schema": {
-                            "question": "用户提交的原始问题",
-                            "extracted_tags": "AI系统提取的关键查询标签列表",
-                            "answer": "AI生成的结构化答案",
-                            "references": "参考资料列表，每条参考资料包含以下字段",
-                            "reference_structure": {
-                                "id": "参考资料ID",
-                                "type": "消息类型",
-                                "tags": "相关标签摘要",
-                                "content_preview": "内容预览（限50字）"
-                            }
+                            "recommendation": "模型返回的回答内容"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
                             "code": 400,
-                            "message": "问题不能为空"
+                            "message": "问题不能为空或不支持的查询模型类型"
                         }
                     },
                     "500": {
                         "description": "服务器错误",
                         "schema": {
                             "code": 500,
-                            "message": "处理问题失败，请稍后重试"
+                            "message": "知识查询失败，请稍后重试"
                         }
                     }
                 },
-                "example_response": {
-                    "code": 200,
-                    "message": "查询成功",
-                    "data": {
-                        "question": "如何申请成绩单？",
-                        "extracted_tags": ["成绩单", "教务", "申请流程"],
-                        "answer": "您可以通过以下方式申请成绩单：\n1. 教务系统自助打印\n2. 教务处人工服务窗口办理",
-                        "references": [{
-                            "id": 1,
-                            "type": "学业相关政策",
-                            "tags": "教务, 成绩单, 流程",
-                            "content_preview": "成绩单申请流程说明：1.登录教务系统..."
-                        }]
-                    }
-                }
-            },
-            
+            }
         ]
     }
     return api_response(docs)
