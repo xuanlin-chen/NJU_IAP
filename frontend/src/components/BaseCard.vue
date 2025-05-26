@@ -9,21 +9,36 @@
           <span>{{ calendarFooterText }}</span>
         </div>
       </div>
-      
+      <!-- 分组列表模式 -->
+      <div v-if="itemGroups && itemGroups.length > 0">
+        <n-collapse>
+          <n-collapse-item v-for="(group, groupIndex) in itemGroups" :key="groupIndex" :title="group.groupTitle"
+            :name="'group-' + groupIndex">
+            <div v-for="(item, itemIndex) in group.items" :key="itemIndex" class="item">
+              <div class="item-title">{{ getItemTitle(item) }}</div>
+              <div class="item-footer">
+                <span>{{ getItemDate(item) }}</span>
+                <span v-if="getItemExtra(item)">{{ getItemExtra(item) }}</span>
+              </div>
+            </div>
+          </n-collapse-item>
+        </n-collapse>
+      </div>
       <!-- 列表模式 -->
       <div v-else-if="items && items.length > 0">
-        <div v-for="(item, index) in items" :key="index" class="item">
-          <div class="item-title">{{ getItemTitle(item) }}</div>
-          <div class="item-footer">
-            <span>{{ getItemDate(item) }}</span>
-            <span v-if="getItemExtra(item)">{{ getItemExtra(item) }}</span>
-          </div>
-        </div>
-        <div v-if="showViewMore" class="view-more">
-          <a href="#" @click.prevent="$emit('view-more')">{{ viewMoreText }}</a>
-        </div>
+        <n-collapse>
+          <n-collapse-item v-for="(item, index) in items" :key="index" :title="getItemTitle(item)"
+            :name="index.toString()">
+            <div class="item-content">
+              <div class="item-footer">
+                <span>{{ getItemDate(item) }}</span>
+                <span v-if="getItemExtra(item)">{{ getItemExtra(item) }}</span>
+              </div>
+            </div>
+          </n-collapse-item>
+        </n-collapse>
       </div>
-      
+
       <!-- 空数据状态 -->
       <div v-else class="no-data">
         {{ emptyText }}
@@ -34,21 +49,32 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { NCard } from 'naive-ui';
+import { NCard, NCollapse, NCollapseItem } from 'naive-ui';
 
-interface CardItem {
+export interface CardItem {
   title?: string;
   date?: string;
   time?: string;
+  type?: string;
   description?: string;
   source?: string;
   views?: number;
   [key: string]: any;
 }
 
+export interface ItemGroup {
+  groupTitle: string;
+  items: CardItem[];
+}
+
+const EventTypes = {
+  VIEW_MORE: 'view-more',
+};
+
 const props = defineProps<{
   title: string;
   items?: CardItem[];
+  itemGroups?: ItemGroup[];
   titleField?: string;
   dateField?: string;
   extraField?: string;
@@ -79,13 +105,15 @@ const getItemExtra = (item: CardItem): string => {
   if (props.extraField) {
     return item[props.extraField] || '';
   }
-  
+
   if (item.source) return item.source;
   if (item.description) return item.description;
   if (item.views !== undefined) return `${item.views} 浏览`;
-  
+
   return '';
 };
+
+
 </script>
 
 <style scoped>
@@ -101,7 +129,8 @@ const getItemExtra = (item: CardItem): string => {
 .base-card {
   margin-bottom: 16px;
   width: 100%;
-  min-height: 300px; /* 保持卡片高度一致，防止抖动 */
+  min-height: 300px;
+  /* 保持卡片高度一致，防止抖动 */
 }
 
 .item {

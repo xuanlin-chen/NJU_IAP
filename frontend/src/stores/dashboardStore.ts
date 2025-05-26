@@ -46,6 +46,7 @@ export interface Message {
 	title: string;
 	time: string;
 	source: URL;
+  type: string; // 添加类型字段
 }
 
 // State interface
@@ -123,6 +124,7 @@ export const useDashboardStore = defineStore("dashboard", {
           title: item.summary.title,
           time: dayjs(item.date).format("YYYY-MM-DD HH:mm"),
           source: new URL(item.summary.source.toString()),
+          type: item.summary.type, // 添加类型字段
         }));
 			} catch (error) {
 				console.error("Failed to fetch today messages:", error);
@@ -163,8 +165,7 @@ export async function useDashboardData() {
 
 	return {
 		ddlData: store.ddlData,
-		todayMessages: store.todayMessages,
-		historyMessages: store.historyMessages,
+		Messages: store.todayMessages,
 		refreshData: store.refreshAllData,
 	};
 }

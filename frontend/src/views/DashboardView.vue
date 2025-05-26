@@ -1,34 +1,19 @@
 <template>
   <div>
-    <!-- 调试信息 -->
-    <div class="debug-info" v-if="debugMode">
-      <p>{{ dashboardText.debug.newsCount }}: {{ ddlData?.length }}</p>
-    </div>
-    
     <n-spin :show="loading">      
       <n-grid :cols="12" :x-gap="16" :y-gap="16" class="dashboard-grid">
         <!-- 左侧区域 -->
         <n-grid-item :span="5">
-          <!-- 今日消息 -->
+          <!-- 消息 -->
           <base-card
-            :title="dashboardText.todayMessages.title"
-            :items="formattedTodayMessages"
+            :title="dashboardText.dayMessages.title"
+            :item-groups="itemGroups"
             date-field="time"
             extra-field="source"
-            :empty-text="dashboardText.todayMessages.noMessages"
-            :view-more-text="dashboardText.todayMessages.viewMore"
+            :empty-text="dashboardText.dayMessages.noMessages"
+            :view-more-text="dashboardText.dayMessages.viewMore"
             @view-more="handleViewMoreToday"
           />
-          
-          <!-- 历史消息
-          <base-card
-            :title="dashboardText.historyMessages.title"
-            :items="formattedHistoryMessages"
-            extra-field="views"
-            :empty-text="dashboardText.historyMessages.noMessages"
-            :view-more-text="dashboardText.historyMessages.viewMore"
-            @view-more="handleViewMoreHistory"
-          /> -->
         </n-grid-item>
         
         <!-- 右侧区域 -->
@@ -38,7 +23,7 @@
             :title="dashboardText.ddlNews.title"
             :items="formattedDdlItems"
             extra-field="description"
-            :empty-text="dashboardText.todayMessages.noMessages"
+            :empty-text="dashboardText.dayMessages.noMessages"
             :view-more-text="dashboardText.ddlNews.viewMore"
             @view-more="handleViewMoreDdl"
           />
@@ -76,6 +61,7 @@ import BaseCard from '../components/BaseCard.vue'
 import dashboardText from '../resource/dashboard'
 import { useDashboardData } from '../stores/dashboardStore';
 import dayjs from 'dayjs';
+import type { CardItem, ItemGroup } from '../components/BaseCard.vue'
 
 // 调试模式开关
 const debugMode = ref(false)
@@ -83,9 +69,32 @@ const debugMode = ref(false)
 // 从dashboardStore.ts导入类型
 import type { DdlItem, Message } from '../stores/dashboardStore';
 
+// 事件类型的集合
+const eventTypes = [
+  '比赛通知',
+  '学习资源',
+  '校园资源',
+  '学业申请',
+  '学业相关政策',
+  '奖励资助政策',
+  '惩罚制度',
+  '校园安全',
+  '讲座分享会信息',
+  '志愿活动',
+  '社会实践',
+  '国际交流项目',
+  '社团消息',
+  '问题活动',
+  '实践培训活动',
+  '作品征集',
+  '其他活动',
+  '实习就业',
+  '其他类型'
+];
+
 // 准备数据容器
 const ddlData = ref<DdlItem[]>([])
-const todayMessages = ref<Message[]>([])
+const Messages = ref<Message[]>([])
 const loading = ref(true) // 初始设置为加载中状态
 const selectedDate = ref(new Date()) // 选中的日期
 let refreshData: (() => Promise<void>) | null = null
@@ -96,13 +105,9 @@ onMounted(async () => {
     // 异步获取数据
     const dashboardData = await useDashboardData()
     ddlData.value = dashboardData.ddlData
-    todayMessages.value = dashboardData.todayMessages
+    Messages.value = dashboardData.Messages
     refreshData = dashboardData.refreshData
     
-    console.log('Data loaded:', {
-      ddlData: ddlData.value,
-      todayMessages: todayMessages.value
-    })
   } catch (error) {
     console.error('Failed to load dashboard data:', error)
   } finally {
@@ -110,26 +115,38 @@ onMounted(async () => {
   }
 })
 
-// 转换 todayMessages 为 CardItem 类型
-const formattedTodayMessages = computed(() => {
-  if (!todayMessages.value || todayMessages.value.length === 0) return [];
-  console.log('link', todayMessages.value.map((message:Message) => message.source))
-  return todayMessages.value.map((message: Message) => ({
+// 转换 Messages 为 CardItem 类型
+const formattedMessages = computed(() => {
+  if (!Messages.value || Messages.value.length === 0) return [];
+  return Messages.value.map((message: Message) => ({
     title: message.title || '',
     time: message.time || '',
-    source: ''
-  }))
+    source: '',
+    type: message.type || '',
+  })) 
 })
 
-// // 转换 historyMessages 为 CardItem 类型
-// const formattedHistoryMessages = computed(() => {
-//   if (!historyMessages || historyMessages.length === 0) return [];
-//   return historyMessages.map(message => ({
-//     title: message.title,
-//     time: message.time,
-//     source: message.source?.toString() || '' // 添加可选链和默认值
-//   }))
-// })
+// 事件组
+const itemGroups = computed(() => {
+  const groups: ItemGroup[] = [];
+
+  console.log("formattedMessages:", formattedMessages.value);
+  for (const type of eventTypes) {
+    const filteredItems = formattedMessages.value.filter(
+      (item: CardItem) => item.type === type
+    );
+
+    if (filteredItems.length > 0) {
+      groups.push({
+        groupTitle: type,
+        items:filteredItems
+      });
+    }
+  }
+
+  console.log("itemGroups:", groups);
+  return groups;
+});
 
 // 创建离散API，可以在组件外使用
 const { message } = createDiscreteApi(['message'])
@@ -162,15 +179,9 @@ function handleViewMoreToday() {
   message.info('查看更多今日消息')
 }
 
-function handleViewMoreHistory() {
-  message.info('查看更多历史消息')
-}
-
 function handleViewMoreDdl() {
   message.info('查看更多DDL消息')
 }
-
-// 注意：数据加载已经在上面的 onMounted 中处理，这里不需要重复加载
 
 // 组件销毁前的清理工作
 onBeforeUnmount(() => {
