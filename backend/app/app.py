@@ -15,8 +15,11 @@ def create_app():
     app.config['JSON_AS_ASCII'] = False
     
     # 加载配置
-    from app.settings import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
+    from app.settings import SQLALCHEMY_DATABASE_URI, USER_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+    app.config['SQLALCHEMY_BINDS'] = {
+        'userinfo': USER_DATABASE_URI
+    }
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
     
     # 初始化数据库

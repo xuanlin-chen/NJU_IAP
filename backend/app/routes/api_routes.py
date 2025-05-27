@@ -1,5 +1,5 @@
 # API路由
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify,session
 from . import api_response
 from http import HTTPStatus
 from ..services.query_service import query_by_question, SearchModel
@@ -13,7 +13,7 @@ from datetime import datetime
 # 为API路由创建Blueprint
 api_bp = Blueprint('api', __name__)
 
-@auth_bp.route('/register', methods=['POST'])
+@api_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
     
@@ -37,7 +37,7 @@ def register():
         db.session.rollback()
         return api_response(message="注册失败", code=500, errors=str(e))
 
-@auth_bp.route('/login', methods=['POST'])
+@api_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     

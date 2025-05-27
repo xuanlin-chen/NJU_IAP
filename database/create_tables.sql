@@ -1,13 +1,5 @@
 # 创建数据库中所需表格的SQL语句
 
-CREATE TABLE `users` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `username` VARCHAR(80) NOT NULL UNIQUE,
-  `password_hash` VARCHAR(128) NOT NULL,
-  `custom_ddls` JSON DEFAULT NULL COMMENT '用户自定义DDL列表，存储格式为[{"content": "DDL内容", "date": "YYYY-MM-DD"}]',
-  `unsubscribed_accounts` JSON DEFAULT NULL COMMENT '用户不想看的公众号列表，存储格式为["公众号名称1", "公众号名称2"]'
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-
 CREATE TABLE `比赛通知` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `类型` VARCHAR(50) NOT NULL,

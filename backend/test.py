@@ -1,14 +1,15 @@
 
 from flask import app
-from app.db import engine
+from app.db import db
 from app.app import create_app
 from sqlalchemy import text
+from app.models.user import User
 
 
 
 def test_database_connection():
     try:
-            conn = engine.connect()
+            conn = db.engine.connect()
             print("数据库连接成功！")
             
             # 关闭连接
@@ -22,7 +23,7 @@ def test_database_connection():
 def test_fetch_data():
     try:
             # 连接数据库
-            with engine.connect() as conn:
+            with db.engine.connect() as conn:
                 # 测试查询比赛通知表
                 result = conn.execute(text("SELECT 标题, 比赛名称, 发布日期 FROM 比赛通知 LIMIT 5"))
                 print("\n比赛通知数据：")
@@ -100,6 +101,63 @@ def test_query_service():
         print(f"查询服务测试失败：{str(e)}")
         return False
 
+def test_user_database_connection():
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+            print("\nUser数据库连接成功！")
+            return True
+    except Exception as e:
+        print(f"\nUser数据库连接测试失败：{str(e)}")
+        return False
+
+def test_user_model_methods():
+    print("\n开始测试用户模型方法...")
+    try:
+        # 创建一个临时用户对象（不保存到数据库）
+        user = User(username='test_user')
+
+        # 测试 set_password 和 check_password
+        password = 'secure_password'
+        user.set_password(password)
+        if user.check_password(password):
+            print("set_password 和 check_password 测试通过")
+        else:
+            print("set_password 或 check_password 测试失败")
+            return False
+
+        # 测试 add_custom_ddl
+        user.add_custom_ddl('完成项目报告')
+        user.add_custom_ddl('准备演示文稿')
+        if user.custom_ddls and len(user.custom_ddls) == 2:
+            print("add_custom_ddl 测试通过")
+        else:
+            print("add_custom_ddl 测试失败")
+            return False
+
+        # 测试 remove_custom_ddl
+        user.remove_custom_ddl(0) # 删除第一个
+        if user.custom_ddls and len(user.custom_ddls) == 1 and user.custom_ddls[0]['content'] == '准备演示文稿':
+             print("remove_custom_ddl 测试通过")
+        else:
+            print("remove_custom_ddl 测试失败")
+            return False
+
+        # 测试 update_unsubscribed_accounts
+        accounts_to_unsubscribe = ['account1', 'account2']
+        user.update_unsubscribed_accounts(accounts_to_unsubscribe)
+        if user.unsubscribed_accounts == accounts_to_unsubscribe:
+            print("update_unsubscribed_accounts 测试通过")
+        else:
+            print("update_unsubscribed_accounts 测试失败")
+            return False
+
+        print("用户模型方法测试全部通过！")
+        return True
+    except Exception as e:
+        print(f"用户模型方法测试失败：{str(e)}")
+        return False
+
 def test_date_query_service():
     try:
         # 测试正确的日期格式
@@ -128,10 +186,12 @@ if __name__ == "__main__":
     app = create_app()
     with app.app_context():
         # 调用需要上下文的函数
-        # test_database_connection()
-        # test_fetch_data()
+        test_database_connection()
+        test_fetch_data()
         # test_generate_daily_news()
         # test_generate_ddl_events()
-        test_date_query_service()
+        # test_date_query_service()
+        # test_user_database_connection()
+        # test_user_model_methods()
         # test_query_service()  # 添加查询服务测试
         
