@@ -5,8 +5,8 @@ import random
 import csv
 import os
 headers = {
-    "cookie":'appmsglist_action_3938956898=card; _qimei_uuid42=18a0b171a0510017b44bc6aaf91047ac4d0b93f86e; pac_uid=0_Sxdf68Qxzw6Yf; _qimei_q32=7e6b3461bd80f5cbb7d4a3fa2216a48f; _qimei_q36=4c68bcdf002ffce6deca54da30001d218806; _qimei_h38=19c52162b44bc6aaf91047ac02000009118a0b; suid=user_0_Sxdf68Qxzw6Yf; logTrackKey=9ef754235188487fa0dd84258b89ee20; RK=MbGwdPsnkb; ptcz=b2ff4a55c26c9f622fbe77dc1aca8ab73e73e86847f4b6db68939653925a2e3f; pgv_pvid=8723881191; ua_id=K7h2QIJ8yFFMNcTAAAAAABEPiNUQDoXPiw7Xump5wD8=; qq_domain_video_guid_verify=7377045afdff82ab; _qimei_fingerprint=d972d7a2666ab450f360b81c8c54f0dc; wxuin=43428532706510; eas_sid=z1c714935558j7W1S5g8A5C8Y6; omgid=0_Sxdf68Qxzw6Yf; mm_lang=zh_CN; poc_sid=HPieJGijcu5HqEAFA9HaxBr5B9Qg7X5Rm-KZi1Q8; rewardsn=; wxtokenkey=777; uuid=59303eb84f752352d8ca5d1c34c04ed8; _clck=3938956898|1|fw7|0; rand_info=CAESIJ1HjY4fSqqbAlZ/P7p6VoacOHB/j43gb7ECIjlDiJhy; slave_bizuin=3938956898; data_bizuin=3938956898; bizuin=3938956898; data_ticket=gXJsYPcPzUMofim2PyjopTK/ttQdfAY4QhTSuuFhn3eA7MYit6xvfDnqYDHgvE8v; slave_sid=YXo0bmljSnk2eHdrOGM2dEdVMTk5dlJsNTJTV003dGpwR2d1U2txaHR1R2pWS0tLTlpGOVBuTXBwQ2NjNmtoVlVpdDhjYzF2c3cwYURCajI1Y1ZKZndYMUVhemlQcFl0ZTdYNFVfRE1kWURkVkZ6SHlyYVpHT3Q5ZlBzVFlkRnExeXFDSVNyYmpaVk5kQ2pD; slave_user=gh_78d74b62b2df; xid=24ed1f5788cc64f10dda9704db98be37; _clsk=1zusy1|1748171841301|2|1|mp.weixin.qq.com/weheat-agent/payload/record',
-     "user-agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+    "cookie":'',
+    "user-agent":''
 }
 url = 'https://mp.weixin.qq.com/cgi-bin/appmsg'
 # 公众号配置字典，key为公众号名称，value为对应的fakeid
@@ -50,7 +50,7 @@ def page(account_name, num=6):                #要请求的文章页数
             'fakeid': fad,
             'type': '9',
             'query': '',
-            'token': '896327721',
+            'token': '1567701478',
             'lang': 'zh_CN',
             'f': 'json',
             'ajax': '1',

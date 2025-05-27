@@ -1,16 +1,63 @@
 # API路由
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from . import api_response
 from http import HTTPStatus
 from ..services.query_service import query_by_question, SearchModel
 from ..services.news_service import generate_daily_news
 from ..services.ddl_service import generate_ddl_events
 from ..services.date_query_service import generate_date_data
+from ..models.user import User
+from ..db import db
+from datetime import datetime
 
 # 为API路由创建Blueprint
 api_bp = Blueprint('api', __name__)
 
+@auth_bp.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    
+    # 验证请求数据
+    if not data or not data.get('username') or not data.get('password'):
+        return api_response(message="用户名和密码不能为空", code=400)
+    
+    # 检查用户名是否已存在
+    if User.query.filter_by(username=data['username']).first():
+        return api_response(message="用户名已存在", code=400)
+    
+    # 创建新用户
+    user = User(username=data['username'])
+    user.set_password(data['password'])
+    
+    try:
+        db.session.add(user)
+        db.session.commit()
+        return api_response(data=user.to_dict(), message="注册成功")
+    except Exception as e:
+        db.session.rollback()
+        return api_response(message="注册失败", code=500, errors=str(e))
 
+@auth_bp.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    
+    # 验证请求数据
+    if not data or not data.get('username') or not data.get('password'):
+        return api_response(message="用户名和密码不能为空", code=400)
+    
+    # 查找用户
+    user = User.query.filter_by(username=data['username']).first()
+    if not user or not user.check_password(data['password']):
+        return api_response(message="用户名或密码错误", code=401)
+    
+    # 更新最后登录时间
+    try:
+        user.last_login = datetime.utcnow()
+        db.session.commit()
+        return api_response(data=user.to_dict(), message="登录成功")
+    except Exception as e:
+        db.session.rollback()
+        return api_response(message="登录失败", code=500, errors=str(e))
 
 @api_bp.route('/news/today', methods=['GET'])
 def get_today_news():
@@ -18,29 +65,6 @@ def get_today_news():
     try:
         # 调用生成每日新闻函数
         news_data = generate_daily_news()
-        #example of news_data:
-# [
-#     {
-#         'date': '2025-05-20',
-#         'summary': {
-#             '类型': '学术讲座',
-#             '标题': '人工智能与未来教育发展论坛',
-#             '关键词': 'AI, 教育创新, 未来发展',
-#             '原文链接': 'https://www.nju.edu.cn/events/ai-forum-2025'
-#         },
-#         'abstract': '南京大学人工智能学院将于2025年5月20日举办"人工智能与未来教育发展论坛"，邀请国内外知名专家学者共同探讨AI技术在教育领域的创新应用...'
-#     },
-#     {
-#         'date': '2025-05-20',
-#         'summary': {
-#             '类型': '校园通知',
-#             '标题': '2025年春季学期期末考试安排',
-#             '关键词': '考试安排, 期末考试, 教务通知',
-#             '原文链接': 'https://www.nju.edu.cn/notice/exam-2025-spring'
-#         },
-#         'abstract': '2025年春季学期期末考试将于6月20日至7月5日进行，请各位同学注意查看具体考试时间安排，做好复习准备...'
-#     }
-# ]
         if not news_data:
             return api_response({
                 'date': news_data['date'],
@@ -54,31 +78,10 @@ def get_today_news():
 
 @api_bp.route('/ddl-events', methods=['GET'])
 def get_ddl_events():
-    """获取近期重要截止日期事件列表"""
+    """获取近期重要截止日期事件列表，只有系统DDL"""
     try:
         # 调用生成DDL事件函数
         events_data = generate_ddl_events()
-        #example of events_data:
-# [
-#     {
-#         'date': '2025-05-20',
-#         'summary': {
-#             '类型': '讲座/分享会信息',
-#             '标题': '2025春季校园招聘宣讲会',
-#             '截止时间': '2025-05-25 18:00:00',
-#             '原文链接': 'https://www.nju.edu.cn/events/career-talk-2025'
-#         }
-#     },
-#     {
-#         'date': '2025-05-20',
-#         'summary': {
-#             '类型': '学业申请',
-#             '标题': '2025年秋季学期交换生项目申请',
-#             '截止时间': '2025-06-01 23:59:59',
-#             '原文链接': 'https://www.nju.edu.cn/exchange/fall-2025'
-#         }
-#     }
-# ]
         if not events_data:
             return api_response({
                 'date': events_data['date'],
@@ -89,6 +92,64 @@ def get_ddl_events():
     except Exception as e:
         print(f'获取DDL事件失败: {str(e)}')
         return api_response(message='获取DDL事件失败，请稍后重试', code=500)
+
+@api_bp.route('/custom-ddl', methods=['POST'])
+def add_custom_ddl():
+    """添加自定义DDL"""
+    try:
+        data = request.get_json()
+        if not data or not data.get('content'):
+            return api_response(message="DDL内容不能为空", code=400)
+
+        current_user = User.query.get(session.get('user_id'))
+        if not current_user:
+            return api_response(message="请先登录", code=401)
+
+        current_user.add_custom_ddl(data['content'])
+        db.session.commit()
+
+        return api_response(data=current_user.to_dict(), message="添加自定义DDL成功")
+    except Exception as e:
+        db.session.rollback()
+        return api_response(message="添加自定义DDL失败", code=500, errors=str(e))
+
+@api_bp.route('/custom-ddl/<int:index>', methods=['DELETE'])
+def remove_custom_ddl(index):
+    """删除自定义DDL"""
+    try:
+        current_user = User.query.get(session.get('user_id'))
+        if not current_user:
+            return api_response(message="请先登录", code=401)
+
+        current_user.remove_custom_ddl(index)
+        db.session.commit()
+
+        return api_response(data=current_user.to_dict(), message="删除自定义DDL成功")
+    except Exception as e:
+        db.session.rollback()
+        return api_response(message="删除自定义DDL失败", code=500, errors=str(e))
+
+@api_bp.route('/subscribed-accounts', methods=['PUT'])
+def update_subscribed_accounts():
+    """更新用户不想看的公众号列表"""
+    try:
+        data = request.get_json()
+        if not data or not isinstance(data.get('accounts'), list):
+            return api_response(message="公众号列表格式错误", code=400)
+
+        current_user = User.query.get(session.get('user_id'))
+        if not current_user:
+            return api_response(message="请先登录", code=401)
+
+        current_user.update_subscribed_accounts(data['accounts'])
+        db.session.commit()
+
+        return api_response(data=current_user.to_dict(), message="更新订阅公众号成功")
+    except ValueError as e:
+        return api_response(message=str(e), code=400)
+    except Exception as e:
+        db.session.rollback()
+        return api_response(message="更新订阅公众号失败", code=500, errors=str(e))
 
 @api_bp.route('/date-query', methods=['GET'])
 def query_by_date():
@@ -114,23 +175,6 @@ def query_by_date():
 @api_bp.route('/knowledge/query', methods=['POST'])
 def query_knowledge():
     """知识库问答接口"""
-#example of request:
-#header添加 Content-Type: application/json
-# - 设置请求体（Body）：
-# - 选择 raw 选项
-# - 格式选择 JSON
-# {
-#     'question': '最近有什么活动？',
-#     'model': 'RAG'
-# }
-    #example of response:
-# {
-#     'code': 200,
-#     'message': '查询成功',
-#     'data': {
-#         'recommendation': '根据最新信息，近期有以下活动：\n1. 人工智能与未来教育发展论坛（2025年5月20日）\n2. 2025春季校园招聘宣讲会（截止时间：2025-05-25）\n3. 2025年秋季学期交换生项目申请（截止时间：2025-06-01）'
-#     }
-# }
     try:
         # 从请求体中获取问题和查询模型
         data = request.get_json()
@@ -182,6 +226,59 @@ def api_docs():
         },
         "endpoints": [
             {
+                "path": "/api/auth/register",
+                "method": "POST",
+                "description": "用户注册",
+                "content_type": "application/json",
+                "request_body": {
+                    "username": "用户名",
+                    "password": "密码"
+                },
+                "responses": {
+                    "200": {
+                        "description": "注册成功",
+                        "schema": {
+                            "id": "用户ID",
+                            "username": "用户名",
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误或用户名已存在"
+                    },
+                    "500": {
+                        "description": "服务器错误"
+                    }
+                }
+            },
+            {
+                "path": "/api/auth/login",
+                "method": "POST",
+                "description": "用户登录",
+                "content_type": "application/json",
+                "request_body": {
+                    "username": "用户名",
+                    "password": "密码"
+                },
+                "responses": {
+                    "200": {
+                        "description": "登录成功",
+                        "schema": {
+                            "id": "用户ID",
+                            "username": "用户名",
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误"
+                    },
+                    "401": {
+                        "description": "用户名或密码错误"
+                    },
+                    "500": {
+                        "description": "服务器错误"
+                    }
+                }
+            },
+            {
                 "path": "/api/news/today",
                 "method": "GET",
                 "description": "获取每日消息摘要",
@@ -202,7 +299,7 @@ def api_docs():
                             "message": "获取新闻失败，请稍后重试"
                         }
                     }
-                },
+                }
             },
             {
                 "path": "/api/ddl-events",
@@ -214,7 +311,7 @@ def api_docs():
                         "description": "成功",
                         "schema": {
                             "date": "日期（ISO格式，如：2024-01-20）",
-                            "summary": "DDL事件列表",
+                            "summary": "DDL事件列表"
                         }
                     },
                     "500": {
@@ -224,7 +321,7 @@ def api_docs():
                             "message": "获取DDL事件失败，请稍后重试"
                         }
                     }
-                },
+                }
             },
             {
                 "path": "/api/date-query",
@@ -234,7 +331,7 @@ def api_docs():
                     {
                         "name": "date",
                         "type": "string",
-                        "required": True,
+                        "required": true,
                         "description": "查询日期，格式为YYYY-MM-DD"
                     }
                 ],
@@ -261,7 +358,7 @@ def api_docs():
                             "message": "日期查询失败，请稍后重试"
                         }
                     }
-                },
+                }
             },
             {
                 "path": "/api/knowledge/query",
@@ -276,13 +373,13 @@ def api_docs():
                     {
                         "name": "question",
                         "type": "string",
-                        "required": True,
+                        "required": true,
                         "description": "用户的问题"
                     },
                     {
                         "name": "model",
                         "type": "string",
-                        "required": False,
+                        "required": false,
                         "description": "查询模型类型，可选值：RAG（默认）、MCP"
                     }
                 ],
@@ -307,7 +404,7 @@ def api_docs():
                             "message": "知识查询失败，请稍后重试"
                         }
                     }
-                },
+                }
             }
         ]
     }
