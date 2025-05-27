@@ -9,21 +9,48 @@
           <span>{{ calendarFooterText }}</span>
         </div>
       </div>
-      
+      <!-- 分组列表模式 -->
+      <div v-if="itemGroups && itemGroups.length > 0">
+        <n-collapse>
+          <n-collapse-item
+            v-for="(group, groupIndex) in itemGroups"
+            :key="groupIndex"
+            :title="group.groupTitle"
+            :name="'group-' + groupIndex"
+          >
+            <div
+              v-for="(item, itemIndex) in group.items"
+              :key="itemIndex"
+              class="item"
+            >
+              <div class="item-title">{{ getItemTitle(item) }}</div>
+              <div class="item-footer">
+                <span>{{ getItemDate(item) }}</span>
+                <span @click.stop="handleClick(item)">
+                查看详情
+                </span>
+              </div>
+            </div>
+          </n-collapse-item>
+        </n-collapse>
+      </div>
       <!-- 列表模式 -->
       <div v-else-if="items && items.length > 0">
-        <div v-for="(item, index) in items" :key="index" class="item">
-          <div class="item-title">{{ getItemTitle(item) }}</div>
-          <div class="item-footer">
-            <span>{{ getItemDate(item) }}</span>
-            <span v-if="getItemExtra(item)">{{ getItemExtra(item) }}</span>
-          </div>
-        </div>
-        <div v-if="showViewMore" class="view-more">
-          <a href="#" @click.prevent="$emit('view-more')">{{ viewMoreText }}</a>
-        </div>
+        <n-collapse>
+          <n-collapse-item
+            v-for="(item, index) in items"
+            :key="index"
+            :title="getItemTitle(item)"
+            :name="index.toString()"
+          >
+            <div class="item-content">
+              <div class="item-footer">
+              </div>
+            </div>
+          </n-collapse-item>
+        </n-collapse>
       </div>
-      
+
       <!-- 空数据状态 -->
       <div v-else class="no-data">
         {{ emptyText }}
@@ -33,22 +60,37 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { NCard } from 'naive-ui';
+import { computed, h } from "vue";
+import { NCard, NCollapse, NCollapseItem, NAvatar, createDiscreteApi } from "naive-ui";
+import { marked } from "marked";
 
-interface CardItem {
+const { notification } = createDiscreteApi(["notification"]);
+
+export interface CardItem {
   title?: string;
   date?: string;
   time?: string;
+  type?: string;
+  abstract?: string;
   description?: string;
-  source?: string;
+  source?: URL;
   views?: number;
   [key: string]: any;
 }
 
+export interface ItemGroup {
+  groupTitle: string;
+  items: CardItem[];
+}
+
+const EventTypes = {
+  VIEW_MORE: "view-more",
+};
+
 const props = defineProps<{
   title: string;
   items?: CardItem[];
+  itemGroups?: ItemGroup[];
   titleField?: string;
   dateField?: string;
   extraField?: string;
@@ -61,6 +103,7 @@ const props = defineProps<{
 
 defineEmits<{
   (event: 'view-more'): void;
+  (event: 'item-click', item: CardItem): void;
 }>();
 
 const showViewMore = computed(() => {
@@ -68,24 +111,59 @@ const showViewMore = computed(() => {
 });
 
 const getItemTitle = (item: CardItem): string => {
-  return props.titleField ? item[props.titleField] : item.title || '';
+  return props.titleField ? item[props.titleField] : item.title || "";
 };
 
 const getItemDate = (item: CardItem): string => {
-  return props.dateField ? item[props.dateField] : (item.date || item.time || '');
+  return props.dateField ? item[props.dateField] : item.date || item.time || "";
 };
 
-const getItemExtra = (item: CardItem): string => {
-  if (props.extraField) {
-    return item[props.extraField] || '';
-  }
-  
-  if (item.source) return item.source;
-  if (item.description) return item.description;
-  if (item.views !== undefined) return `${item.views} 浏览`;
-  
-  return '';
-};
+function handleClick(item: CardItem) {
+  notification.create({
+    title: item.title || "详情",
+    description: () => h('div', { style: 'display: flex; justify-content: space-between; align-items: center;' }, [
+      h('span', {}, "智能摘要"),
+      item.source ? h('a', 
+        { 
+          href: item.source,
+          target: '_blank',
+          style: {
+            fontSize: '12px',
+            color: 'var(--primary-color)',
+            textDecoration: 'none'
+          },
+          onClick: (e: Event) => {
+            e.stopPropagation();
+          }
+        }, 
+        '查看原文'
+      ) : null
+    ]),
+    content: () => h('div', {
+      innerHTML: marked(item.abstract || '暂无摘要'),
+    }),
+    avatar: () =>
+      h(NAvatar, {
+        size: "small",
+        round: true,
+        src: "https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg",
+      }),
+    action: () => 
+      h('div', [
+        h('a', 
+          { 
+            href: item.source,
+            target: item.source ? '_blank' : undefined,
+            style: {
+              marginRight: '10px',
+              color: 'var(--primary-color)'
+            }
+          }, 
+          '查看原文'
+        )
+      ]),
+  });
+}
 </script>
 
 <style scoped>
@@ -101,7 +179,8 @@ const getItemExtra = (item: CardItem): string => {
 .base-card {
   margin-bottom: 16px;
   width: 100%;
-  min-height: 300px; /* 保持卡片高度一致，防止抖动 */
+  min-height: 300px;
+  /* 保持卡片高度一致，防止抖动 */
 }
 
 .item {
@@ -160,10 +239,5 @@ const getItemExtra = (item: CardItem): string => {
   text-align: center;
   font-size: 12px;
   color: #999999;
-}
-
-/* 确保卡片标题为黑色 */
-:deep(.n-card-header__main) {
-  color: #333333;
 }
 </style>
