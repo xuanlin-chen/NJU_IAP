@@ -129,8 +129,8 @@ def remove_custom_ddl(index):
         db.session.rollback()
         return api_response(message="删除自定义DDL失败", code=500, errors=str(e))
 
-@api_bp.route('/subscribed-accounts', methods=['PUT'])
-def update_subscribed_accounts():
+@api_bp.route('/unsubscribed-accounts', methods=['PUT'])
+def update_unsubscribed_accounts():
     """更新用户不想看的公众号列表"""
     try:
         data = request.get_json()
@@ -141,7 +141,7 @@ def update_subscribed_accounts():
         if not current_user:
             return api_response(message="请先登录", code=401)
 
-        current_user.update_subscribed_accounts(data['accounts'])
+        current_user.update_unsubscribed_accounts(data['accounts'])
         db.session.commit()
 
         return api_response(data=current_user.to_dict(), message="更新订阅公众号成功")

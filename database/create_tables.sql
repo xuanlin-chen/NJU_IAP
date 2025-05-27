@@ -5,7 +5,7 @@ CREATE TABLE `users` (
   `username` VARCHAR(80) NOT NULL UNIQUE,
   `password_hash` VARCHAR(128) NOT NULL,
   `custom_ddls` JSON DEFAULT NULL COMMENT '用户自定义DDL列表，存储格式为[{"content": "DDL内容", "date": "YYYY-MM-DD"}]',
-  `subscribed_accounts` JSON DEFAULT NULL COMMENT '用户不想看的公众号列表，存储格式为["公众号名称1", "公众号名称2"]'
+  `unsubscribed_accounts` JSON DEFAULT NULL COMMENT '用户不想看的公众号列表，存储格式为["公众号名称1", "公众号名称2"]'
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 CREATE TABLE `比赛通知` (

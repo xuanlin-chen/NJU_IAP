@@ -9,7 +9,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     custom_ddls = db.Column(db.JSON, nullable=True)
-    subscribed_accounts = db.Column(db.JSON, nullable=True)
+    unsubscribed_accounts = db.Column(db.JSON, nullable=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -22,14 +22,14 @@ class User(db.Model):
             'id': self.id,
             'username': self.username,
             'custom_ddls': self.custom_ddls if self.custom_ddls else [],
-            'subscribed_accounts': self.subscribed_accounts if self.subscribed_accounts else []
+            'unsubscribed_accounts': self.unsubscribed_accounts if self.unsubscribed_accounts else []
         }
 
-    def update_subscribed_accounts(self, accounts):
-        """更新用户订阅的公众号列表"""
+    def update_unsubscribed_accounts(self, accounts):
+        """更新用户取消订阅的公众号列表"""
         if not isinstance(accounts, list):
             raise ValueError('订阅账号必须是列表格式')
-        self.subscribed_accounts = accounts
+        self.unsubscribed_accounts = accounts
 
     def add_custom_ddl(self, content):
         from datetime import date
