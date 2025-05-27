@@ -77,31 +77,24 @@ def safe_json_parse(raw_str, max_retries=3):
         raise ValueError("无法提取有效JSON内容")
 
 # 读取提示词
-def read_prompt_file():
-    with open("prompt_structuring.txt", "r", encoding="utf-8") as f:
-        return f.read()
+def read_prompt_file(prompt_type = "structuring"):
+    if prompt_type == "filter":
+        with open("prompt_filter.txt", "r", encoding="utf-8") as f:
+            return f.read()
+
+    if prompt_type == "structuring":
+        with open("prompt_structuring.txt", "r", encoding="utf-8") as f:
+            return f.read()
+
+    if prompt_type == "summary":
+        with open("prompt_summary.txt", "r", encoding="utf-8") as f:
+            return f.read()
 
 def analyze_article(content):
     api_key = API_KEY_FILTER
     base_url = API_URL_FILTER
 
-    prompt_filter = """你是一个高校信息过滤助手，你需要完成的任务是判断文章含有信息对本科生是否有用。判断规则如下：
-1. 内容分析：提取关键要素（核心内容/时间/对象）
-2. 有用性定义：
-   a. 具有行动指引功能（如报名、准备材料、参加活动等）
-   b. 影响学业进度或生活安排（如考试时间、课程调整等）
-   c. 涉及生活必需（宿舍调整、校园活动、安全提醒等）
-   d. 提供发展机会或涉及资格/机会的获取条件（竞赛通知、实习机会等）
-   e. 其他本科生可以参与的事件
-3. 需排除的内容（直接判断为“无用”）：
-   a. 对已经完成的活动的总结或者记录，且对本科生后续行程没有具体安排
-   b. 纯工作部署类会议报道
-   c. 未落地的规划方案讨论
-   d. 无具体实施路径的政策宣导
-   e. 无本科生参与机制的教研活动
-4. 思考判断：根据上述规则判断文章是否有用。若将文章判断为“无用”，请再次谨慎思考是否真的“无用”，以保证不遗漏信息
-5. 最终结论：仅输出“有用”或者“无用”
-重要提醒：除输出“有用”或者“无用”外不要输出其他任何文字"""
+    prompt_filter = read_prompt_file("filter")
 
     messages = [
         {"role": "system", "content": prompt_filter},
@@ -137,7 +130,7 @@ def process_files_to_db():
     # os.makedirs(DESTINATION_PATH, exist_ok=True)
     # os.makedirs(JSON_STORAGE_PATH, exist_ok=True)
 
-    prompt_structuring = read_prompt_file()
+    prompt_structuring = read_prompt_file("structuring")
 
     for filename in os.listdir(MARKDOWN_PATH):
         if not filename.endswith(".md"):
@@ -211,16 +204,14 @@ def process_files_to_db():
                         print(f"文件 {filename} 经过 {max_retries} 次重试仍无法生成有效JSON，跳过处理")
                     continue
 
-                # 确保json_data不为None
                 if json_data is None:
-                    print(f"文件 {filename} 的JSON数据为空，跳过处理")
                     continue
 
                 # 生成文章摘要
-                prompt_summary = "请生成这篇文章的核心摘要：\n" + content
+                prompt_summary = read_prompt_file("summary")
                 messages_summary = [
-                    {"role": "system", "content": "你是一个文章摘要生成助手，当你收到一篇关于校园信息的文章（比如关于志愿活动，比赛通知等等的消息）时，要概括文章的核心内容，重点聚焦在用户作为大学生可能感兴趣的地方。"},
-                    {"role": "user", "content": prompt_summary}
+                    {"role": "system", "content": prompt_summary},
+                    {"role": "user", "content": content}
                 ]
 
                 try:
