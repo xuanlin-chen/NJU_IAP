@@ -50,9 +50,8 @@ def login():
     if not user or not user.check_password(data['password']):
         return api_response(message="用户名或密码错误", code=401)
     
-    # 更新最后登录时间
     try:
-        user.last_login = datetime.utcnow()
+        session['user_id'] = user.id  # 在会话中设置用户ID
         db.session.commit()
         return api_response(data=user.to_dict(), message="登录成功")
     except Exception as e:
@@ -108,6 +107,10 @@ def add_custom_ddl():
         current_user.add_custom_ddl(data['content'])
         db.session.commit()
 
+        # 重新加载用户数据以确保会话中的custom_ddls是最新的
+        db.session.expunge(current_user) # 分离对象
+        current_user = User.query.get(session.get('user_id')) # 重新查询
+
         return api_response(data=current_user.to_dict(), message="添加自定义DDL成功")
     except Exception as e:
         db.session.rollback()
@@ -123,6 +126,10 @@ def remove_custom_ddl(index):
 
         current_user.remove_custom_ddl(index)
         db.session.commit()
+
+        # 重新加载用户数据以确保会话中的custom_ddls是最新的
+        db.session.expunge(current_user) # 分离对象
+        current_user = User.query.get(session.get('user_id')) # 重新查询
 
         return api_response(data=current_user.to_dict(), message="删除自定义DDL成功")
     except Exception as e:

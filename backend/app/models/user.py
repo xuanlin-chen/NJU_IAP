@@ -7,8 +7,8 @@ class User(db.Model):
     __bind_key__ = 'userinfo'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    username = db.Column(db.String(1024), unique=True, nullable=False)
+    password_hash = db.Column(db.String(1024), nullable=False)
     custom_ddls = db.Column(db.JSON, nullable=True)
     unsubscribed_accounts = db.Column(db.JSON, nullable=True)
 
@@ -22,8 +22,8 @@ class User(db.Model):
         return {
             'id': self.id,
             'username': self.username,
-            'custom_ddls': self.custom_ddls if self.custom_ddls else [],
-            'unsubscribed_accounts': self.unsubscribed_accounts if self.unsubscribed_accounts else []
+            'custom_ddls': list(self.custom_ddls) if self.custom_ddls else [],
+            'unsubscribed_accounts': list(self.unsubscribed_accounts) if self.unsubscribed_accounts else []
         }
 
     def update_unsubscribed_accounts(self, accounts):
@@ -39,10 +39,13 @@ class User(db.Model):
             'date': date.today().isoformat()
         }
         if self.custom_ddls is None:
-            self.custom_ddls = [new_ddl]
-        else:
-            self.custom_ddls.append(new_ddl)
+            self.custom_ddls = []
+        self.custom_ddls=list(self.custom_ddls)+[new_ddl]
 
     def remove_custom_ddl(self, index):
         if self.custom_ddls and 0 <= index < len(self.custom_ddls):
-            self.custom_ddls.pop(index)
+            # 保持字典结构，只删除指定索引的元素
+            ddl_list = list(self.custom_ddls)
+            ddl_list.pop(index)
+            self.custom_ddls = ddl_list
+            # 创建新列表以确保SQLAlchemy检测到变化
