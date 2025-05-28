@@ -78,10 +78,10 @@ def save_to_markdown(news_item, index, folder_path):
     file_path = os.path.join(folder_path, filename)
 
     with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(f"|原文链接|: {base_url + news_item.href}\n\n")
+        f.write(f"|发布日期|: {news_item.time}\n")
         f.write(f"标题: {news_item.title}\n")
         f.write(f"类型: {news_item.type}\n")
-        f.write(f"时间: {news_item.time}\n")
-        f.write(f"链接: {base_url + news_item.href}\n\n")
         if news_item.content:
             f.write(f"内容:\n{news_item.content}\n\n")
     print(f"新闻 '{news_item.title}' 已保存到 {file_path}")

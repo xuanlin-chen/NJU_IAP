@@ -5,6 +5,9 @@ import TargetIcon from './TargetIcon.vue'
 import EmailIcon from './EmailIcon.vue'
 import PhoneIcon from './PhoneIcon.vue'
 import LocationIcon from './LocationIcon.vue'
+import DashboardIcon from './DashboardIcon.vue'
+import ChatIcon from './ChatIcon.vue'
+import BookIcon from './BookIcon.vue'
 
 export {
   InfoCircleIcon,
@@ -13,5 +16,8 @@ export {
   TargetIcon,
   EmailIcon,
   PhoneIcon,
-  LocationIcon
+  LocationIcon,
+  DashboardIcon,
+  ChatIcon,
+  BookIcon
 }

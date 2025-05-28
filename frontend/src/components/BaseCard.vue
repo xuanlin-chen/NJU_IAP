@@ -26,9 +26,7 @@
               <div class="item-title">{{ getItemTitle(item) }}</div>
               <div class="item-footer">
                 <span>{{ getItemDate(item) }}</span>
-                <span @click.stop="handleClick(item)">
-                查看详情
-                </span>
+                <span @click.stop="handleClick(item)"> 查看详情 </span>
               </div>
             </div>
           </n-collapse-item>
@@ -44,8 +42,7 @@
             :name="index.toString()"
           >
             <div class="item-content">
-              <div class="item-footer">
-              </div>
+              <div class="item-footer"></div>
             </div>
           </n-collapse-item>
         </n-collapse>
@@ -61,7 +58,13 @@
 
 <script setup lang="ts">
 import { computed, h } from "vue";
-import { NCard, NCollapse, NCollapseItem, NAvatar, createDiscreteApi } from "naive-ui";
+import {
+  NCard,
+  NCollapse,
+  NCollapseItem,
+  NAvatar,
+  createDiscreteApi,
+} from "naive-ui";
 import { marked } from "marked";
 
 const { notification } = createDiscreteApi(["notification"]);
@@ -102,8 +105,8 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-  (event: 'view-more'): void;
-  (event: 'item-click', item: CardItem): void;
+  (event: "view-more"): void;
+  (event: "item-click", item: CardItem): void;
 }>();
 
 const showViewMore = computed(() => {
@@ -121,46 +124,59 @@ const getItemDate = (item: CardItem): string => {
 function handleClick(item: CardItem) {
   notification.create({
     title: item.title || "详情",
-    description: () => h('div', { style: 'display: flex; justify-content: space-between; align-items: center;' }, [
-      h('span', {}, "智能摘要"),
-      item.source ? h('a', 
-        { 
-          href: item.source,
-          target: '_blank',
-          style: {
-            fontSize: '12px',
-            color: 'var(--primary-color)',
-            textDecoration: 'none'
-          },
-          onClick: (e: Event) => {
-            e.stopPropagation();
-          }
-        }, 
-        '查看原文'
-      ) : null
-    ]),
-    content: () => h('div', {
-      innerHTML: marked(item.abstract || '暂无摘要'),
-    }),
+    description: () =>
+      h(
+        "div",
+        {
+          style:
+            "display: flex; justify-content: space-between; align-items: center;",
+        },
+        [
+          h("span", {}, "智能摘要"),
+          item.source
+            ? h(
+                "a",
+                {
+                  href: item.source,
+                  target: "_blank",
+                  style: {
+                    fontSize: "12px",
+                    color: "var(--primary-color)",
+                    textDecoration: "none",
+                  },
+                  onClick: (e: Event) => {
+                    e.stopPropagation();
+                  },
+                },
+                "查看原文"
+              )
+            : null,
+        ]
+      ),
+    content: () =>
+      h("div", {
+        innerHTML: marked(item.abstract || "暂无摘要"),
+      }),
     avatar: () =>
       h(NAvatar, {
         size: "small",
         round: true,
         src: "https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg",
       }),
-    action: () => 
-      h('div', [
-        h('a', 
-          { 
+    action: () =>
+      h("div", [
+        h(
+          "a",
+          {
             href: item.source,
-            target: item.source ? '_blank' : undefined,
+            target: item.source ? "_blank" : undefined,
             style: {
-              marginRight: '10px',
-              color: 'var(--primary-color)'
-            }
-          }, 
-          '查看原文'
-        )
+              marginRight: "10px",
+              color: "var(--primary-color)",
+            },
+          },
+          "查看原文"
+        ),
       ]),
   });
 }

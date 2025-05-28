@@ -1,12 +1,101 @@
 <template>
   <div class="home-container">
+    <div class="top-actions">
+      <n-button
+        @click="
+          showAuthModal = true;
+          activeTab = 'login';
+        "
+        size="large"
+      >
+        登录
+      </n-button>
+      <n-button
+        @click="
+          showAuthModal = true;
+          activeTab = 'register';
+        "
+        size="large"
+      >
+        注册
+      </n-button>
+    </div>
     <h1>欢迎使用南京大学信息聚合平台</h1>
+
+    <!-- Combined Auth Modal -->
+    <n-modal v-model:show="showAuthModal" preset="card" style="width: 400px">
+      <div class="auth-tabs">
+        <n-tabs v-model:value="activeTab" type="segment" animated>
+          <n-tab-pane name="login" tab="登录">
+            <div class="login-form">
+              <n-form :model="authForm" ref="formRef">
+                <n-form-item label="用户名" path="username">
+                  <n-input
+                    v-model:value="authForm.username"
+                    placeholder="请输入用户名"
+                  />
+                </n-form-item>
+                <n-form-item label="密码" path="password">
+                  <n-input
+                    v-model:value="authForm.password"
+                    type="password"
+                    placeholder="请输入密码"
+                    @keyup.enter="handleAuth('login')"
+                  />
+                </n-form-item>
+              </n-form>
+              <div class="form-actions">
+                <n-button @click="showAuthModal = false">取消</n-button>
+                <n-button
+                  type="primary"
+                  @click="handleAuth('login')"
+                  :loading="loading"
+                >
+                  登录
+                </n-button>
+              </div>
+            </div>
+          </n-tab-pane>
+          <n-tab-pane name="register" tab="注册">
+            <div class="login-form">
+              <n-form :model="authForm" ref="formRef">
+                <n-form-item label="用户名" path="username">
+                  <n-input
+                    v-model:value="authForm.username"
+                    placeholder="请输入用户名"
+                  />
+                </n-form-item>
+                <n-form-item label="密码" path="password">
+                  <n-input
+                    v-model:value="authForm.password"
+                    type="password"
+                    placeholder="请输入密码"
+                    @keyup.enter="handleAuth('register')"
+                  />
+                </n-form-item>
+              </n-form>
+              <div class="form-actions">
+                <n-button @click="showAuthModal = false">取消</n-button>
+                <n-button
+                  type="primary"
+                  @click="handleAuth('register')"
+                  :loading="loading"
+                >
+                  注册
+                </n-button>
+              </div>
+            </div>
+          </n-tab-pane>
+        </n-tabs>
+      </div>
+    </n-modal>
+
     <p class="description">这是教育数据聚合平台的首页，提供功能导航。</p>
     <div class="features">
       <div class="feature" @click="navigateTo('dashboard')">
         <div class="feature-icon">
           <n-icon size="48">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M21 18H3V6h18m0-2H3c-1.11 0-2 .89-2 2v12c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V6a2 2 0 0 0-2-2m-9 6.5A2.5 2.5 0 0 1 14.5 9A2.5 2.5 0 0 1 17 11.5a2.5 2.5 0 0 1-2.5 2.5A2.5 2.5 0 0 1 12 11.5m1 3h3c1.1 0 2 .9 2 2V17h-8v-.5c0-1.1.9-2 2-2h1Z"/></svg>
+            <dashboard-icon />
           </n-icon>
         </div>
         <h3>实时信息</h3>
@@ -15,7 +104,7 @@
       <div class="feature" @click="navigateTo('chat')">
         <div class="feature-icon">
           <n-icon size="48">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M17 22v2H7v-2h10m2-2H5v2h14v-2m1-8V3c0-.55-.45-1-1-1H8c-.55 0-1 .45-1 1v9h13m-5.5-7c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5s1.5.67 1.5 1.5m0 3.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5s1.5.67 1.5 1.5M22 14H7v7h15v-7Z"/></svg>
+            <chat-icon />
           </n-icon>
         </div>
         <h3>AI互动</h3>
@@ -24,35 +113,99 @@
       <div class="feature" @click="navigateTo('about')">
         <div class="feature-icon">
           <n-icon size="48">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M19 1l-5 5v11l5-4.5V1m2 4v13.5c-1.1-.35-2.3-.5-3.5-.5c-1.7 0-4.15.65-5.5 1.5V6c-1.45-1.1-3.55-1.5-5.5-1.5c-1.95 0-4.05.4-5.5 1.5v14.65c0 .25.25.5.5.5c.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5c1.35-.85 3.8-1.5 5.5-1.5c1.65 0 3.35.3 4.75 1.05c.1.05.15.05.25.05c.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1m-2 13.5v-7C18.85 10.05 17.7 10 16.5 10c-1.15 0-3.35.4-5.5 1.5v6.95c1.05-.55 2.95-1.45 5.5-1.45c1.65 0 3.35.3 4.75 1.05c.1.05.15.05.25.05z"/></svg>
+            <book-icon />
           </n-icon>
         </div>
         <h3>关于我们</h3>
         <p>如果你有兴趣了解我们的话</p>
       </div>
     </div>
-    
+
     <div class="mascot-container">
       <img src="../assets/xiaoxun.jpg" class="mascot-image" />
       <img src="../assets/nju.png" class="logo-image" />
     </div>
-    
   </div>
 </template>
 
 <script setup lang="ts">
-import { NIcon } from 'naive-ui'
-import { useRouter } from 'vue-router'
+import {
+  NIcon,
+  NButton,
+  NModal,
+  NForm,
+  NFormItem,
+  NInput,
+  NTabs,
+  NTabPane,
+} from "naive-ui";
+import { useRouter } from "vue-router";
+import { ref } from "vue";
+import { DashboardIcon, ChatIcon, BookIcon } from "../components/icons";
 
-const router = useRouter()
+const router = useRouter();
+const showAuthModal = ref(false);
+const activeTab = ref("login");
+const loading = ref(false);
+const formRef = ref(null);
+
+const authForm = ref({
+  username: "",
+  password: "",
+});
 
 // 导航到指定路由
 const navigateTo = (route: string) => {
-  router.push(`/${route}`)
-}
+  router.push(`/${route}`);
+};
+
+// 处理认证（登录/注册）
+const handleAuth = async (type: "login" | "register") => {
+  loading.value = true;
+  try {
+    const endpoint = type === "login" ? "/api/login" : "/api/register";
+
+    // 发送认证请求
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: authForm.value.username,
+        password: authForm.value.password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // 操作成功
+      showAuthModal.value = false;
+      router.push("/dashboard"); // 认证成功后跳转到仪表盘页面
+    } else {
+      // 处理错误
+      console.error(`${type === "login" ? "登录" : "注册"}失败:`, data.message);
+      // 这里可以添加错误提示
+    }
+  } catch (error) {
+    console.error(`${type === "login" ? "登录" : "注册"}请求出错:`, error);
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
 
 <style scoped>
+.top-actions {
+  position: absolute;
+  top: 20px;
+  right: 40px;
+  display: flex;
+  gap: 16px;
+  z-index: 100;
+}
+
 .home-container {
   padding: 40px 20px;
   text-align: center;
@@ -131,5 +284,23 @@ h1 {
   max-width: 180px; /* 调整Logo大小 */
   width: 100%;
   height: auto;
+}
+
+.auth-tabs {
+  margin-top: 10px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 20px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
 }
 </style>
