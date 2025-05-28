@@ -84,7 +84,7 @@ def test_generate_daily_news():
 def test_query_service():
     try:
         # 测试正常查询
-        question = "告诉我5月南京大学所有的比赛"
+        question = "EL报名什么时候截至"
         result = query_by_question(question)
         print("\n查询服务测试 - 正常查询：")
         print(f"问题：{question}")
@@ -186,12 +186,12 @@ if __name__ == "__main__":
     app = create_app()
     with app.app_context():
         # 调用需要上下文的函数
-        test_database_connection()
-        test_fetch_data()
+        # test_database_connection()
+        # test_fetch_data()
         # test_generate_daily_news()
         # test_generate_ddl_events()
         # test_date_query_service()
         # test_user_database_connection()
         # test_user_model_methods()
-        # test_query_service()  # 添加查询服务测试
+        test_query_service()  # 添加查询服务测试
         

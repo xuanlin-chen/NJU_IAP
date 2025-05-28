@@ -125,7 +125,16 @@ def generate_news_by_date(target_date):
         '原文链接': msg['原文链接']
     } for msg in all_messages]
     
-    abstract = [msg['原文信息'] for msg in all_messages]
+    # 提取第一个||之间的内容作为摘要
+    abstract = []
+    for msg in all_messages:
+        content = msg['原文信息']
+        # 修改正则表达式以匹配单竖线 |
+        match = re.search(r'\|([^|]*)\|', content)
+        if match:
+            abstract.append(match.group(1))
+        else:
+            abstract.append(content)
     
     # 为每条消息生成独立JSON对象
     news_list = [{
