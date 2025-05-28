@@ -76,7 +76,7 @@ export interface CardItem {
   type?: string;
   abstract?: string;
   description?: string;
-  source?: URL;
+  source?: string | URL;
   views?: number;
   [key: string]: any;
 }
@@ -137,7 +137,7 @@ function handleClick(item: CardItem) {
             ? h(
                 "a",
                 {
-                  href: item.source,
+                  href: typeof item.source === 'string' ? item.source : item.source.href,
                   target: "_blank",
                   style: {
                     fontSize: "12px",
@@ -168,7 +168,7 @@ function handleClick(item: CardItem) {
         h(
           "a",
           {
-            href: item.source,
+            href: typeof item.source === 'string' ? item.source : (item.source ? item.source.href : ''),
             target: item.source ? "_blank" : undefined,
             style: {
               marginRight: "10px",

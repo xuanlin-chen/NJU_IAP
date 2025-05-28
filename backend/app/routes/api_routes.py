@@ -58,40 +58,6 @@ def login():
         db.session.rollback()
         return api_response(message="登录失败", code=500, errors=str(e))
 
-@api_bp.route('/news/today', methods=['GET'])
-def get_today_news():
-    """获取每日新闻摘要"""
-    try:
-        # 调用生成每日新闻函数
-        news_data = generate_daily_news()
-        if not news_data:
-            return api_response({
-                'date': news_data['date'],
-                'summary': '今日暂无更新',
-                'raw_messages': []
-            }, message='今日暂无新闻更新')
-        return api_response(news_data, message='获取新闻成功')
-    except Exception as e:
-        print(f'获取每日新闻失败: {str(e)}')
-        return api_response(message='获取新闻失败，请稍后重试', code=500)
-
-@api_bp.route('/ddl-events', methods=['GET'])
-def get_ddl_events():
-    """获取近期重要截止日期事件列表，只有系统DDL"""
-    try:
-        # 调用生成DDL事件函数
-        events_data = generate_ddl_events()
-        if not events_data:
-            return api_response({
-                'date': events_data['date'],
-                'summary': [],
-                'raw_messages': []
-            }, message='今日暂无DDL事件')
-        return api_response(events_data, message='获取DDL事件成功')
-    except Exception as e:
-        print(f'获取DDL事件失败: {str(e)}')
-        return api_response(message='获取DDL事件失败，请稍后重试', code=500)
-
 @api_bp.route('/custom-ddl', methods=['POST'])
 def add_custom_ddl():
     """添加自定义DDL"""
@@ -170,7 +136,7 @@ def query_by_date():
         # 调用日期查询服务
         result_data = generate_date_data(date_str)
         
-        # 检查是否有错误
+        # 检查是否有错误 
         if 'error' in result_data:
             return api_response(result_data, message=result_data['error'], code=400)
             

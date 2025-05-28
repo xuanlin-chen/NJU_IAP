@@ -1,11 +1,20 @@
 <template>
   <div class="message-container" :class="role">
+    <!-- 用户消息 -->
     <div v-if="role === 'user'" class="message-bubble">
       <div v-html="formattedContent" class="message-content"></div>
     </div>
     
-    <div v-else class="ai-content-wrapper">
+    <!-- AI助手消息 -->
+    <div v-else-if="role === 'assistant'" class="ai-content-wrapper">
       <div class="ai-content">
+        <div v-html="formattedContent" class="message-content"></div>
+      </div>
+    </div>
+    
+    <!-- 系统消息 -->
+    <div v-else-if="role === 'system'" class="system-content-wrapper">
+      <div class="system-content">
         <div v-html="formattedContent" class="message-content"></div>
       </div>
     </div>
@@ -19,7 +28,7 @@ const props = defineProps({
   role: {
     type: String,
     required: true,
-    validator: (value: string) => ['user', 'ai'].includes(value)
+    validator: (value: string) => ['user', 'assistant', 'system'].includes(value)
   },
   content: {
     type: String,
@@ -107,5 +116,26 @@ const formattedContent = computed(() => {
   border-top: none;
   margin-top: -16px; /* 使连续的AI消息更加紧凑 */
   padding-top: 0;
+}
+
+/* 系统消息样式 */
+.system {
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.system-content-wrapper {
+  max-width: 80%;
+}
+
+.system-content {
+  background-color: #fff3e0; /* 暖橙色背景 */
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-size: 14px;
+  color: #d84315; /* 暖橙色文字 */
+  border: 1px solid #ffe0b2;
 }
 </style>

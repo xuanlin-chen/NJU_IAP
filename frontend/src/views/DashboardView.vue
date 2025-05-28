@@ -62,15 +62,13 @@ import {
 import SimpleCalendar from "../components/SimpleCalendar.vue";
 import BaseCard from "../components/BaseCard.vue";
 import dashboardText from "../resource/dashboard";
-import { useDashboardData } from "../stores/dashboardStore";
+import { useDashboardData, useDashboardStore } from "../stores/dashboardStore";
 import dayjs from "dayjs";
 import type { CardItem, ItemGroup } from "../components/BaseCard.vue";
 
-// 调试模式开关
-const debugMode = ref(false);
-
 // 从dashboardStore.ts导入类型
 import type { DdlItem, Message } from "../stores/dashboardStore";
+import type { DateString }from '@/utils/DateString';
 
 // 事件类型的集合
 const eventTypes = [
@@ -93,6 +91,8 @@ const eventTypes = [
   "其他活动",
   "实习就业",
   "其他类型",
+  "文体活动",
+  "校园通知",
 ];
 
 // 准备数据容器
@@ -120,13 +120,26 @@ onMounted(async () => {
 // 转换 Messages 为 CardItem 类型
 const formattedMessages = computed(() => {
   if (!Messages.value || Messages.value.length === 0) return [];
-  return Messages.value.map((message: Message) => ({
-    title: message.title || "",
-    time: message.time || "",
-    abstract: message.abstract || "",
-    type: message.type || "",
-    source: message.source || "",
-  }));
+  return Messages.value.map((message: Message) => {
+    // 处理 source 字段，如果是 URL 类型就转换为字符串
+    let sourceStr = "";
+    if (message.source) {
+      if (typeof message.source === 'string') {
+        sourceStr = message.source;
+      } else {
+        // 是 URL 对象
+        sourceStr = message.source.href;
+      }
+    }
+    
+    return {
+      title: message.title || "",
+      time: message.time || "",
+      abstract: message.abstract || "",
+      type: message.type || "",
+      source: sourceStr,
+    };
+  });
 });
 
 // 事件组
@@ -158,8 +171,28 @@ const { message } = createDiscreteApi([
 ]);
 
 // 日期选择处理
-function handleDateSelect(date: Date) {
+async function handleDateSelect(date: Date) {
   selectedDate.value = date;
+  
+  // 获取选定日期的消息
+  if (refreshData) {
+    loading.value = true;
+    try {
+      // 获取选定日期的消息数据
+      const dashboardStore = useDashboardStore();
+      const formattedDate = dayjs(date).format("YYYY-MM-DD") as DateString;
+      await dashboardStore.fetchMessages(formattedDate);
+      
+      // 更新 Messages
+      Messages.value = dashboardStore.Messages;
+      console.log(Messages.value);
+    } catch (error) {
+      console.error(`Failed to load messages for date ${dayjs(date).format("YYYY-MM-DD")}:`, error);
+      message.error("无法加载所选日期的消息");
+    } finally {
+      loading.value = false;
+    }
+  }
 }
 
 // 根据选中日期过滤 DDL 数据
@@ -175,12 +208,26 @@ const ddlBySelectedDate = computed(() => {
 const formattedDdlItems = computed(() => {
   if (!ddlBySelectedDate.value || ddlBySelectedDate.value.length === 0)
     return [];
-  return ddlBySelectedDate.value.map((item) => ({
-    title: item.title || "",
-    date: item.date ? item.date.format("YYYY-MM-DD") : "",
-    time: item.time ? item.time.format("HH:mm") : "",
-    description: item.time ? `${item.time.format("HH:mm")}` : "",
-  }));
+  return ddlBySelectedDate.value.map((item) => {
+    // 处理 source 字段
+    let sourceStr = "";
+    if (item.source) {
+      if (typeof item.source === 'string') {
+        sourceStr = item.source;
+      } else {
+        // 是 URL 对象
+        sourceStr = item.source.href;
+      }
+    }
+    
+    return {
+      title: item.title || "",
+      date: item.date ? item.date.format("YYYY-MM-DD") : "",
+      time: item.time ? item.time.format("HH:mm") : "",
+      description: item.time ? `${item.time.format("HH:mm")}` : "",
+      source: sourceStr,
+    };
+  });
 });
 
 // 处理"查看更多"点击事件
@@ -194,7 +241,6 @@ function handleViewMoreDdl() {
 
 // 组件销毁前的清理工作
 onBeforeUnmount(() => {
-  debugMode.value = false;
   loading.value = false;
   // 如果有其他事件监听器或计时器，这里也应该清理它们
 });

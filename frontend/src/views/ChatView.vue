@@ -39,6 +39,11 @@
                 />
               </transition-group>
               
+              <!-- 错误提示 -->
+              <div v-if="chatStore.error" class="error-message">
+                {{ chatStore.error }}
+              </div>
+              
               <!-- 正在输入提示 -->
               <transition name="fade">
                 <div v-if="chatStore.isTyping" class="ai-typing">
@@ -80,6 +85,7 @@ const chatStore = useChatStore() as {
   currentChatIndex: number;
   currentChat: ChatItem | null;
   isTyping: boolean;
+  error: string | null;
   startNewChat: () => void;
   selectChat: (index: number) => void;
   deleteChat: (index: number) => void;
@@ -103,9 +109,23 @@ function scrollToBottom() {
   }
 }
 
+// 监听消息和打字状态变化，滚动到底部
+import { watch } from 'vue';
+
+watch(
+  () => [...chatStore.messages, chatStore.isTyping],
+  () => {
+    // 使用 nextTick 确保 DOM 已更新
+    nextTick(() => {
+      scrollToBottom();
+    });
+  },
+  { deep: true }
+);
+
 // 页面加载时滚动到底部
 onMounted(() => {
-  scrollToBottom()
+  scrollToBottom();
 })
 </script>
 
@@ -219,5 +239,16 @@ onMounted(() => {
 
 .message-fade-move {
   transition: transform 0.4s ease;
+}
+
+/* 错误提示样式 */
+.error-message {
+  padding: 16px 24px;
+  background-color: #ffebee; /* Light red background */
+  color: #d32f2f; /* Red text */
+  border-bottom: 1px solid #ffcdd2;
+  margin-top: 8px;
+  border-radius: 8px;
+  font-size: 14px;
 }
 </style>
