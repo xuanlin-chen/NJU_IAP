@@ -7,6 +7,8 @@ type Dayjs = dayjs.Dayjs;
 
 const api_router = {
   dateQuery: (date: DateString) => `/api/date-query?date=${date}`,
+  addCustomDdl: () => "/api/custom-ddl",
+  removeCustomDdl: (index: number) => `/api/custom-ddl/${index}`,
 }
 
 // API response interfaces
@@ -194,6 +196,67 @@ export const useDashboardStore = defineStore("dashboard", {
     // 刷新所有数据
     async refreshAllData() {
       return this.initialize();
+    },
+
+    // 添加自定义DDL
+    async addCustomDdl(ddlItem: DdlItem) {
+      try {
+        this.isLoading = true;
+        
+        // 将DdlItem转换为API请求格式
+        const content = `${ddlItem.title} (截止时间: ${ddlItem.date.format("YYYY-MM-DD")}${ddlItem.time ? ` ${ddlItem.time.format("HH:mm")}` : ""})${ddlItem.source ? ` [来源: ${typeof ddlItem.source === 'string' ? ddlItem.source : ddlItem.source?.href || ""}]` : ""}`;
+        
+        const response = await fetch(api_router.addCustomDdl(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ content }),
+          credentials: 'include' // 确保包含cookie以验证用户身份
+        });
+        
+        const data = await response.json();
+        
+        if (data.code === 200) {
+          // 添加成功，更新本地数据
+          this.ddlData.push(ddlItem);
+          return true;
+        }
+        console.error("Failed to add custom DDL:", data.message);
+        return false;
+      } catch (error) {
+        console.error("Failed to add custom DDL:", error);
+        return false;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    // 删除自定义DDL
+    async removeCustomDdl(index: number) {
+      try {
+        this.isLoading = true;
+        
+        const response = await fetch(api_router.removeCustomDdl(index), {
+          method: 'DELETE',
+          credentials: 'include' // 确保包含cookie以验证用户身份
+        });
+        
+        const data = await response.json();
+        
+        if (data.code === 200) {
+          // 删除成功，更新本地数据
+          // 注意：这里的索引可能与后端不同，实际项目中应根据返回数据更新
+          return true;
+        }
+        console.error("Failed to remove custom DDL:", data.message);
+        return false;
+      } catch (error) {
+        console.error("Failed to remove custom DDL:", error);
+        return false;
+      } finally {
+        this.isLoading = false;
+      }
     },
   },
 });

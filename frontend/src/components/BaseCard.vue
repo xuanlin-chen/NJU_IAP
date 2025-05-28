@@ -42,7 +42,12 @@
             :name="index.toString()"
           >
             <div class="item-content">
-              <div class="item-footer"></div>
+              <div class="item-footer">
+                <div class="item-actions">
+                  <n-button v-if="showDeleteButton" size="small" type="error" @click.stop="handleDelete(item, index)">删除</n-button>
+                  <span v-if="item.extra" class="item-extra">{{ item.extra }}</span>
+                </div>
+              </div>
             </div>
           </n-collapse-item>
         </n-collapse>
@@ -78,7 +83,9 @@ export interface CardItem {
   description?: string;
   source?: string | URL;
   views?: number;
-  [key: string]: any;
+  extra?: string;
+  // 使用 unknown 而不是 any
+  [key: string]: unknown;
 }
 
 export interface ItemGroup {
@@ -102,23 +109,30 @@ const props = defineProps<{
   maxItems?: number;
   isCalendarMode?: boolean;
   calendarFooterText?: string;
+  showDeleteButton?: boolean;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (event: "view-more"): void;
   (event: "item-click", item: CardItem): void;
+  (event: "delete-item", item: CardItem, index: number): void;
 }>();
+
+// 处理删除按钮点击
+function handleDelete(item: CardItem, index: number) {
+  emit("delete-item", item, index);
+}
 
 const showViewMore = computed(() => {
   return props.maxItems && props.items && props.items.length > props.maxItems;
 });
 
 const getItemTitle = (item: CardItem): string => {
-  return props.titleField ? item[props.titleField] : item.title || "";
+  return props.titleField ? String(item[props.titleField] || "") : item.title || "";
 };
 
 const getItemDate = (item: CardItem): string => {
-  return props.dateField ? item[props.dateField] : item.date || item.time || "";
+  return props.dateField ? String(item[props.dateField] || "") : item.date || item.time || "";
 };
 
 function handleClick(item: CardItem) {
@@ -255,5 +269,19 @@ function handleClick(item: CardItem) {
   text-align: center;
   font-size: 12px;
   color: #999999;
+}
+
+/* 新增样式 */
+.item-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.item-extra {
+  margin-left: auto;
+  color: #666;
 }
 </style>

@@ -20,14 +20,28 @@
           <!-- 右侧区域 -->
           <n-grid-item :span="4">
             <!-- ddl提醒 -->
-            <base-card
-              :title="dashboardText.ddlNews.title"
-              :items="formattedDdlItems"
-              extra-field="description"
-              :empty-text="dashboardText.dayMessages.noMessages"
-              :view-more-text="dashboardText.ddlNews.viewMore"
-              @view-more="handleViewMoreDdl"
-            />
+            <div style="position: relative;">
+              <base-card
+                :title="dashboardText.ddlNews.title"
+                :items="formattedDdlItems"
+                extra-field="description"
+                :empty-text="dashboardText.dayMessages.noMessages"
+                :view-more-text="dashboardText.ddlNews.viewMore"
+                :show-delete-button="true"
+                @view-more="handleViewMoreDdl"
+                @delete-item="handleDeleteDdl"
+              />
+              
+              <!-- 添加浮动按钮用于添加DDL -->
+              <n-float-button
+                type="primary"
+                position="absolute"
+                style="right: 16px; top: 16px; color: white;"
+                @click="handleAddDdl"
+              >
+                +
+              </n-float-button>
+            </div>
 
             <!-- 使用 BaseCard 组件显示日历 -->
             <base-card
@@ -46,6 +60,30 @@
           </n-grid-item>
         </n-grid>
       </n-spin>
+      
+      <!-- DDL添加对话框 -->
+      <n-modal v-model:show="showAddDdlModal" preset="card" title="添加DDL" style="max-width: 450px;" size="medium">
+        <n-form :model="newDdl" label-placement="left" label-width="auto" :style="{ maxWidth: '100%' }">
+          <n-form-item label="标题" path="title">
+            <n-input v-model:value="newDdl.title" placeholder="请输入DDL标题" />
+          </n-form-item>
+          <n-form-item label="日期" path="date">
+            <n-date-picker v-model:value="newDdl.dateTimestamp" type="date" clearable style="width: 100%" />
+          </n-form-item>
+          <n-form-item label="时间" path="time">
+            <n-time-picker v-model:value="newDdl.timeTimestamp" format="HH:mm" clearable style="width: 100%" />
+          </n-form-item>
+          <n-form-item label="来源链接" path="source">
+            <n-input v-model:value="newDdl.source" placeholder="请输入链接（可选）" />
+          </n-form-item>
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px">
+            <n-button @click="showAddDdlModal = false">取消</n-button>
+            <n-button type="primary" @click="submitNewDdl" :disabled="!newDdl.title || !newDdl.dateTimestamp">
+              添加
+            </n-button>
+          </div>
+        </n-form>
+      </n-modal>
     </div>
   </n-notification-provider>
 </template>
@@ -58,6 +96,15 @@ import {
   NSpin,
   NNotificationProvider,
   createDiscreteApi,
+  NFloatButton,
+  NModal,
+  NCard,
+  NForm,
+  NFormItem,
+  NInput,
+  NDatePicker,
+  NTimePicker,
+  NButton,
 } from "naive-ui";
 import SimpleCalendar from "../components/SimpleCalendar.vue";
 import BaseCard from "../components/BaseCard.vue";
@@ -101,6 +148,15 @@ const Messages = ref<Message[]>([]);
 const loading = ref(true); // 初始设置为加载中状态
 const selectedDate = ref(new Date()); // 选中的日期
 let refreshData: (() => Promise<void>) | null = null;
+
+// 添加DDL对话框状态
+const showAddDdlModal = ref(false);
+const newDdl = ref({
+  title: "",
+  dateTimestamp: null as number | null,
+  timeTimestamp: null as number | null,
+  source: "",
+});
 
 // 在组件挂载时异步加载数据
 onMounted(async () => {
@@ -239,6 +295,104 @@ function handleViewMoreDdl() {
   message.info("查看更多DDL消息");
 }
 
+// 处理添加DDL按钮点击事件
+function handleAddDdl() {
+  // 重置表单
+  newDdl.value = {
+    title: "",
+    dateTimestamp: null,
+    timeTimestamp: null,
+    source: "",
+  };
+  // 显示对话框
+  showAddDdlModal.value = true;
+}
+
+// 提交新的DDL
+async function submitNewDdl() {
+  try {
+    if (!newDdl.value.title || !newDdl.value.dateTimestamp) {
+      message.error("标题和日期不能为空");
+      return;
+    }
+    
+    // 创建新的DDL项
+    const newDdlItem: DdlItem = {
+      title: newDdl.value.title,
+      date: dayjs(newDdl.value.dateTimestamp),
+      time: newDdl.value.timeTimestamp ? dayjs(newDdl.value.timeTimestamp) : dayjs(new Date()),
+      source: newDdl.value.source || "",
+    };
+    
+    // 使用store的addCustomDdl方法调用后端API
+    loading.value = true;
+    const dashboardStore = useDashboardStore();
+    const result = await dashboardStore.addCustomDdl(newDdlItem);
+    
+    if (result) {
+      message.success("DDL添加成功");
+      showAddDdlModal.value = false;
+      
+      // 重新加载当前日期的DDL数据
+      const formattedDate = dayjs(selectedDate.value).format("YYYY-MM-DD") as DateString;
+      await dashboardStore.fetchDdlData(formattedDate);
+      ddlData.value = dashboardStore.ddlData;
+    } else {
+      message.error("DDL添加失败，请稍后再试");
+    }
+  } catch (error) {
+    console.error("添加DDL失败:", error);
+    message.error("添加DDL失败");
+  } finally {
+    loading.value = false;
+  }
+}
+
+// 处理删除DDL项目
+async function handleDeleteDdl(item: CardItem, index: number) {
+  try {
+    // 确认是否要删除
+    if (!window.confirm("确定要删除这个DDL吗？")) {
+      return;
+    }
+    
+    loading.value = true;
+    
+    // 获取DDL在本地数据中的索引
+    // 注意：这里的索引可能与后端存储的索引不同，实际项目中应使用唯一ID
+    const dashboardStore = useDashboardStore();
+    
+    // 目前我们只是简单地根据标题和日期匹配，实际项目中可能需要其他方式
+    const ddlIndex = ddlData.value.findIndex(
+      (ddlItem) => 
+        ddlItem.title === item.title && 
+        ddlItem.date.format("YYYY-MM-DD") === item.date
+    );
+    
+    if (ddlIndex === -1) {
+      message.error("无法找到要删除的DDL项目");
+      return;
+    }
+    
+    // 调用后端API删除DDL
+    const result = await dashboardStore.removeCustomDdl(ddlIndex);
+    
+    if (result) {
+      message.success("DDL删除成功");
+      
+      // 从本地数据中删除
+      ddlData.value.splice(ddlIndex, 1);
+    } else {
+      message.error("DDL删除失败");
+    }
+  } catch (error) {
+    console.error("删除DDL失败:", error);
+    message.error("删除DDL失败");
+  } finally {
+    loading.value = false;
+  }
+}
+
 // 组件销毁前的清理工作
 onBeforeUnmount(() => {
   loading.value = false;
@@ -329,5 +483,20 @@ onBeforeUnmount(() => {
 :deep(.base-card) {
   min-height: 300px;
   /* 给DDL卡片固定最小高度 */
+}
+
+/* 浮动按钮样式 */
+:deep(.n-float-button) {
+  z-index: 10;
+  font-size: 24px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  color: white !important;
+}
+
+:deep(.n-float-button:hover) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 </style>
