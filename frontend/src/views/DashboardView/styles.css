@@ -1,0 +1,86 @@
+/* Dashboard 共享样式 */
+.bordered-card {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  color: #333333;
+}
+
+.dashboard-grid {
+  margin-top: 20px;
+  width: 100%;
+  max-width: 1600px;
+  /* 适合现代显示器的宽度 */
+  margin-right: auto;
+  /* 自动左右边距实现居中 */
+  box-sizing: border-box;
+  /* 确保padding不会增加总宽度 */
+  display: flex;
+  gap: 24px;
+  /* 增加列间距 */
+}
+
+.user-avatar-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.user-avatar-wrapper:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.debug-info {
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+/* 使DDL卡片有固定高度，防止内容变化导致日历位置抖动 */
+.base-card {
+  min-height: 300px;
+  /* 给DDL卡片固定最小高度 */
+}
+
+.subscription-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.subscription-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+/* 日历相关样式 */
+.calendar-card {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.calendar-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-footer {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 12px;
+  color: #999999;
+}
+
+/* 移除固定定位，使用独立的布局方式防止抖动 */
+.calendar-wrapper {
+  width: 100%;
+}

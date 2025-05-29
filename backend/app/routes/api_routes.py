@@ -1,5 +1,5 @@
 # API路由
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, session
 from . import api_response
 from http import HTTPStatus
 from ..services.query_service import query_by_question, SearchModel
