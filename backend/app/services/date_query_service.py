@@ -7,6 +7,9 @@ from sqlalchemy import text
 from app.db import db
 from .news_service import generate_daily_news
 from .ddl_service import generate_ddl_events
+from ..models.user import User
+from flask import session
+import pendulum
 
 def generate_date_data(target_date_str):
     """
@@ -49,10 +52,38 @@ def generate_date_data(target_date_str):
         # 解析日期字符串
         target_date = datetime.datetime.strptime(target_date_str, '%Y-%m-%d').date()
         
+        # 获取用户自定义DDL
+        user_ddls = []
+        user_id = session.get("user_id")
+        print(f"[DEBUG] User ID from session: {user_id}") # 添加调试日志
+        if user_id:
+            user = User.query.get(user_id)
+            if user and user.custom_ddls:
+                for ddl in user.custom_ddls:
+                    ddl_date = datetime.datetime.strptime(ddl['date'], '%Y-%m-%d').date()
+                    # 检查DDL日期是否在target_date及其后5天内
+                    if target_date <= ddl_date <= target_date + datetime.timedelta(days=5):
+                        user_ddls.append({
+                            'date': ddl['date'],
+                            'summary': {
+                                '类型': '用户自定义',
+                                '标题': ddl['content'],
+                                '截止时间': ddl['date'] # 自定义DDL没有具体时间，暂时用日期代替
+                            }
+                        })
+
         # 修改news_service和ddl_service中的函数调用，传入目标日期
         news_data = generate_news_by_date(target_date)
-        ddl_data = generate_ddl_by_date(target_date)
         
+        # 获取未来5天的DDL事件
+        ddl_data = []
+        for i in range(6): # 包括目标日期和之后5天
+            current_date = target_date + datetime.timedelta(days=i)
+            ddl_data.extend(generate_ddl_by_date(current_date))
+
+        # 将用户自定义DDL放在ddl_events的开头
+        ddl_data = user_ddls + ddl_data
+
         # 构建返回数据
         return {
             'date': target_date.isoformat(),
@@ -199,6 +230,24 @@ def generate_ddl_by_date(target_date):
                     '原文链接': row[3],
                     '截止时间': row[4]
                 }
+                
+               
+                print(f"[DEBUG] 截止时间: {event['截止时间']}") # 添加调试日志
+                
+                if isinstance(event['截止时间'], datetime.datetime):
+                    formatted_deadline = event['截止时间'].strftime('%Y-%m-%d %H:%M:%S')
+                elif isinstance(event['截止时间'], str):
+                    try:
+                        # 尝试解析常见的日期时间格式，并转换为UTC时间再格式化
+                        dt_obj = pendulum.parse(event['截止时间'])
+                        formatted_deadline = dt_obj.in_utc().strftime('%Y-%m-%d %H:%M:%S')
+                    except Exception:
+                        formatted_deadline = event['截止时间'] # 如果解析失败，保留原始字符串
+                else:
+                    formatted_deadline = str(event['截止时间'])
+
+                event['截止时间'] = formatted_deadline
+                
                 ddl_events.append(event)
         except Exception as e:
             # print(f"查询{message_type}失败")
