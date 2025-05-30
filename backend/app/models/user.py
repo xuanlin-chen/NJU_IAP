@@ -32,11 +32,23 @@ class User(db.Model):
             raise ValueError('订阅账号必须是列表格式')
         self.unsubscribed_accounts = accounts
 
-    def add_custom_ddl(self, content):
+    def add_custom_ddl(self, content, date_str=None):
         from datetime import date
+        # 如果提供了日期，则使用提供的日期，否则使用今天的日期
+        if date_str:
+            # 确保日期格式正确
+            try:
+                year, month, day = map(int, date_str.split('-'))
+                custom_date = date(year, month, day).isoformat()
+            except (ValueError, AttributeError):
+                # 如果日期格式不正确，回退到使用今天的日期
+                custom_date = date.today().isoformat()
+        else:
+            custom_date = date.today().isoformat()
+            
         new_ddl = {
             'content': content,
-            'date': date.today().isoformat()
+            'date': custom_date
         }
         if self.custom_ddls is None:
             self.custom_ddls = []

@@ -64,24 +64,56 @@
       v-model:show="subscriptionModalVisible"
       preset="card"
       title="公众号订阅管理"
-      style="max-width: 500px"
+      style="max-width: 600px"
       size="medium"
     >
       <div class="subscription-list">
-        <n-space vertical>
+        <!-- 未登录用户提示登录 -->
+        <div class="login-hint" v-if="!userStore.isLoggedIn">
+          <n-alert type="info" title="提示">
+            登录后可以永久保存您的订阅设置
+            <div style="margin-top: 8px;">
+              <n-button text type="primary" @click="showAuthModal = true">
+                去登录
+              </n-button>
+            </div>
+          </n-alert>
+        </div>
+        
+        <!-- 已登录用户显示保存按钮 -->
+        <div v-if="userStore.isLoggedIn" class="form-actions">
+        </div>
+        
+        <!-- 所有用户都使用列表，但只有未登录用户显示取消订阅按钮 -->
+        <n-space vertical class="account-list">
           <div
             v-for="(account, index) in subscribedAccounts"
             :key="index"
             class="subscription-item"
           >
             <span class="account-name">{{ account }}</span>
-            <n-button quaternary circle size="small" @click="unsubscribeAccount(account)" class="delete-btn">
+            <!-- 只有未登录用户显示取消订阅按钮 -->
+            <n-button
+              quaternary
+              circle
+              size="small"
+              @click="unsubscribeAccount(account)"
+              class="delete-btn"
+            >
               <n-icon><close-icon /></n-icon>
             </n-button>
           </div>
         </n-space>
       </div>
     </n-modal>
+
+    <!-- 登录/注册模态框 -->
+    <auth-modal
+      v-model:show="showAuthModal"
+      initial-tab="login"
+      @login-success="handleLoginSuccess"
+      @register-success="handleRegisterSuccess"
+    />
   </div>
 </template>
 
@@ -98,13 +130,23 @@ import {
   NButton,
   NSpace,
   NIcon,
+  NTransfer,
+  NAlert,
 } from "naive-ui";
 import { CloseOutline as CloseIcon } from "@vicons/ionicons5";
+import { useUserStore } from "@/stores/userStore";
 import { useDashboardStore } from "../../stores/dashboardStore";
+import { useRouter } from "vue-router";
 import dayjs from "dayjs";
 import type { DdlItem } from "../../stores/dashboardStore";
 import type { DateString } from "@/utils/DateString";
 import { gongzhonghao } from "@/resource/map";
+import AuthModal from "@/components/auth/AuthModal.vue";
+
+// 初始化 userStore 和 router
+const userStore = useUserStore();
+const router = useRouter();
+const showAuthModal = ref(false);
 
 // 注入共享状态，使用更明确的类型标注
 const dashboardState = inject("dashboardState") as {
@@ -118,12 +160,14 @@ const dashboardState = inject("dashboardState") as {
   };
   showSubscriptionModal: { value: boolean };
   showAddDdlModal: { value: boolean };
-  newDdl: { value: {
-    title: string;
-    dateTimestamp: number | null;
-    timeTimestamp: number | null;
-    source: string;
-  }};
+  newDdl: {
+    value: {
+      title: string;
+      dateTimestamp: number | null;
+      timeTimestamp: number | null;
+      source: string;
+    };
+  };
   subscriptionStatus: { value: Record<string, boolean> };
   toggleSubscriptionModal: (value: boolean) => void;
 };
@@ -137,12 +181,12 @@ const {
   showSubscriptionModal,
   showAddDdlModal,
   newDdl,
-  subscriptionStatus
+  subscriptionStatus,
 } = dashboardState;
 
 // 父组件已经完成初始化，这里不需要重复
 // 添加调试日志以检查订阅状态
-debugLog('当前订阅状态', subscriptionStatus.value);
+debugLog("当前订阅状态", subscriptionStatus.value);
 
 // 公众号列表
 const gongzhonghaoList = computed(() => {
@@ -151,30 +195,30 @@ const gongzhonghaoList = computed(() => {
 
 // 获取已订阅的账号列表
 const subscribedAccounts = computed(() => {
-  return Object.keys(subscriptionStatus.value).filter(account => 
-    subscriptionStatus.value[account]
+  return Object.keys(subscriptionStatus.value).filter(
+    (account) => subscriptionStatus.value[account]
   );
 });
 
 // 取消订阅某个账号
 async function unsubscribeAccount(account: string) {
   try {
-    debugLog('取消订阅', account);
+    debugLog("取消订阅", account);
     subscriptionStatus.value[account] = false;
-    
+
     // TODO: 调用后端API保存设置
     // const dashboardStore = useDashboardStore();
     // await dashboardStore.updateSubscription(account, false);
-    
+
     message.success(`已取消订阅: ${account}`);
-    
+
     // 如果没有任何订阅了，关闭对话框
     if (subscribedAccounts.value.length === 0) {
       subscriptionModalVisible.value = false;
     }
   } catch (error) {
-    console.error('取消订阅失败:', error);
-    message.error('取消订阅失败，请重试');
+    console.error("取消订阅失败:", error);
+    message.error("取消订阅失败，请重试");
     // 恢复状态
     subscriptionStatus.value[account] = true;
   }
@@ -187,24 +231,27 @@ const addDdlModalVisible = computed({
   },
   set(value) {
     showAddDdlModal.value = value;
-  }
+  },
 });
 
 // 使用computed，并添加详细的日志记录
 const subscriptionModalVisible = computed({
   get() {
-    debugLog('访问 subscriptionModalVisible', showSubscriptionModal.value);
+    debugLog("访问 subscriptionModalVisible", showSubscriptionModal.value);
     return showSubscriptionModal.value;
   },
   set(value) {
-    debugLog('设置 subscriptionModalVisible', {newValue: value, oldValue: showSubscriptionModal.value});
+    debugLog("设置 subscriptionModalVisible", {
+      newValue: value,
+      oldValue: showSubscriptionModal.value,
+    });
     showSubscriptionModal.value = value;
-  }
+  },
 });
 
 // 监视订阅对话框的状态变化
 watchEffect(() => {
-  debugLog('模态组件内订阅对话框状态', showSubscriptionModal.value);
+  debugLog("模态组件内订阅对话框状态", showSubscriptionModal.value);
 });
 
 // 处理表单模型的计算属性
@@ -212,7 +259,7 @@ const ddlForm = computed({
   get: () => newDdl.value,
   set: (value) => {
     newDdl.value = value;
-  }
+  },
 });
 
 // 提交新的DDL
@@ -235,21 +282,70 @@ async function submitNewDdl() {
 
     // 使用store的addCustomDdl方法调用后端API
     loading.value = true;
+    const result = await useUserStore().addCustomDdl(newDdlItem);
     const dashboardStore = useDashboardStore();
-    const result = await dashboardStore.addCustomDdl(newDdlItem);
-
-    if (result) {
+    if (result.success) {
       message.success("DDL添加成功");
       addDdlModalVisible.value = false;
 
-      // 重新加载当前日期的DDL数据
+      // 添加成功后立即刷新当前日期的数据
+      const selectedDateStr = dayjs(selectedDate.value).format("YYYY-MM-DD");
+      const newDdlDateStr = newDdlItem.date.format("YYYY-MM-DD");
+
+      // 直接添加新DDL到当前数据集，以实现即时显示效果
+      if (selectedDateStr === newDdlDateStr) {
+        // 检查是否已存在相同的DDL（防止重复）
+        const exists = ddlData.value.some(
+          (item) =>
+            item.title === newDdlItem.title &&
+            item.date.format("YYYY-MM-DD") === newDdlDateStr
+        );
+
+        if (!exists) {
+          // 添加完整的DDL项目，确保时间信息正确
+          ddlData.value.push({
+            title: newDdlItem.title,
+            date: newDdlItem.date,
+            time: newDdlItem.time,
+            source: newDdlItem.source,
+          });
+          console.log("Added new DDL to current dashboard:", newDdlItem);
+        }
+      }
+
+      // 保存当前添加的DDL，以确保它不会在刷新数据时丢失
+      const addedDdl = { ...newDdlItem };
+      
+      // 后台异步刷新所有数据，确保与服务器保持同步
+      // 添加小延迟，确保后端有时间处理添加的DDL
       const formattedDate = dayjs(selectedDate.value).format(
         "YYYY-MM-DD"
       ) as DateString;
-      await dashboardStore.fetchDdlData(formattedDate);
-      ddlData.value = dashboardStore.ddlData;
+      
+      // 延迟500毫秒再刷新数据，给后端API处理时间
+      setTimeout(() => {
+        dashboardStore.fetchDdlData(formattedDate).then(() => {
+          // 更新本地数据，但保留刚添加的DDL
+          const freshDdlData = [...dashboardStore.ddlData];
+          
+          // 检查新添加的DDL是否已存在于刷新后的数据中
+          const ddlExists = freshDdlData.some(
+            item => 
+              item.title === addedDdl.title && 
+              item.date.format("YYYY-MM-DD") === addedDdl.date.format("YYYY-MM-DD")
+          );
+          
+          // 如果不存在（服务器尚未返回），则添加到本地数据
+          if (!ddlExists && selectedDateStr === newDdlDateStr) {
+            freshDdlData.push(addedDdl);
+          }
+          
+          // 更新本地数据
+          ddlData.value = freshDdlData;
+        });
+      }, 500);
     } else {
-      message.error("DDL添加失败，请稍后再试");
+      message.error(result.error || "DDL添加失败，请稍后再试");
     }
   } catch (error) {
     console.error("添加DDL失败:", error);
@@ -267,7 +363,7 @@ async function saveSubscriptionSettings() {
     // TODO: 与后端集成，保存订阅设置
     // const dashboardStore = useDashboardStore();
     // const result = await dashboardStore.saveSubscriptionSettings(subscriptionStatus.value);
-    
+
     // 临时实现，直接显示成功
     const result = true;
 
@@ -286,19 +382,32 @@ async function saveSubscriptionSettings() {
   }
 }
 
+// 登录成功处理
+const handleLoginSuccess = () => {
+  message.success('登录成功');
+  // 刷新订阅状态，将来可以从用户设置中读取
+  // 这里可以根据需要添加其他逻辑
+};
+
+// 注册成功处理
+const handleRegisterSuccess = () => {
+  message.success('注册成功');
+  // 注册成功后的逻辑
+};
+
 // onMounted 钩子，用于组件挂载后执行的逻辑
 onMounted(() => {
-  debugLog('ModalDialogs组件已挂载，初始模态框状态', {
+  debugLog("ModalDialogs组件已挂载，初始模态框状态", {
     showSubscriptionModal: showSubscriptionModal.value,
-    subscriptionModalVisible: subscriptionModalVisible.value
+    subscriptionModalVisible: subscriptionModalVisible.value,
   });
-  
+
   // 检查订阅状态是否正确初始化
-  debugLog('订阅状态', {
+  debugLog("订阅状态", {
     status: subscriptionStatus.value,
     keys: Object.keys(subscriptionStatus.value),
     firstAccount: gongzhonghao[0],
-    firstStatus: subscriptionStatus.value[gongzhonghao[0]]
+    firstStatus: subscriptionStatus.value[gongzhonghao[0]],
   });
 });
 </script>
@@ -308,6 +417,15 @@ onMounted(() => {
   max-height: 400px;
   overflow-y: auto;
   padding: 4px 0;
+}
+
+.login-hint {
+  margin-bottom: 16px;
+}
+
+.account-list {
+  width: 100%;
+  margin-top: 16px;
 }
 
 .subscription-item {
@@ -337,5 +455,11 @@ onMounted(() => {
 
 .delete-btn:hover {
   color: #ff4d4f;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 16px 0;
 }
 </style>

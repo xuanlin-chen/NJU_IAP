@@ -95,7 +95,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { NButton, NIcon, NAvatar } from 'naive-ui'
-import chatResource from '../../resource/chat'
 
 interface ChatItem {
   id: string;

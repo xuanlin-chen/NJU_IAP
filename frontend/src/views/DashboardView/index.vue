@@ -5,11 +5,53 @@
         <n-grid :cols="12" :x-gap="16" :y-gap="16" class="dashboard-grid">
           <!-- 用户头像 -->
           <n-grid-item :span="1">
-            <n-dropdown trigger="click" @select="handleDropdownSelect" :options="dropdownOptions">
-              <div class="user-avatar-wrapper">
-                <AccountIcon />
+            <div class="user-avatar-wrapper" @click="showUserModal = true">
+              <!-- 根据登录状态动态切换图标 -->
+              <AccountIcon v-if="!userStore.isLoggedIn" />
+              <AccountIcon_ v-else />
+            </div>
+            
+            <!-- 使用NModal替代下拉菜单 -->
+            <n-modal
+              v-model:show="showUserModal"
+              style="width: 300px"
+              preset="card"
+              :title="userStore.isLoggedIn ? '用户选项' : '请登录'"
+              size="small"
+              :bordered="false"
+              :segmented="true"
+              :auto-focus="false"
+              transform-origin="center"
+            >
+              <!-- 用户信息区域 -->
+              <div class="user-modal-header">
+                <div class="user-avatar">
+                  <AccountIcon v-if="!userStore.isLoggedIn" />
+                  <AccountIcon_ v-else />
+                </div>
+                <div class="user-info">
+                  <div class="user-name">{{ userStore.isLoggedIn ? '已登录用户' : '未登录' }}</div>
+                  <div class="user-status">{{ userStore.isLoggedIn ? '在线' : '点击登录以使用完整功能' }}</div>
+                </div>
               </div>
-            </n-dropdown>
+              
+              <!-- 分割线 -->
+              <div class="user-modal-divider"></div>
+              
+              <!-- 菜单选项 -->
+              <n-space vertical class="user-modal-options">
+                <n-button 
+                  v-for="option in dropdownOptions" 
+                  :key="option.key" 
+                  @click="handleModalOption(option.key)"
+                  class="user-option-button"
+                  text
+                  size="large"
+                >
+                  {{ option.label }}
+                </n-button>
+              </n-space>
+            </n-modal>
           </n-grid-item>
           
           <!-- 左侧区域 -->
@@ -30,25 +72,36 @@
 
       <!-- 对话框组件 -->
       <ModalDialogs />
+      
+      <!-- 登录/注册模态框 -->
+      <auth-modal
+        v-model:show="showAuthModal"
+        initial-tab="login"
+        @login-success="handleLoginSuccess"
+        @register-success="handleRegisterSuccess"
+      />
     </div>
   </n-notification-provider>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, provide, watchEffect } from "vue";
+import { ref, onMounted, onBeforeUnmount, provide, watchEffect, computed } from "vue";
 import { useRouter } from "vue-router";
 import {
   NGrid,
   NGridItem,
   NSpin,
   NNotificationProvider,
-  NDropdown,
+  NModal,
+  NSpace,
+  NButton,
   createDiscreteApi
 } from "naive-ui";
 import { debugLog } from "../../utils/debug";
 import { useDashboardData } from "../../stores/dashboardStore";
 import { useUserStore } from "../../stores/userStore";
 import AccountIcon from "@/components/icons/AccountIcon.vue";
+import AccountIcon_ from "@/components/icons/AccountIcon_.vue";
 import type { DdlItem, Message } from "../../stores/dashboardStore";
 
 // 导入子组件
@@ -56,6 +109,7 @@ import MessageSection from "./MessageSection.vue";
 import DdlSection from "./DdlSection.vue";
 import CalendarSection from "./CalendarSection.vue";
 import ModalDialogs from "./ModalDialogs.vue";
+import AuthModal from "@/components/auth/AuthModal.vue";
 
 // 初始化router和userStore
 const router = useRouter();
@@ -70,6 +124,12 @@ const ddlData = ref<DdlItem[]>([]);
 const loading = ref(true);
 const selectedDate = ref(new Date());
 let refreshData: (() => Promise<void>) | null = null;
+
+// 登录/注册模态框状态
+const showAuthModal = ref(false);
+
+// 用户选项模态框状态
+const showUserModal = ref(false);
 
 // 添加DDL对话框状态
 const showAddDdlModal = ref(false);
@@ -92,38 +152,60 @@ for (const account of gongzhonghao) {
   subscriptionStatus.value[account] = true; // 默认全部订阅
 }
 
-// 下拉菜单选项
-const dropdownOptions = [
-  {
-    label: "个人设置",
-    key: "settings",
-  },
-  {
-    label: "退出登录",
-    key: "logout",
-  },
-  {
-    label: "退订消息",
-    key: "unsubscribe",
-  },
-];
+// 下拉菜单选项 - 使用计算属性根据登录状态动态生成
+const dropdownOptions = computed(() => {
+  const commonOptions = [
+    {
+      label: "退订消息",
+      key: "unsubscribe",
+    }
+  ];
+  
+  // 根据登录状态返回不同选项
+  const loginOptions = userStore.isLoggedIn 
+    ? [
+        {
+          label: "个人设置",
+          key: "settings",
+        },
+        {
+          label: "退出登录",
+          key: "logout",
+        }
+      ]
+    : [
+        {
+          label: "登录/注册",
+          key: "login",
+        }
+      ];
+      
+  return [...loginOptions, ...commonOptions];
+});
 
-// 处理下拉菜单选择
-function handleDropdownSelect(key: string) {
-  debugLog('下拉菜单选择', key);
+// 处理模态框选项选择
+function handleModalOption(key: string) {
+  debugLog('模态框选项选择', key);
   if (key === "unsubscribe") {
     toggleSubscriptionModal(true);
+    showUserModal.value = false;
   } else if (key === "logout") {
     // 处理退出登录逻辑
     if (userStore.isLoggedIn) {
       userStore.logout();
       message.success('已成功退出登录');
     }
+    showUserModal.value = false;
   } else if (key === "settings") {
     // 导航到用户设置页面
     router.push('/settings');
+    showUserModal.value = false;
+  } else if (key === "login") {
+    // 显示登录/注册模态框
+    showAuthModal.value = true;
+    showUserModal.value = false;
   }
-  debugLog('处理下拉菜单选择', { key });
+  debugLog('处理模态框选项选择', { key });
 }
 
 // 切换订阅管理对话框
@@ -142,6 +224,27 @@ function toggleAddDdlModal(show: boolean) {
 function updateSelectedDate(date: Date) {
   debugLog('更新选定的日期', { date });
   selectedDate.value = date;
+}
+
+// 登录成功处理函数
+function handleLoginSuccess() {
+  message.success('登录成功');
+  showAuthModal.value = false;
+  showUserModal.value = false;
+  // 如果需要，可以在这里刷新数据
+  if (refreshData) {
+    refreshData();
+  }
+}
+
+// 注册成功处理函数
+function handleRegisterSuccess() {
+  message.success('注册成功并已登录');
+  showAuthModal.value = false;
+  showUserModal.value = false;
+  if (refreshData) {
+    refreshData();
+  }
 }
 
 // 提供方法给子组件
@@ -233,5 +336,60 @@ provide("dashboardState", dashboardState);
 
 .user-avatar-wrapper:hover {
   background-color: #e0e0e0;
+}
+
+/* 用户模态框样式 */
+.user-modal-header {
+  display: flex;
+  align-items: center;
+  padding-bottom: 16px;
+}
+
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+}
+
+.user-info {
+  margin-left: 16px;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.user-status {
+  font-size: 12px;
+  color: #999;
+}
+
+.user-modal-divider {
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.06);
+  margin: 8px 0 16px 0;
+}
+
+.user-modal-options {
+  width: 100%;
+}
+
+.user-option-button {
+  text-align: left;
+  padding: 10px 0;
+  font-size: 14px;
+  width: 100%;
+  transition: background-color 0.2s;
+  border-radius: 4px;
+}
+
+.user-option-button:hover {
+  background-color: rgba(0, 0, 0, 0.04);
 }
 </style>
