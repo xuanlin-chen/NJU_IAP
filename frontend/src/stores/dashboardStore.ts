@@ -120,20 +120,20 @@ export const useDashboardStore = defineStore("dashboard", {
 				const hardcodedDdlEvents: Record<string, DdlEvent[]> = {
 					"2025-05-19": [
 						{
-							date: "2025-05-30",
+							date: "2025-05-21",
 							summary: {
 								原文链接: "https://jw.nju.edu.cn/",
-								截止时间: "2025-05-30 23:59:00",
-								标题: "EL最终作品提交",
+								截止时间: "2025-05-21 23:59:00",
+								标题: "南京大学123周年校庆教授请吃饭活动",
 								类型: "学业安排"
 							}
 						},
 						{
-							date: "2025-05-30",
+							date: "2025-05-22",
 							summary: {
 								原文链接: "https://www.nju.edu.cn/",
-								截止时间: "2025-05-30 17:30:00",
-								标题: "欧洲交流生项目申请截止",
+								截止时间: "2025-05-22 17:30:00",
+								标题: "南京大学第三届新生戏剧节第二、三场展演",
 								类型: "学业申请"
 							}
 						}

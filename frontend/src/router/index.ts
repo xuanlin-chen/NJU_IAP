@@ -32,6 +32,11 @@ const router = createRouter({
       path: '/settings',
       name: 'settings',
       component: UserSettingsView
+    },
+    {
+      path: '/pointcard',
+      name: 'pointcard',
+      component: () => import('../views/PointCardView.vue')
     }
   ]
 })

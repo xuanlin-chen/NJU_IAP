@@ -1,5 +1,5 @@
 export default {
-  title: "南哪信息",
+  title: "南大信息",
   menuItems: {
     home: "首页",
     dashboard: "信息中心",
