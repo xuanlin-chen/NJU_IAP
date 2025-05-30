@@ -2,7 +2,7 @@
   <div style="position: relative">
     <base-card
       :title="dashboardText.ddlNews.title"
-      :items="formattedDdlItems"
+      :item-groups="formattedDdlItems"
       extra-field="description"
       :empty-text="dashboardText.dayMessages.noMessages"
       :view-more-text="dashboardText.ddlNews.viewMore"
@@ -24,15 +24,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref } from "vue";
+import { computed, inject } from "vue";
 import { NFloatButton } from "naive-ui";
 import BaseCard from "../../components/BaseCard.vue";
 import dashboardText from "../../resource/dashboard";
-import dayjs from "dayjs";
 import AddIcon from "@/components/icons/AddIcon.vue";
 import type { CardItem } from "../../components/BaseCard.vue";
 import type { DdlItem } from "../../stores/dashboardStore";
-import type { DateString } from "@/utils/DateString";
 import { useUserStore } from "@/stores/userStore";
 
 // 注入共享状态
@@ -51,6 +49,7 @@ const dashboardState = inject("dashboardState") as {
     title: string;
     dateTimestamp: number | null;
     timeTimestamp: number | null;
+    type: string;
     source: string;
   }};
   toggleAddDdlModal: (show: boolean) => void;
@@ -59,39 +58,58 @@ const dashboardState = inject("dashboardState") as {
 // 解构以便更容易使用
 const { ddlData, selectedDate, loading, message, showAddDdlModal, newDdl } = dashboardState;
 
-// 根据选中日期过滤 DDL 数据
-const ddlBySelectedDate = computed(() => {
-  if (!ddlData.value || ddlData.value.length === 0) return [];
-  const sd = dayjs(selectedDate.value).format("YYYY-MM-DD");
-  return ddlData.value.filter(
-    (item: DdlItem) => item.date && item.date.format("YYYY-MM-DD") === sd
-  );
-});
-
 // 格式化 DDL 数据为 CardItem 类型
 const formattedDdlItems = computed(() => {
-  if (!ddlBySelectedDate.value || ddlBySelectedDate.value.length === 0)
+  console.debug("Formatting DDLs for date:", selectedDate.value);
+  
+  // 检查是否有 DDL 数据
+  if (!ddlData.value || ddlData.value.length === 0) {
     return [];
-  return ddlBySelectedDate.value.map((item) => {
-    // 处理 source 字段
-    let sourceStr = "";
-    if (item.source) {
-      if (typeof item.source === "string") {
-        sourceStr = item.source;
-      } else {
-        // 是 URL 对象
-        sourceStr = item.source.href;
+  }  
+  // 过滤并转换 DDL 数据
+  const filteredItems = ddlData.value
+    .filter(item => {
+      // 确保 item.date 存在并且有 format 方法
+      if (!item.date || typeof item.date.format !== 'function') return false;
+      
+      // 比较日期字符串
+      return item.date.format('YYYY-MM-DD') ;
+    })
+    .map(item => {
+      // 处理 source 字段
+      let sourceStr = "";
+      if (item.source) {
+        if (typeof item.source === "string") {
+          sourceStr = item.source;
+        } else {
+          // 是 URL 对象
+          sourceStr = item.source.href;
+        }
       }
-    }
 
-    return {
-      title: item.title || "",
-      date: item.date ? item.date.format("YYYY-MM-DD") : "",
-      time: item.time ? item.time.format("HH:mm") : "",
-      description: item.time ? `${item.time.format("HH:mm")}` : "",
-      source: sourceStr,
-    };
-  });
+      // 创建显示在卡片中的描述文本，现在包含类型信息
+      let description = item.time ? `${item.time.format("HH:mm")}` : "";
+      if (item.type) {
+        description = description ? `${description} | ${item.type}` : item.type;
+      }
+
+      return {
+        title: item.title || "",
+        date: item.date ? item.date.format("YYYY-MM-DD") : "",
+        time: item.time ? item.time.format("HH:mm") : "",
+        description: description,
+        source: sourceStr,
+        type: item.type, // 添加类型字段
+      };
+    });
+  
+  console.debug("Filtered DDL Items:", filteredItems);
+  return [
+    {
+      groupTitle: "DDL",
+      items: filteredItems,
+    }
+  ];
 });
 
 function handleViewMoreDdl() {
@@ -106,6 +124,7 @@ function handleAddDdl() {
     dateTimestamp: selectedDate.value.getTime(), // 预设为当前选中日期
     timeTimestamp: null,
     source: "",
+    type: "用户自定义", // 设置默认类型
   };
   // 显示对话框
   showAddDdlModal.value = true;
