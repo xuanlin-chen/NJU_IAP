@@ -14,7 +14,8 @@ import {
   InformationCircleOutline as InfoIcon,
   BarChartOutline as ChartIcon,
   MenuOutline as MenuIcon,
-  ChevronBackOutline as ChevronBackIcon
+  ChevronBackOutline as ChevronBackIcon,
+  SettingsOutline as SettingsIcon
 } from '@vicons/ionicons5'
 import sidebarText from '../resource/components/sidebar'
 import { useSidebarStore } from '@/stores/sidebarStore';
@@ -56,6 +57,11 @@ const menuOptions = [
     label: sidebarText.menuItems.about,
     key: 'about',
     icon: renderIcon(InfoIcon)
+  },
+  {
+    label: sidebarText.menuItems.settings,
+    key: 'settings',
+    icon: renderIcon(SettingsIcon)
   }
 ]
 

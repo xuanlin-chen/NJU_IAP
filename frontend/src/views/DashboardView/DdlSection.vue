@@ -36,11 +36,16 @@ import type { DdlItem } from "../../stores/dashboardStore";
 import type { DateString } from "@/utils/DateString";
 
 // 注入共享状态
-const { ddlData, selectedDate, loading, message, showAddDdlModal, newDdl } = inject("dashboardState") as {
+const dashboardState = inject("dashboardState") as {
   ddlData: { value: DdlItem[] };
   selectedDate: { value: Date };
   loading: { value: boolean };
-  message: any;
+  message: {
+    success: (text: string) => void;
+    error: (text: string) => void;
+    info: (text: string) => void;
+    warning: (text: string) => void;
+  };
   showAddDdlModal: { value: boolean };
   newDdl: { value: {
     title: string;
@@ -48,7 +53,11 @@ const { ddlData, selectedDate, loading, message, showAddDdlModal, newDdl } = inj
     timeTimestamp: number | null;
     source: string;
   }};
+  toggleAddDdlModal: (show: boolean) => void;
 };
+
+// 解构以便更容易使用
+const { ddlData, selectedDate, loading, message, showAddDdlModal, newDdl, toggleAddDdlModal } = dashboardState;
 
 // 根据选中日期过滤 DDL 数据
 const ddlBySelectedDate = computed(() => {

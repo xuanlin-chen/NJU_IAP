@@ -14,9 +14,24 @@
       <div class="chat-main">
         <!-- 聊天头部 -->
         <div class="chat-header">
-          <transition name="fade" mode="out-in">
-            <h2 :key="chatStore.currentChatIndex">{{ chatStore.currentChat?.title || chatResource.title }}</h2>
-          </transition>
+          <div class="header-content">
+            <transition name="fade" mode="out-in">
+              <h2 :key="chatStore.currentChatIndex">{{ chatStore.currentChat?.title || chatResource.title }}</h2>
+            </transition>
+            
+            <!-- 模型切换按钮 -->
+            <n-button 
+              size="medium" 
+              :type="chatStore.currentModel === 'RAG' ? 'primary' : 'info'"
+              @click="chatStore.toggleModel"
+              class="model-toggle-btn"
+              :ghost="true"
+              round
+              strong
+            >
+              <span class="model-icon">{{ chatStore.currentModel === 'RAG' ? 'RAG' : 'MCP' }}</span>
+            </n-button>
+          </div>
         </div>
         
         <!-- 聊天消息区域 -->
@@ -69,6 +84,8 @@ import ChatMessage from '../components/chat/ChatMessage.vue'
 import WelcomeScreen from '../components/chat/WelcomeScreen.vue'
 import ChatInput from '../components/chat/ChatInput.vue'
 import { useChatStore } from '@/stores/chatStore.ts';
+import { NButton } from 'naive-ui';
+import type { SearchModelType } from '@/stores/chatStore';
 
 // Define the ChatItem type
 interface ChatItem {
@@ -84,6 +101,7 @@ const chatStore = useChatStore() as {
   messages: { role: string; content: string }[];
   currentChatIndex: number;
   currentChat: ChatItem | null;
+  currentModel: SearchModelType;
   isTyping: boolean;
   error: string | null;
   startNewChat: () => void;
@@ -91,6 +109,7 @@ const chatStore = useChatStore() as {
   deleteChat: (index: number) => void;
   askExample: () => void;
   onSendMessage: (message: string) => void;
+  toggleModel: () => void;
 };
 
 // Convert chatHistory dates to Date objects
@@ -167,12 +186,42 @@ onMounted(() => {
   border-top-left-radius: 16px;
 }
 
+.header-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 16px;
+  position: relative;
+}
+
 .chat-header h2 {
   margin: 0;
-  padding: 16px 24px;
+  padding: 8px 16px;
   font-size: 18px;
   color: var(--md-grey-800);
   font-weight: 500;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.model-toggle-btn {
+  position: absolute;
+  right: 16px;
+  font-size: 14px;
+  padding: 4px 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  border-width: 1.5px;
+}
+
+.model-toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.model-icon {
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .chat-messages {

@@ -1,5 +1,6 @@
 <template>
-  <div class="home-container">
+  <n-message-provider>
+    <div class="home-container">
     <div class="top-actions">
       <n-button
         @click="
@@ -49,7 +50,7 @@
                 <n-button
                   type="primary"
                   @click="handleAuth('login')"
-                  :loading="loading"
+                  :loading="userStore.loading"
                 >
                   登录
                 </n-button>
@@ -79,7 +80,7 @@
                 <n-button
                   type="primary"
                   @click="handleAuth('register')"
-                  :loading="loading"
+                  :loading="userStore.loading"
                 >
                   注册
                 </n-button>
@@ -126,6 +127,7 @@
       <img src="../assets/nju.png" class="logo-image" />
     </div>
   </div>
+  </n-message-provider>
 </template>
 
 <script setup lang="ts">
@@ -138,15 +140,19 @@ import {
   NInput,
   NTabs,
   NTabPane,
+  NMessageProvider,
+  useMessage,
 } from "naive-ui";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 import { DashboardIcon, ChatIcon, BookIcon } from "../components/icons";
+import { useUserStore } from "../stores/userStore";
 
 const router = useRouter();
+const userStore = useUserStore();
+const message = useMessage();
 const showAuthModal = ref(false);
 const activeTab = ref("login");
-const loading = ref(false);
 const formRef = ref(null);
 
 const authForm = ref({
@@ -161,37 +167,27 @@ const navigateTo = (route: string) => {
 
 // 处理认证（登录/注册）
 const handleAuth = async (type: "login" | "register") => {
-  loading.value = true;
   try {
-    const endpoint = type === "login" ? "/api/login" : "/api/register";
-
-    // 发送认证请求
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: authForm.value.username,
-        password: authForm.value.password,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
+    let result: { success: boolean; error?: string };
+    
+    if (type === "login") {
+      result = await userStore.login(authForm.value.username, authForm.value.password);
+    } else {
+      result = await userStore.register(authForm.value.username, authForm.value.password);
+    }
+    
+    if (result.success) {
       // 操作成功
       showAuthModal.value = false;
       router.push("/dashboard"); // 认证成功后跳转到仪表盘页面
+      message.success(`${type === "login" ? "登录" : "注册"}成功`);
     } else {
       // 处理错误
-      console.error(`${type === "login" ? "登录" : "注册"}失败:`, data.message);
-      // 这里可以添加错误提示
+      message.error(result.error || `${type === "login" ? "登录" : "注册"}失败`);
     }
   } catch (error) {
     console.error(`${type === "login" ? "登录" : "注册"}请求出错:`, error);
-  } finally {
-    loading.value = false;
+    message.error(`${type === "login" ? "登录" : "注册"}失败，请稍后重试`);
   }
 };
 </script>

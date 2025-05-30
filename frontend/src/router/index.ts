@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import DashboardView from '../views/DashboardView/index.vue'
 import ChatView from '../views/ChatView.vue'
 import AboutView from '../views/AboutView.vue'
+import UserSettingsView from '../views/UserSettingsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,11 @@ const router = createRouter({
       path: '/about',
       name: 'about',
       component: AboutView
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: UserSettingsView
     }
   ]
 })

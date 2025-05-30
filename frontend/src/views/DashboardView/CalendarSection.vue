@@ -26,7 +26,7 @@ import type { DateString } from "@/utils/DateString";
 import type { Message } from "../../stores/dashboardStore";
 
 // 注入共享状态
-const { selectedDate, loading, Messages, message } = inject("dashboardState") as {
+const dashboardState = inject("dashboardState") as {
   selectedDate: { value: Date };
   loading: { value: boolean };
   Messages: { value: Message[] };
@@ -36,11 +36,15 @@ const { selectedDate, loading, Messages, message } = inject("dashboardState") as
     success: (text: string) => void;
     warning: (text: string) => void;
   };
+  updateSelectedDate: (date: Date) => void;
 };
+
+// 解构以便更容易使用
+const { selectedDate, loading, Messages, message, updateSelectedDate } = dashboardState;
 
 // 日期选择处理
 async function handleDateSelect(date: Date) {
-  selectedDate.value = date;
+  updateSelectedDate(date); // 使用提供的函数更新日期
 
   loading.value = true;
   try {

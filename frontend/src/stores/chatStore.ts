@@ -9,10 +9,14 @@ const api_router = {
 // API响应接口
 interface ApiResponse {
   code: number;
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   data: any;
   message: string;
   errors?: string;
 }
+
+// 查询模型类型
+export type SearchModelType = 'RAG' | 'MCP';
 
 export const useChatStore = defineStore('chat', () => {
   interface Message {
@@ -32,6 +36,7 @@ export const useChatStore = defineStore('chat', () => {
     { id: '2', title: 'Chat 2', messages: [], date: new Date() },
   ]);
   const currentChatIndex = ref(0);
+  const currentModel = ref<SearchModelType>('RAG');
 
   const currentChat = computed(() => chatHistory.value[currentChatIndex.value]);
 
@@ -94,7 +99,7 @@ export const useChatStore = defineStore('chat', () => {
         },
         body: JSON.stringify({
           question: message,
-          model: 'RAG'  // 默认使用RAG模型
+          model: currentModel.value  // 使用当前选择的模型
         }),
       });
       
@@ -141,10 +146,15 @@ export const useChatStore = defineStore('chat', () => {
     }
   };
 
+  const toggleModel = () => {
+    currentModel.value = currentModel.value === 'RAG' ? 'MCP' : 'RAG';
+  };
+  
   return { 
     chatHistory, 
     currentChatIndex, 
     currentChat, 
+    currentModel,
     messages, 
     isTyping, 
     error,
@@ -152,6 +162,7 @@ export const useChatStore = defineStore('chat', () => {
     selectChat, 
     deleteChat, 
     askExample, 
-    onSendMessage 
+    onSendMessage,
+    toggleModel
   };
 });

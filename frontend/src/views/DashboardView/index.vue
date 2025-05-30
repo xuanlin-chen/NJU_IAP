@@ -36,6 +36,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, provide, watchEffect } from "vue";
+import { useRouter } from "vue-router";
 import {
   NGrid,
   NGridItem,
@@ -46,6 +47,7 @@ import {
 } from "naive-ui";
 import { debugLog } from "../../utils/debug";
 import { useDashboardData } from "../../stores/dashboardStore";
+import { useUserStore } from "../../stores/userStore";
 import AccountIcon from "@/components/icons/AccountIcon.vue";
 import type { DdlItem, Message } from "../../stores/dashboardStore";
 
@@ -55,9 +57,16 @@ import DdlSection from "./DdlSection.vue";
 import CalendarSection from "./CalendarSection.vue";
 import ModalDialogs from "./ModalDialogs.vue";
 
-// 创建状态容器
-const ddlData = ref<DdlItem[]>([]);
+// 初始化router和userStore
+const router = useRouter();
+const userStore = useUserStore();
+
+// 创建离散API，可以在组件外使用
+const { message } = createDiscreteApi(["message", "notification"]);
+
+// 定义观测数据
 const Messages = ref<Message[]>([]);
+const ddlData = ref<DdlItem[]>([]);
 const loading = ref(true);
 const selectedDate = ref(new Date());
 let refreshData: (() => Promise<void>) | null = null;
@@ -106,25 +115,54 @@ function handleDropdownSelect(key: string) {
     toggleSubscriptionModal(true);
   } else if (key === "logout") {
     // 处理退出登录逻辑
-    console.log("用户选择了退出登录");
+    if (userStore.isLoggedIn) {
+      userStore.logout();
+      message.success('已成功退出登录');
+    }
   } else if (key === "settings") {
-    // 处理个人设置逻辑
-    console.log("用户选择了个人设置");
+    // 导航到用户设置页面
+    router.push('/settings');
   }
   debugLog('处理下拉菜单选择', { key });
 }
 
-// 创建离散API，可以在组件外使用
-const { message } = createDiscreteApi(["message", "notification"]);
+// 切换订阅管理对话框
+function toggleSubscriptionModal(show: boolean) {
+  debugLog('切换订阅管理对话框', { show });
+  showSubscriptionModal.value = show;
+}
+
+// 切换添加DDL对话框
+function toggleAddDdlModal(show: boolean) {
+  debugLog('切换添加DDL对话框', { show });
+  showAddDdlModal.value = show;
+}
+
+// 更新选定的日期
+function updateSelectedDate(date: Date) {
+  debugLog('更新选定的日期', { date });
+  selectedDate.value = date;
+}
+
+// 提供方法给子组件
+provide("toggleAddDdlModal", toggleAddDdlModal);
+provide("toggleSubscriptionModal", toggleSubscriptionModal);
+provide("updateSelectedDate", updateSelectedDate);
+provide("subscriptionStatus", subscriptionStatus);
 
 // 在组件挂载时异步加载数据
 onMounted(async () => {
   try {
     // 异步获取数据
     const dashboardData = await useDashboardData();
+    
+    // 将非响应式数据转换为响应式数据
     ddlData.value = dashboardData.ddlData;
     Messages.value = dashboardData.Messages;
     refreshData = dashboardData.refreshData;
+    
+    // 不需要更新 dashboardState，因为它已经引用了正确的响应式对象
+    // dashboardState 中的引用在初始化时已经建立，不需要再赋值
     
     // 确认订阅状态已经初始化
     debugLog('组件挂载后的订阅状态', { 
@@ -140,60 +178,60 @@ onMounted(async () => {
 
 // 组件销毁前的清理工作
 onBeforeUnmount(() => {
-  loading.value = false;
-  // 如果有其他事件监听器或计时器，这里也应该清理它们
+  debugLog('组件即将销毁', {});
 });
 
-// 定义控制模态框的操作方法
-const toggleSubscriptionModal = (value: boolean) => {
-  debugLog('toggleSubscriptionModal 被调用', {value, current: showSubscriptionModal.value});
-  showSubscriptionModal.value = value;
-};
-
-// 监视订阅对话框的状态变化
+// 监听日期变化
 watchEffect(() => {
-  debugLog('订阅模态框状态变化', showSubscriptionModal.value);
+  if (selectedDate.value) {
+    debugLog('监听到日期变化', { selectedDate: selectedDate.value });
+  }
 });
 
-// 将共享状态提供给子组件
-provide("dashboardState", {
-  ddlData,
+// 创建仪表板状态对象
+const dashboardState = {
   Messages,
-  loading,
-  selectedDate,
+  ddlData,
   refreshData,
-  message,
+  selectedDate,
+  loading,
+  message, // 来自 createDiscreteApi
+  showAddDdlModal, 
   showSubscriptionModal,
-  showAddDdlModal,
   newDdl,
   subscriptionStatus,
-  // 提供直接操作方法
-  toggleSubscriptionModal
-});
+  toggleAddDdlModal,
+  toggleSubscriptionModal,
+  updateSelectedDate
+};
+
+// 导出单个状态和整个状态对象给子组件
+provide("Messages", Messages);
+provide("ddlData", ddlData); 
+provide("refreshData", refreshData);
+provide("selectedDate", selectedDate);
+provide("dashboardState", dashboardState);
 </script>
 
 <style scoped>
 .dashboard-grid {
-  margin-top: 20px;
-  width: 100%;
-  max-width: 1600px;
-  margin-right: auto;
-  box-sizing: border-box;
-  display: flex;
-  gap: 24px;
+  margin: 16px;
+  margin-top: 60px;
 }
 
 .user-avatar-wrapper {
   display: flex;
-  align-items: center;
   justify-content: center;
-  cursor: pointer;
-  padding: 6px;
+  align-items: center;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  transition: background-color 0.2s;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .user-avatar-wrapper:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: #e0e0e0;
 }
 </style>

@@ -6,273 +6,275 @@ import dayjs from "dayjs";
 type Dayjs = dayjs.Dayjs;
 
 const api_router = {
-  dateQuery: (date: DateString) => `/api/date-query?date=${date}`,
-  addCustomDdl: () => "/api/custom-ddl",
-  removeCustomDdl: (index: number) => `/api/custom-ddl/${index}`,
-}
+	dateQuery: (date: DateString) => `/api/date-query?date=${date}`,
+	addCustomDdl: () => "/api/custom-ddl",
+	removeCustomDdl: (index: number) => `/api/custom-ddl/${index}`,
+};
 
 // API response interfaces
 interface ApiResponse {
-  code: number;
-  data: ApiData;
-  message: string;
+	code: number;
+	data: ApiData;
+	message: string;
 }
 
 interface ApiData {
-  date: string;
-  ddl_events: DdlEvent[];
-  news: NewsItem[];
+	date: string;
+	ddl_events: DdlEvent[];
+	news: NewsItem[];
 }
 
 interface DdlEvent {
-  title: string;
-  deadline: string;  // 格式预计为 "YYYY-MM-DD HH:MM" 
-  source?: string;  // 可能为空，需要处理
+	title: string;
+	deadline: string; // 格式预计为 "YYYY-MM-DD HH:MM"
+	source?: string; // 可能为空，需要处理
 }
 
 interface NewsItem {
-  title?: string;
-  time?: string;
-  date?: string;
-  source?: string;
-  abstract?: string;
-  type?: string;
-  summary?: {
-    keywords?: string;
-    source?: string;
-    title?: string;
-    type?: string;
-  };
+	title?: string;
+	time?: string;
+	date?: string;
+	source?: string;
+	abstract?: string;
+	type?: string;
+	summary?: {
+		keywords?: string;
+		source?: string;
+		title?: string;
+		type?: string;
+	};
 }
 
 // Output interfaces for the store
 export interface DdlItem {
-  title: string;
-  date: Dayjs; // 格式: "YYYY-MM-DD"
-  time: Dayjs; // 格式: "HH:MM" 24小时制
-  source: URL | string;
+	title: string;
+	date: Dayjs; // 格式: "YYYY-MM-DD"
+	time: Dayjs; // 格式: "HH:MM" 24小时制
+	source: URL | string;
 }
 
 export interface Message {
-  title: string;
-  time: string;
-  source: URL | string;
-  abstract: string;
-  type: string;
+	title: string;
+	time: string;
+	source: URL | string;
+	abstract: string;
+	type: string;
 }
 
 // State interface
 interface DashboardState {
-  ddlData: DdlItem[];
-  Messages: Message[];
-  historyMessages: Message[];
-  isLoading: boolean;
-  error: string | null;
+	ddlData: DdlItem[];
+	Messages: Message[];
+	historyMessages: Message[];
+	isLoading: boolean;
+	error: string | null;
 }
 
 // Dashboard Store
 export const useDashboardStore = defineStore("dashboard", {
-  // State
-  state: (): DashboardState => ({
-    ddlData: [],
-    Messages: [],
-    historyMessages: [],
-    isLoading: false,
-    error: null,
-  }),
+	// State
+	state: (): DashboardState => ({
+		ddlData: [],
+		Messages: [],
+		historyMessages: [],
+		isLoading: false,
+		error: null,
+	}),
 
-  // Actions
-  actions: {
-    // 通用数据获取
-    async fetchData<T>(url: string): Promise<T> {
-      try {
-        this.isLoading = true;
-        this.error = null;
-        
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        return convertKey(data) as T;
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        this.error = errorMessage;
-        console.error(`Error fetching data from ${url}:`, error);
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
-    },
+	// Actions
+	actions: {
+		// 通用数据获取
+		async fetchData<T>(url: string): Promise<T> {
+			try {
+				this.isLoading = true;
+				this.error = null;
 
-    // 获取DDL数据
-    async fetchDdlData(date: DateString) {
-      try {
-        const response = await this.fetchData<ApiResponse>(
-          api_router.dateQuery(date)
-        );
+				const response = await fetch(url);
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+				const data = await response.json();
+				return convertKey(data) as T;
+			} catch (error) {
+				const errorMessage =
+					error instanceof Error ? error.message : String(error);
+				this.error = errorMessage;
+				console.error(`Error fetching data from ${url}:`, error);
+				throw error;
+			} finally {
+				this.isLoading = false;
+			}
+		},
 
-        if (response.code === 200 && response.data.ddl_events) {
-          this.ddlData = response.data.ddl_events.map((event: DdlEvent) => {
-            const dateTime = dayjs(event.deadline);
-            // 处理URL，确保有效性
-            let sourceUrl: URL | string = "";
-            try {
-              // 确保source不是undefined
-              const sourceStr = event.source || "";
-              sourceUrl = sourceStr ? new URL(sourceStr) : "";
-            } catch (e) {
-              sourceUrl = event.source || "";
-              console.warn(`Invalid URL in DDL: ${event.source}`);
-            }
-            
-            return {
-              title: event.title,
-              date: dateTime, // 提取日期部分
-              time: dateTime, // 提取时间部分
-              source: sourceUrl
-            };
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch DDL data:", error);
-      }
-    },
+		// 获取DDL数据
+		async fetchDdlData(date: DateString) {
+			try {
+				const response = await this.fetchData<ApiResponse>(
+					api_router.dateQuery(date),
+				);
 
-    // 获取消息
-    async fetchMessages(date: DateString) {
-      try {
-        const response = await this.fetchData<ApiResponse>(
-          api_router.dateQuery(date)
-        );
+				if (response.code === 200 && response.data.ddl_events) {
+					this.ddlData = response.data.ddl_events.map((event: DdlEvent) => {
+						const dateTime = dayjs(event.deadline);
+						// 处理URL，确保有效性
+						let sourceUrl: URL | string = "";
+						try {
+							// 确保source不是undefined
+							const sourceStr = event.source || "";
+							sourceUrl = sourceStr ? new URL(sourceStr) : "";
+						} catch (e) {
+							sourceUrl = event.source || "";
+							console.warn(`Invalid URL in DDL: ${event.source}`);
+						}
 
-        if (response.code === 200) {
-          console.log(`Fetched messages for date ${date}:`, response.data.news);
-          this.Messages = response.data.news.map((item: NewsItem) => {
-            // 处理URL，确保有效性
-            let sourceUrl: URL | string;
-            try {
-              // 尝试从summary获取source，如果没有则使用直接的source
-              const sourceStr = item.summary?.source || item.source || "";
-              sourceUrl = sourceStr ? new URL(sourceStr) : "";
-            } catch (e) {
-              sourceUrl = item.summary?.source || item.source || "";
-              console.warn(`Invalid URL in Message: ${item.summary?.source || item.source}`);
-            }
-            
-            return {
-              // 从summary获取标题，如果没有则使用直接的标题
-              title: item.summary?.title || item.title || "",
-              // 使用时间信息，提供备选
-              time: item.time || item.date || "",
-              source: sourceUrl,
-              abstract: item.abstract || "",
-              // 从summary获取类型，如果没有则使用直接的类型
-              type: item.summary?.type || item.type || "news"
-            };
-          });
-        }
-      } catch (error) {
-        console.error(`Failed to fetch messages for date ${date}:`, error);
-      }
-    },
+						return {
+							title: event.title,
+							date: dateTime, // 提取日期部分
+							time: dateTime, // 提取时间部分
+							source: sourceUrl,
+						};
+					});
+				}
+			} catch (error) {
+				console.error("Failed to fetch DDL data:", error);
+			}
+		},
 
-    // 初始化所有数据
-    async initialize() {
-      this.isLoading = true;
-      try {
-        await Promise.all([
-          this.fetchDdlData(dayjs().format("YYYY-MM-DD") as DateString),
-          this.fetchMessages(dayjs().format("YYYY-MM-DD") as DateString),
-        ]);
-      } catch (error) {
-        console.error("Error initializing dashboard data:", error);
-      } finally {
-        this.isLoading = false;
-      }
-    },
+		// 获取消息
+		async fetchMessages(date: DateString) {
+			try {
+				const response = await this.fetchData<ApiResponse>(
+					api_router.dateQuery(date),
+				);
 
-    // 刷新所有数据
-    async refreshAllData() {
-      return this.initialize();
-    },
+				if (response.code === 200) {
+					console.log(`Fetched messages for date ${date}:`, response.data.news);
+					this.Messages = response.data.news.map((item: NewsItem) => {
+						// 处理URL，确保有效性
+						let sourceUrl: URL | string;
+						try {
+							// 尝试从summary获取source，如果没有则使用直接的source
+							const sourceStr = item.summary?.source || item.source || "";
+							sourceUrl = sourceStr ? new URL(sourceStr) : "";
+						} catch (e) {
+							sourceUrl = item.summary?.source || item.source || "";
+							console.warn(
+								`Invalid URL in Message: ${item.summary?.source || item.source}`,
+							);
+						}
 
-    // 添加自定义DDL
-    async addCustomDdl(ddlItem: DdlItem) {
-      try {
-        this.isLoading = true;
-        
-        // 将DdlItem转换为API请求格式
-        const content = `${ddlItem.title} (截止时间: ${ddlItem.date.format("YYYY-MM-DD")}${ddlItem.time ? ` ${ddlItem.time.format("HH:mm")}` : ""})${ddlItem.source ? ` [来源: ${typeof ddlItem.source === 'string' ? ddlItem.source : ddlItem.source?.href || ""}]` : ""}`;
-        
-        const response = await fetch(api_router.addCustomDdl(), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ content }),
-          credentials: 'include' // 确保包含cookie以验证用户身份
-        });
-        
-        const data = await response.json();
-        
-        if (data.code === 200) {
-          // 添加成功，更新本地数据
-          this.ddlData.push(ddlItem);
-          return true;
-        }
-        console.error("Failed to add custom DDL:", data.message);
-        return false;
-      } catch (error) {
-        console.error("Failed to add custom DDL:", error);
-        return false;
-      } finally {
-        this.isLoading = false;
-      }
-    },
+						return {
+							// 从summary获取标题，如果没有则使用直接的标题
+							title: item.summary?.title || item.title || "",
+							// 使用时间信息，提供备选
+							time: item.time || item.date || "",
+							source: sourceUrl,
+							abstract: item.abstract || "",
+							// 从summary获取类型，如果没有则使用直接的类型
+							type: item.summary?.type || item.type || "news",
+						};
+					});
+				}
+			} catch (error) {
+				console.error(`Failed to fetch messages for date ${date}:`, error);
+			}
+		},
 
-    // 删除自定义DDL
-    async removeCustomDdl(index: number) {
-      try {
-        this.isLoading = true;
-        
-        const response = await fetch(api_router.removeCustomDdl(index), {
-          method: 'DELETE',
-          credentials: 'include' // 确保包含cookie以验证用户身份
-        });
-        
-        const data = await response.json();
-        
-        if (data.code === 200) {
-          // 删除成功，更新本地数据
-          // 注意：这里的索引可能与后端不同，实际项目中应根据返回数据更新
-          return true;
-        }
-        console.error("Failed to remove custom DDL:", data.message);
-        return false;
-      } catch (error) {
-        console.error("Failed to remove custom DDL:", error);
-        return false;
-      } finally {
-        this.isLoading = false;
-      }
-    },
-  },
+		// 初始化所有数据
+		async initialize() {
+			this.isLoading = true;
+			try {
+				await Promise.all([
+					this.fetchDdlData(dayjs().format("YYYY-MM-DD") as DateString),
+					this.fetchMessages(dayjs().format("YYYY-MM-DD") as DateString),
+				]);
+			} catch (error) {
+				console.error("Error initializing dashboard data:", error);
+			} finally {
+				this.isLoading = false;
+			}
+		},
+
+		// 刷新所有数据
+		async refreshAllData() {
+			return this.initialize();
+		},
+
+		// 添加自定义DDL
+		async addCustomDdl(ddlItem: DdlItem) {
+			try {
+				this.isLoading = true;
+
+				// 将DdlItem转换为API请求格式
+				const content = `${ddlItem.title} (截止时间: ${ddlItem.date.format("YYYY-MM-DD")}${ddlItem.time ? ` ${ddlItem.time.format("HH:mm")}` : ""})${ddlItem.source ? ` [来源: ${typeof ddlItem.source === "string" ? ddlItem.source : ddlItem.source?.href || ""}]` : ""}`;
+
+				const response = await fetch(api_router.addCustomDdl(), {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ content }),
+					credentials: "include", // 确保包含cookie以验证用户身份
+				});
+
+				const data = await response.json();
+
+				if (data.code === 200) {
+					// 添加成功，更新本地数据
+					this.ddlData.push(ddlItem);
+					return true;
+				}
+				console.error("Failed to add custom DDL:", data.message);
+				return false;
+			} catch (error) {
+				console.error("Failed to add custom DDL:", error);
+				return false;
+			} finally {
+				this.isLoading = false;
+			}
+		},
+
+		// 删除自定义DDL
+		async removeCustomDdl(index: number) {
+			try {
+				this.isLoading = true;
+
+				const response = await fetch(api_router.removeCustomDdl(index), {
+					method: "DELETE",
+					credentials: "include", // 确保包含cookie以验证用户身份
+				});
+
+				const data = await response.json();
+
+				if (data.code === 200) {
+					// 删除成功，更新本地数据
+					// 注意：这里的索引可能与后端不同，实际项目中应根据返回数据更新
+					return true;
+				}
+				console.error("Failed to remove custom DDL:", data.message);
+				return false;
+			} catch (error) {
+				console.error("Failed to remove custom DDL:", error);
+				return false;
+			} finally {
+				this.isLoading = false;
+			}
+		},
+	},
 });
 
 // 导出简化版本的 useDashboardData 以保持向后兼容
 export async function useDashboardData() {
-  const store = useDashboardStore();
+	const store = useDashboardStore();
 
-  // 初始化 store 数据
-  if (store.ddlData.length === 0) {
-    await store.initialize();
-  }
+	// 初始化 store 数据
+	if (store.ddlData.length === 0) {
+		await store.initialize();
+	}
 
-  return {
-    ddlData: store.ddlData,
-    Messages: store.Messages,
-    refreshData: store.refreshAllData,
-  };
+	return {
+		ddlData: store.ddlData,
+		Messages: store.Messages,
+		refreshData: store.refreshAllData,
+	};
 }

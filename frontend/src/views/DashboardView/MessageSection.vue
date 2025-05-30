@@ -22,10 +22,17 @@ import BaseCard from "../../components/BaseCard.vue";
 import type { Message } from "../../stores/dashboardStore";
 
 // 注入共享状态
-const { Messages, message } = inject("dashboardState") as {
+const dashboardState = inject("dashboardState") as {
   Messages: { value: Message[] };
-  message: any;
+  message: {
+    success: (text: string) => void;
+    error: (text: string) => void;
+    info: (text: string) => void;
+  };
 };
+
+// 解构以便更容易使用
+const { Messages, message } = dashboardState;
 
 // 转换 Messages 为 CardItem 类型
 const formattedMessages = computed(() => {

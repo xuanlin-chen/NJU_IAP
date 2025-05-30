@@ -4,7 +4,8 @@ export default {
     home: "首页",
     dashboard: "信息中心",
     chat: "智能助手",
-    about: "关于我们"
+    about: "关于我们",
+    settings: "用户设置"
   },
   userProfile: {
     welcome: "欢迎回来",
