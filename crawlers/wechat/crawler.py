@@ -12,7 +12,7 @@ links = []
 MARKDOWN_PATH = r"D:\南大微信公众号"#md文章的路径
 
 # 这里是你的绝对路径
-article_link_dir = r"D:\python\pythonProject4\.venv\article_link"#存原文链接的绝对路径
+article_link_dir = r"C:\Users\chenxuanlin\Desktop\njuIAP\NJU_IAP\article_link"#存原文链接的绝对路径
 
 
 def read_csv_links(account_name):
@@ -25,7 +25,7 @@ def read_csv_links(account_name):
         with open(csv_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                if '标签' in row and row['标签'] == '0':
+                if '标签' in row and row['标签'] == '1':
                     filtered_links.append(row['链接'])
     except FileNotFoundError:
         print(f"警告: 未找到 {account_name} 的CSV文件")

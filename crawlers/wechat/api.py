@@ -5,8 +5,8 @@ import random
 import csv
 import os
 headers = {
-    "cookie":'',
-    "user-agent":''
+    "cookie":'_qimei_uuid42=18a0b171a0510017b44bc6aaf91047ac4d0b93f86e; pac_uid=0_Sxdf68Qxzw6Yf; _qimei_q32=7e6b3461bd80f5cbb7d4a3fa2216a48f; _qimei_q36=4c68bcdf002ffce6deca54da30001d218806; _qimei_h38=19c52162b44bc6aaf91047ac02000009118a0b; suid=user_0_Sxdf68Qxzw6Yf; logTrackKey=9ef754235188487fa0dd84258b89ee20; RK=MbGwdPsnkb; ptcz=b2ff4a55c26c9f622fbe77dc1aca8ab73e73e86847f4b6db68939653925a2e3f; pgv_pvid=8723881191; qq_domain_video_guid_verify=7377045afdff82ab; _qimei_fingerprint=d972d7a2666ab450f360b81c8c54f0dc; eas_sid=z1c714935558j7W1S5g8A5C8Y6; omgid=0_Sxdf68Qxzw6Yf; ua_id=BT0ubAW85OdLZBB1AAAAAJaZTWxVdWuqWGaMtm5ZbzM=; wxuin=48227321653452; mm_lang=zh_CN; rewardsn=; wxtokenkey=777; uuid=f88fa96d4bc6f0eb644b9068e878938b; _clck=3938956898|1|fwc|0; rand_info=CAESIF1PaC179QFAIIhESl857NZEf+nNWHFshFJbx/XBlP2S; slave_bizuin=3938956898; data_bizuin=3938956898; bizuin=3938956898; data_ticket=zJcpQCRcui0RT04oAcgOv8Zuw98Qji6VkyBQu+njcL4lIWTyczT3zg+s3nUMR74u; slave_sid=X3RVR0hKb0RnajN5UjlxWk80Snlvd2c2cVBfZFVJdFYyX2NjblpjamQ3b0x3TVBoRE5ObmZ2eElJWmM3azlkaHBvUVU0ME41aWI2UXViRDZhZ2FrdU5MalJmRFpIVU1ZOW12ejJ6RUwwSlRNdm13TDVsY1ozOEhSdTQ1WVdNM3ZLY1p2MUVxMXNuaFN3WnZE; slave_user=gh_78d74b62b2df; xid=d049c9a3dfd7a7404aa0b3d36d7d5728; _clsk=1nzw7ke|1748608227396|2|1|mp.weixin.qq.com/weheat-agent/payload/record',
+    "user-agent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
 }
 url = 'https://mp.weixin.qq.com/cgi-bin/appmsg'
 # 公众号配置字典，key为公众号名称，value为对应的fakeid
@@ -50,7 +50,7 @@ def page(account_name, num=6):                #要请求的文章页数
             'fakeid': fad,
             'type': '9',
             'query': '',
-            'token': '1567701478',
+            'token': '740379817',
             'lang': 'zh_CN',
             'f': 'json',
             'ajax': '1',
