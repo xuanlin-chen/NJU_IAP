@@ -17,7 +17,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20  # 与你本地开发环境一致的 Node.js 版本
+          node-version: 23  # 与你本地开发环境一致的 Node.js 版本
 
       # 步骤3：安装 pnpm（前端包管理器）
       - name: Install pnpm
