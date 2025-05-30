@@ -28,12 +28,12 @@ import { computed, inject, ref } from "vue";
 import { NFloatButton } from "naive-ui";
 import BaseCard from "../../components/BaseCard.vue";
 import dashboardText from "../../resource/dashboard";
-import { useDashboardStore } from "../../stores/dashboardStore";
 import dayjs from "dayjs";
 import AddIcon from "@/components/icons/AddIcon.vue";
 import type { CardItem } from "../../components/BaseCard.vue";
 import type { DdlItem } from "../../stores/dashboardStore";
 import type { DateString } from "@/utils/DateString";
+import { useUserStore } from "@/stores/userStore";
 
 // 注入共享状态
 const dashboardState = inject("dashboardState") as {
@@ -57,7 +57,7 @@ const dashboardState = inject("dashboardState") as {
 };
 
 // 解构以便更容易使用
-const { ddlData, selectedDate, loading, message, showAddDdlModal, newDdl, toggleAddDdlModal } = dashboardState;
+const { ddlData, selectedDate, loading, message, showAddDdlModal, newDdl } = dashboardState;
 
 // 根据选中日期过滤 DDL 数据
 const ddlBySelectedDate = computed(() => {
@@ -103,7 +103,7 @@ function handleAddDdl() {
   // 重置表单
   newDdl.value = {
     title: "",
-    dateTimestamp: null,
+    dateTimestamp: selectedDate.value.getTime(), // 预设为当前选中日期
     timeTimestamp: null,
     source: "",
   };
@@ -121,9 +121,6 @@ async function handleDeleteDdl(item: CardItem, index: number) {
 
     loading.value = true;
 
-    // 获取DDL在本地数据中的索引
-    const dashboardStore = useDashboardStore();
-
     // 根据标题和日期匹配
     const ddlIndex = ddlData.value.findIndex(
       (ddlItem) =>
@@ -137,7 +134,7 @@ async function handleDeleteDdl(item: CardItem, index: number) {
     }
 
     // 调用后端API删除DDL
-    const result = await dashboardStore.removeCustomDdl(ddlIndex);
+    const result = await useUserStore().removeCustomDdl(ddlIndex);
 
     if (result) {
       message.success("DDL删除成功");

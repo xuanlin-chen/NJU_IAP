@@ -156,7 +156,6 @@ onMounted(() => {
   right: 0;
   bottom: 0;
   z-index: 100;
-  background-color: var(--md-grey-50);
   overflow: hidden;
 }
 
@@ -172,7 +171,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   max-height: 100%;
-  background-color: #fffff0; /* Ivory color */
+  background-color: #ffffff; /* White color */
   border-top-left-radius: 16px;
   border-bottom-left-radius: 16px;
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
@@ -181,7 +180,7 @@ onMounted(() => {
 .chat-header {
   padding: 0;
   border-bottom: 1px solid #eaeaea;
-  background-color: #fffff0; /* Ivory color */
+  background-color: #ffffff; /* White color */
   text-align: center;
   border-top-left-radius: 16px;
 }
@@ -198,7 +197,6 @@ onMounted(() => {
   margin: 0;
   padding: 8px 16px;
   font-size: 18px;
-  color: var(--md-grey-800);
   font-weight: 500;
   flex-grow: 1;
   text-align: center;
@@ -228,7 +226,7 @@ onMounted(() => {
   flex: 1;
   padding: 0;
   overflow-y: auto;
-  background-color: #fffff0; /* Ivory color */
+  background-color: #ffffff; /* White color */
   position: relative;
 }
 
@@ -241,14 +239,13 @@ onMounted(() => {
 
 .ai-typing {
   padding: 16px 24px;
-  background-color: #fffbeb; /* Slightly darker ivory for contrast */
-  border-bottom: 1px solid #eaeada;
+  background-color: #f9f9f9; /* Light gray for subtle contrast */
+  border-bottom: 1px solid #eaeaea;
 }
 
 .typing-indicator {
   display: inline-block;
   animation: pulse 1.2s infinite;
-  color: var(--md-grey-700);
 }
 
 @keyframes pulse {

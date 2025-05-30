@@ -23,73 +23,13 @@
     </div>
     <h1>欢迎使用南京大学信息聚合平台</h1>
 
-    <!-- Combined Auth Modal -->
-    <n-modal v-model:show="showAuthModal" preset="card" style="width: 400px">
-      <div class="auth-tabs">
-        <n-tabs v-model:value="activeTab" type="segment" animated>
-          <n-tab-pane name="login" tab="登录">
-            <div class="login-form">
-              <n-form :model="authForm" ref="formRef">
-                <n-form-item label="用户名" path="username">
-                  <n-input
-                    v-model:value="authForm.username"
-                    placeholder="请输入用户名"
-                  />
-                </n-form-item>
-                <n-form-item label="密码" path="password">
-                  <n-input
-                    v-model:value="authForm.password"
-                    type="password"
-                    placeholder="请输入密码"
-                    @keyup.enter="handleAuth('login')"
-                  />
-                </n-form-item>
-              </n-form>
-              <div class="form-actions">
-                <n-button @click="showAuthModal = false">取消</n-button>
-                <n-button
-                  type="primary"
-                  @click="handleAuth('login')"
-                  :loading="userStore.loading"
-                >
-                  登录
-                </n-button>
-              </div>
-            </div>
-          </n-tab-pane>
-          <n-tab-pane name="register" tab="注册">
-            <div class="login-form">
-              <n-form :model="authForm" ref="formRef">
-                <n-form-item label="用户名" path="username">
-                  <n-input
-                    v-model:value="authForm.username"
-                    placeholder="请输入用户名"
-                  />
-                </n-form-item>
-                <n-form-item label="密码" path="password">
-                  <n-input
-                    v-model:value="authForm.password"
-                    type="password"
-                    placeholder="请输入密码"
-                    @keyup.enter="handleAuth('register')"
-                  />
-                </n-form-item>
-              </n-form>
-              <div class="form-actions">
-                <n-button @click="showAuthModal = false">取消</n-button>
-                <n-button
-                  type="primary"
-                  @click="handleAuth('register')"
-                  :loading="userStore.loading"
-                >
-                  注册
-                </n-button>
-              </div>
-            </div>
-          </n-tab-pane>
-        </n-tabs>
-      </div>
-    </n-modal>
+    <!-- 使用复用的登录/注册模态框 -->
+    <auth-modal
+      v-model:show="showAuthModal"
+      :initial-tab="activeTab"
+      @login-success="handleLoginSuccess"
+      @register-success="handleRegisterSuccess"
+    />
 
     <p class="description">这是教育数据聚合平台的首页，提供功能导航。</p>
     <div class="features">
@@ -134,12 +74,6 @@
 import {
   NIcon,
   NButton,
-  NModal,
-  NForm,
-  NFormItem,
-  NInput,
-  NTabs,
-  NTabPane,
   NMessageProvider,
   useMessage,
 } from "naive-ui";
@@ -147,48 +81,27 @@ import { useRouter } from "vue-router";
 import { ref } from "vue";
 import { DashboardIcon, ChatIcon, BookIcon } from "../components/icons";
 import { useUserStore } from "../stores/userStore";
+import AuthModal from "../components/auth/AuthModal.vue";
 
 const router = useRouter();
 const userStore = useUserStore();
 const message = useMessage();
 const showAuthModal = ref(false);
-const activeTab = ref("login");
-const formRef = ref(null);
-
-const authForm = ref({
-  username: "",
-  password: "",
-});
+const activeTab = ref<'login' | 'register'>('login');
 
 // 导航到指定路由
 const navigateTo = (route: string) => {
   router.push(`/${route}`);
 };
 
-// 处理认证（登录/注册）
-const handleAuth = async (type: "login" | "register") => {
-  try {
-    let result: { success: boolean; error?: string };
-    
-    if (type === "login") {
-      result = await userStore.login(authForm.value.username, authForm.value.password);
-    } else {
-      result = await userStore.register(authForm.value.username, authForm.value.password);
-    }
-    
-    if (result.success) {
-      // 操作成功
-      showAuthModal.value = false;
-      router.push("/dashboard"); // 认证成功后跳转到仪表盘页面
-      message.success(`${type === "login" ? "登录" : "注册"}成功`);
-    } else {
-      // 处理错误
-      message.error(result.error || `${type === "login" ? "登录" : "注册"}失败`);
-    }
-  } catch (error) {
-    console.error(`${type === "login" ? "登录" : "注册"}请求出错:`, error);
-    message.error(`${type === "login" ? "登录" : "注册"}失败，请稍后重试`);
-  }
+// 登录成功后的处理
+const handleLoginSuccess = () => {
+  router.push("/dashboard"); // 认证成功后跳转到仪表盘页面
+};
+
+// 注册成功后的处理
+const handleRegisterSuccess = () => {
+  router.push("/dashboard"); // 认证成功后跳转到仪表盘页面
 };
 </script>
 

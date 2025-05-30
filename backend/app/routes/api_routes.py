@@ -6,6 +6,7 @@ from ..services.query_service import query_by_question
 from ..services.date_query_service import generate_date_data
 from ..models.user import User
 from ..db import db
+from typing import cast
 
 # 为API路由创建Blueprint
 api_bp = Blueprint("api", __name__)
@@ -62,22 +63,27 @@ def login():
 def add_custom_ddl():
     """添加自定义DDL"""
     try:
-        data = request.get_json()
+        data: dict = request.get_json()
         if not data or not data.get("content"):
             return api_response(message="DDL内容不能为空", code=400)
 
-        current_user = User.query.get(session.get("user_id"))
-        if not current_user:
+        user_obj = User.query.get(session.get("user_id"))
+        if not user_obj:
             return api_response(message="请先登录", code=401)
-
-        current_user.add_custom_ddl(data["content"])
+            
+        current_user: User = cast(User, user_obj)
+        # 检查是否有日期参数
+        date_str = data.get("date")
+        current_user.add_custom_ddl(data["content"], date_str)
         db.session.commit()
 
         # 重新加载用户数据以确保会话中的custom_ddls是最新的
         db.session.expunge(current_user)  # 分离对象
-        current_user = User.query.get(session.get("user_id"))  # 重新查询
-
-        return api_response(data=current_user.to_dict(), message="添加自定义DDL成功")
+        user_obj = User.query.get(session.get("user_id"))  # 重新查询
+        if user_obj:
+            current_user = cast(User, user_obj)
+            return api_response(data=current_user.to_dict(), message="添加自定义DDL成功")
+        return api_response(message="获取更新后的用户数据失败", code=500)
     except Exception as e:
         db.session.rollback()
         return api_response(message="添加自定义DDL失败", code=500, errors=str(e))

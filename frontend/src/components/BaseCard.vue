@@ -9,6 +9,58 @@
           <span>{{ calendarFooterText }}</span>
         </div>
       </div>
+
+      <!-- 详情模态框 -->
+      <n-modal
+        v-model:show="showItemDetailsModal"
+        preset="card"
+        style="max-width: 600px"
+        :title="currentItem?.title || '详情'"
+        size="medium"
+        :segmented="true"
+      >
+        <template #header-extra>
+          <div class="modal-header-extra">
+            <n-avatar
+              size="small"
+              round
+              src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
+            />
+            <span class="header-label">智能摘要</span>
+          </div>
+        </template>
+
+        <div class="item-abstract" v-if="currentItem">
+          <!-- 使用 v-html 来渲染 markdown -->
+          <div
+            v-html="renderMarkdown(currentItem.abstract || '暂无摘要')"
+            class="markdown-content"
+          ></div>
+        </div>
+
+        <template #footer>
+          <div class="modal-footer">
+            <n-space justify="end">
+              <n-button
+                v-if="currentItem?.source"
+                type="primary"
+                tag="a"
+                :href="
+                  typeof currentItem?.source === 'string'
+                    ? currentItem?.source
+                    : currentItem?.source
+                    ? currentItem?.source.href
+                    : ''
+                "
+                target="_blank"
+              >
+                查看原文
+              </n-button>
+              <n-button @click="showItemDetailsModal = false"> 关闭 </n-button>
+            </n-space>
+          </div>
+        </template>
+      </n-modal>
       <!-- 分组列表模式 -->
       <div v-if="itemGroups && itemGroups.length > 0">
         <n-collapse>
@@ -26,7 +78,9 @@
               <div class="item-title">{{ getItemTitle(item) }}</div>
               <div class="item-footer">
                 <span>{{ getItemDate(item) }}</span>
-                <span @click.stop="handleClick(item)"> 查看详情 </span>
+                <span @click.stop="handleClick(item)" class="view-details-link">
+                  查看详情
+                </span>
               </div>
             </div>
           </n-collapse-item>
@@ -44,8 +98,16 @@
             <div class="item-content">
               <div class="item-footer">
                 <div class="item-actions">
-                  <n-button v-if="showDeleteButton" size="small" type="error" @click.stop="handleDelete(item, index)">删除</n-button>
-                  <span v-if="item.extra" class="item-extra">{{ item.extra }}</span>
+                  <n-button
+                    v-if="showDeleteButton"
+                    size="small"
+                    type="error"
+                    @click.stop="handleDelete(item, index)"
+                    >删除</n-button
+                  >
+                  <span v-if="item.extra" class="item-extra">{{
+                    item.extra
+                  }}</span>
                 </div>
               </div>
             </div>
@@ -62,17 +124,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h } from "vue";
+import { computed, ref } from "vue";
 import {
   NCard,
   NCollapse,
   NCollapseItem,
   NAvatar,
-  createDiscreteApi,
+  NModal,
+  NButton,
+  NSpace,
 } from "naive-ui";
 import { marked } from "marked";
+// 在浏览器环境中使用 DOMPurify 的正确方式
 
-const { notification } = createDiscreteApi(["notification"]);
+// 状态变量
+const showItemDetailsModal = ref(false);
+const currentItem = ref<CardItem | null>(null);
 
 export interface CardItem {
   title?: string;
@@ -118,6 +185,81 @@ const emit = defineEmits<{
   (event: "delete-item", item: CardItem, index: number): void;
 }>();
 
+// 配置 marked
+marked.setOptions({
+  breaks: true, // 支持换行
+  gfm: true, // 支持 GitHub Flavored Markdown
+});
+
+// Markdown 渲染函数
+function renderMarkdown(content: string): string {
+  try {
+    // 使用 marked 将 markdown 转换为 HTML
+    const html = marked(content);
+
+    // 检查 html 是否为 Promise
+    if (html instanceof Promise) {
+      // 如果是 Promise，我们不能在同步函数中处理它
+      // 返回一个默认值并处理 Promise
+      html
+        .then((resolvedHtml) => {
+          // 这里我们不能直接返回，因为我们已经在同步函数中
+          console.log("Markdown rendered asynchronously");
+        })
+        .catch((error) => {
+          console.error("Async markdown rendering error:", error);
+        });
+      return content; // 返回原始内容作为回退
+    }
+
+    // 基础的 HTML 清理函数，防止潜在的 XSS 攻击
+    const sanitizedHtml = sanitizeHtml(html);
+
+    return sanitizedHtml;
+  } catch (error) {
+    console.error("Markdown 渲染错误:", error);
+    // 如果渲染失败，返回原始文本
+    return content.replace(/\n/g, "<br>");
+  }
+}
+
+// 简单的 HTML 清理函数
+function sanitizeHtml(html: string): string {
+  // 允许的标签和属性
+  const allowedTags = [
+    "p",
+    "br",
+    "strong",
+    "em",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "ul",
+    "ol",
+    "li",
+    "blockquote",
+    "code",
+    "pre",
+    "a",
+    "img",
+  ];
+  const allowedAttributes: Record<string, string[]> = {
+    a: ["href", "target"],
+    img: ["src", "alt", "width", "height"],
+  };
+
+  // 移除 script 标签和其他危险内容
+  const sanitized = html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/on\w+="[^"]*"/gi, "")
+    .replace(/javascript:/gi, "");
+
+  return sanitized;
+}
+
 // 处理删除按钮点击
 function handleDelete(item: CardItem, index: number) {
   emit("delete-item", item, index);
@@ -128,94 +270,121 @@ const showViewMore = computed(() => {
 });
 
 const getItemTitle = (item: CardItem): string => {
-  return props.titleField ? String(item[props.titleField] || "") : item.title || "";
+  return props.titleField
+    ? String(item[props.titleField] || "")
+    : item.title || "";
 };
 
 const getItemDate = (item: CardItem): string => {
-  return props.dateField ? String(item[props.dateField] || "") : item.date || item.time || "";
+  return props.dateField
+    ? String(item[props.dateField] || "")
+    : item.date || item.time || "";
 };
 
 function handleClick(item: CardItem) {
-  notification.create({
-    title: item.title || "详情",
-    description: () =>
-      h(
-        "div",
-        {
-          style:
-            "display: flex; justify-content: space-between; align-items: center;",
-        },
-        [
-          h("span", {}, "智能摘要"),
-          item.source
-            ? h(
-                "a",
-                {
-                  href: typeof item.source === 'string' ? item.source : item.source.href,
-                  target: "_blank",
-                  style: {
-                    fontSize: "12px",
-                    color: "var(--primary-color)",
-                    textDecoration: "none",
-                  },
-                  onClick: (e: Event) => {
-                    e.stopPropagation();
-                  },
-                },
-                "查看原文"
-              )
-            : null,
-        ]
-      ),
-    content: () =>
-      h("div", {
-        innerHTML: marked(item.abstract || "暂无摘要"),
-      }),
-    avatar: () =>
-      h(NAvatar, {
-        size: "small",
-        round: true,
-        src: "https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg",
-      }),
-    action: () =>
-      h("div", [
-        h(
-          "a",
-          {
-            href: typeof item.source === 'string' ? item.source : (item.source ? item.source.href : ''),
-            target: item.source ? "_blank" : undefined,
-            style: {
-              marginRight: "10px",
-              color: "var(--primary-color)",
-            },
-          },
-          "查看原文"
-        ),
-      ]),
-  });
+  // 使用模态框替代通知
+  showItemDetailsModal.value = true;
+  currentItem.value = item;
 }
 </script>
 
 <style scoped>
-.bordered-card {
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  background-color: #ffffff;
-  position: relative;
-  overflow: hidden;
-  color: #333333;
-}
-
 .base-card {
   margin-bottom: 16px;
-  width: 100%;
-  min-height: 300px;
-  /* 保持卡片高度一致，防止抖动 */
+}
+
+.bordered-card {
+  border: 1px solid var(--border-color);
+}
+
+.calendar-container {
+  padding: 16px 0;
+}
+
+.calendar-footer {
+  margin-top: 12px;
+  text-align: center;
+  color: var(--text-color-2);
+  font-size: 14px;
+}
+
+.modal-header-extra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-label {
+  font-size: 14px;
+  color: var(--text-color-2);
+}
+
+.item-abstract {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 16px 0;
+}
+
+.markdown-content {
+  line-height: 1.6;
+  color: var(--text-color-1);
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  margin: 16px 0 8px 0;
+  font-weight: 600;
+}
+
+.markdown-content p {
+  margin: 8px 0;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.markdown-content blockquote {
+  margin: 16px 0;
+  padding: 8px 16px;
+  border-left: 4px solid var(--primary-color);
+  background-color: var(--code-color);
+}
+
+.markdown-content code {
+  padding: 2px 4px;
+  background-color: var(--code-color);
+  border-radius: 4px;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+}
+
+.markdown-content pre {
+  margin: 16px 0;
+  padding: 16px;
+  background-color: var(--code-color);
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.markdown-content pre code {
+  padding: 0;
+  background-color: transparent;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .item {
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .item:last-child {
@@ -223,65 +392,47 @@ function handleClick(item: CardItem) {
 }
 
 .item-title {
-  font-size: 14px;
   font-weight: 500;
-  color: #333333;
-  margin-bottom: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  margin-bottom: 8px;
+  color: var(--text-color-1);
 }
 
 .item-footer {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  color: #999999;
-}
-
-.view-more {
-  text-align: right;
-  margin-top: 10px;
+  align-items: center;
   font-size: 14px;
+  color: var(--text-color-2);
 }
 
-.view-more a {
-  color: #8052da;
-  text-decoration: none;
+.view-details-link {
+  color: var(--primary-color);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.view-details-link:hover {
+  color: var(--primary-color-hover);
+}
+
+.item-content {
+  padding: 8px 0;
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.item-extra {
+  color: var(--text-color-3);
 }
 
 .no-data {
   text-align: center;
-  padding: 15px 0;
-  color: #999999;
-}
-
-/* 日历容器样式 */
-.calendar-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 0;
-}
-
-.calendar-footer {
-  margin-top: 10px;
-  text-align: center;
-  font-size: 12px;
-  color: #999999;
-}
-
-/* 新增样式 */
-.item-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-top: 8px;
-}
-
-.item-extra {
-  margin-left: auto;
-  color: #666;
+  padding: 40px 20px;
+  color: var(--text-color-3);
+  font-size: 14px;
 }
 </style>
