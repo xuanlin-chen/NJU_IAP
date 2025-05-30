@@ -26,6 +26,7 @@ jobs:
       # 步骤4：安装项目依赖并构建前端（生成 dist 目录）
       - name: Install dependencies and build
         run: |
+          cd frontend
           pnpm install
           pnpm build  # 执行构建命令（与你本地构建命令一致）
 
