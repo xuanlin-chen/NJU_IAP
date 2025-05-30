@@ -9,8 +9,20 @@ def query_by_question(question: str, model: str = "RAG"):
     else:
         return query_mcp(question)
 
+'''
 if __name__ == "__main__":
-    question = input("请输入您的问题：")
-    model = input("请选择您的查询方式（RAG或MCP）：")
-    answer = query_by_question(question, model)
-    print(answer)
+    while True:
+        question = input("请输入问题：")
+        if question == "":
+            continue
+        if question == "exit":
+            break
+
+        while True:
+            model = input("请选择您的查询方式（RAG或MCP）：")
+            if model == "RAG" or model == "MCP":
+                break
+        
+        answer = query_by_question(question, model)
+        print(answer)
+'''
