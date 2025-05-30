@@ -38,15 +38,8 @@ jobs:
           username: ${{ secrets.SSH_USER }}  # 从 Secrets 读取登录用户
           key: ${{ secrets.SSH_KEY }}        # 从 Secrets 读取 SSH 私钥
           script: |  # 在服务器上执行的命令（按顺序）
-            # 备份旧 dist 目录（避免更新失败时回滚）
-            mv /var/www/nju_iap/dist /var/www/nju_iap/dist_$(date +%s)
-            
-            # 将本地构建的 dist 目录上传到服务器（使用 scp）
-            scp -r /home/runner/work/NJU_IAP/NJU_IAP/frontend/dist $SSH_USER@$SSH_HOST:/var/www/nju_iap/
-            
-            # 调整文件权限（确保 Nginx 可访问）
-            chown -R www-data:www-data /var/www/nju_iap/dist
-            chmod -R 755 /var/www/nju_iap/dist
-            
-            # 可选：重启 Nginx 服务（若配置有变更）
-            systemctl restart nginx
+            bash -c 'mv /var/www/nju_iap/dist /var/www/nju_iap/dist_$(date +%s)'
+            bash -c 'rsync -avz --delete /home/runner/work/NJU_IAP/NJU_IAP/frontend/dist/ $SSH_USER@$SSH_HOST:/var/www/nju_iap/dist/'
+            bash -c 'chown -R www-data:www-data /var/www/nju_iap/dist'
+            bash -c 'chmod -R 755 /var/www/nju_iap/dist'
+            bash -c 'systemctl restart nginx'
