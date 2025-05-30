@@ -39,18 +39,6 @@
             placeholder="请输入链接（可选）"
           />
         </n-form-item>
-        <n-form-item label="类型" path="type">
-          <n-input
-            v-model:value="ddlForm.type"
-            placeholder="请输入类型（如：用户自定义、作业等）"
-          />
-        </n-form-item>
-        <n-form-item label="类型" path="type">
-          <n-input
-            v-model:value="ddlForm.type"
-            placeholder="请输入类型（如：用户自定义、作业等）"
-          />
-        </n-form-item>
         <div
           style="
             display: flex;
@@ -178,7 +166,6 @@ const dashboardState = inject("dashboardState") as {
       dateTimestamp: number | null;
       timeTimestamp: number | null;
       source: string;
-      type: string;
     };
   };
   subscriptionStatus: { value: Record<string, boolean> };
@@ -291,7 +278,6 @@ async function submitNewDdl() {
         ? dayjs(ddlForm.value.timeTimestamp)
         : dayjs(new Date()),
       source: ddlForm.value.source || "",
-      type: ddlForm.value.type || "用户自定义", // 使用表单中的类型，如果没有则默认为"用户自定义"
     };
 
     // 使用store的addCustomDdl方法调用后端API
@@ -322,20 +308,13 @@ async function submitNewDdl() {
             date: newDdlItem.date,
             time: newDdlItem.time,
             source: newDdlItem.source,
-            type: newDdlItem.type,
           });
           console.log("Added new DDL to current dashboard:", newDdlItem);
         }
       }
 
       // 保存当前添加的DDL，以确保它不会在刷新数据时丢失
-      const addedDdl: DdlItem = { 
-        title: newDdlItem.title,
-        date: newDdlItem.date,
-        time: newDdlItem.time,
-        source: newDdlItem.source,
-        type: newDdlItem.type
-      };
+      const addedDdl = { ...newDdlItem };
       
       // 后台异步刷新所有数据，确保与服务器保持同步
       // 添加小延迟，确保后端有时间处理添加的DDL

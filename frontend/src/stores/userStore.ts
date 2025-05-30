@@ -126,7 +126,6 @@ export const useUserStore = defineStore("user", () => {
 				body: JSON.stringify({
 					content: content.title,
 					date: content.date.format("YYYY-MM-DD"),
-					type: content.type || "用户自定义", // 添加类型字段
 				}),
 			});
 
