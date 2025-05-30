@@ -1,5 +1,5 @@
-from rag_query_function import query_rag
-from mcp_query_function import query_mcp
+from .rag_query_function import query_rag
+from .mcp_query_function import query_mcp
 
 
 # 利用model参数，让查询的时候用户可以选择查询方式

@@ -1,8 +1,8 @@
 # API路由
 from flask import Blueprint, request, session
-from . import api_response
+from .__init__ import api_response
 from http import HTTPStatus
-from ..services.query_service import query_by_question, SearchModel
+from ..services.query_service import query_by_question
 from ..services.date_query_service import generate_date_data
 from ..models.user import User
 from ..db import db
@@ -161,14 +161,8 @@ def query_knowledge():
         question = data["question"]
         model = data.get("model", "RAG")
 
-        # 转换模型类型
-        try:
-            search_model = SearchModel[model]
-        except KeyError:
-            return api_response(message=f"不支持的查询模型类型: {model}", code=400)
-
         # 调用查询服务
-        result = query_by_question(question, search_model)
+        result = query_by_question(question, model)
 
         # 如果返回结果包含错误信息
         if "code" in result and result["code"] != HTTPStatus.OK:
