@@ -4,7 +4,8 @@
 南京大学信息聚合平台
 （NJU Information Aggregation Platform）
 
-可访问47.122.71.85（服务器可能不稳定）
+可访问47.122.71.85（可能非最新版，推荐本地优先）
+
 也可git clone后按以下方式运行：
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
