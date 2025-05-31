@@ -45,18 +45,7 @@
           <h2>{{ homeText.about.team.title }}</h2>
           <p>{{ homeText.about.team.content }}</p>
           <div class="team-info">
-            <div class="team-stat blur-effect rounded-corner">
-              <div class="stat-number">{{ homeText.about.team.stats.membersCount }}</div>
-              <div class="stat-label">{{ homeText.about.team.members }}</div>
-            </div>
-            <div class="team-stat blur-effect rounded-corner">
-              <div class="stat-number">{{ homeText.about.team.stats.experienceYears }}</div>
-              <div class="stat-label">{{ homeText.about.team.experience }}</div>
-            </div>
-            <div class="team-stat blur-effect rounded-corner">
-              <div class="stat-number">{{ homeText.about.team.stats.institutionsCount }}</div>
-              <div class="stat-label">{{ homeText.about.team.institutions }}</div>
-            </div>
+
           </div>
         </div>
         
@@ -79,7 +68,7 @@
               <n-icon>
                 <LocationIcon />
               </n-icon>
-              <span>{{ homeText.about.contact.address }}</span>
+              <a :href="homeText.about.contact.address" target="_blank">{{ homeText.about.contact.address }}</a>
             </div>
           </div>
         </div>

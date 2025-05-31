@@ -1,3 +1,5 @@
+import type { LogoGithub } from "@vicons/ionicons5";
+
 export default {
   hero: {
     title: "教育数据智能分析平台",
@@ -29,45 +31,37 @@ export default {
   about: {
     title: "关于我们",
     mission: {
-      title: "我们的使命",
-      content: "我们致力于通过数据分析与AI技术，为教育机构和学生提供更高效、个性化的学习体验，推动教育资源的有效利用和学习效果的最大化。"
+      title: "项目介绍",
+      content: "本平台聚焦大学生“DDL”焦虑和信息差焦虑，致力于解决大学生所需信息分散、获取效率低的痛点，通过自动化爬虫整合校园多源信息（公众号、官网等），结合AI技术对数据智能分析，随后实现推送每日消息，AI智能检索，DDL自动提醒等交互功能，实现信息的精准定位、高效获取和智能提醒。以此践行”Easy Life“理念，用代码记录温情，用技术传递善意。"    
     },
     technology: {
       title: "技术优势",
       dataAnalysis: {
-        title: "实时数据分析",
-        content: "提供即时的学习数据分析，帮助用户了解学习进度和效果"
+        title: "自动获取数据源",
+        content: "使用多种爬虫技术，自动获取各类教育平台的数据，进行全面的分析"
       },
       security: {
         title: "数据安全",
-        content: "严格的数据保护机制，确保用户隐私和学习数据安全"
+        content: "严格的数据保护机制，确保用户隐私和数据安全"
       },
       aiRecommendation: {
-        title: "AI智能推荐",
-        content: "基于用户学习行为，智能推荐合适的学习资源和学习路径"
+        title: "AI智能分析",
+        content: "经由AI技术对数据进行智能分析，提供结构化，精简的信息报告"
       },
       precision: {
-        title: "精准定位",
-        content: "精准定位学习薄弱环节，提供有针对性的辅导和资源"
+        title: "个性化交互",
+        content: "用户自行增加自定义DDL，修改需要订阅的公众号，实现精准推送"
       }
     },
     team: {
       title: "团队介绍",
-      content: "我们的团队由教育专家、数据科学家和软件工程师组成，致力于将先进技术应用于教育领域，打造最智能、高效的教育数据平台。",
-      members: "团队成员",
-      experience: "行业经验",
-      institutions: "合作机构",
-      stats: {
-        membersCount: "20+",
-        experienceYears: "5年+",
-        institutionsCount: "100+"
-      }
+      content: "我们的团队由南京大学的4名大一新生组成，致力于将AI技术应用于日常生活，打造智能、高效的信息聚合平台，传播代码的温情与善意"
     },
     contact: {
       title: "联系我们",
-      email: "contact@edu-data.com",
-      phone: "400-123-4567",
-      address: "南京市栖霞区仙林大道163号"
+      email: "241880625@smail.nju.edu.cn",
+      phone: "18059410101",
+      address: "https://github.com/xuanlin-chen/NJU_IAP"
     }
   }
 }
