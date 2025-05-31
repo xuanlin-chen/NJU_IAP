@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { ref, onErrorCaptured } from 'vue'
-import { 
-  NConfigProvider, 
-  NLayout, 
-  NLayoutContent,
-  NMessageProvider,
-} from 'naive-ui'
-import SideBar from './components/SideBar.vue'
+// Import Naive UI components individually for better tree-shaking
+import { NConfigProvider } from 'naive-ui'
+import { NLayout } from 'naive-ui'
+import { NLayoutContent } from 'naive-ui'
+import { NMessageProvider } from 'naive-ui'
+import { defineAsyncComponent } from 'vue'
+// Load the sidebar component only when needed using defineAsyncComponent
+const SideBar = defineAsyncComponent({
+  loader: () => import('./components/SideBar.vue'),
+  delay: 100,
+  timeout: 2000
+})
 
 // 错误处理
 const hasError = ref(false)

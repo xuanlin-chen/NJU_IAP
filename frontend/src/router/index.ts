@@ -1,9 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import DashboardView from '../views/DashboardView/index.vue'
-import ChatView from '../views/ChatView.vue'
-import AboutView from '../views/AboutView.vue'
-import UserSettingsView from '../views/UserSettingsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,27 +6,27 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: () => import(/* webpackChunkName: "home" */ '../views/HomeView.vue')
     },
     {
       path: '/dashboard',
       name: 'dashboard',
-      component: DashboardView
+      component: () => import(/* webpackChunkName: "dashboard" */ '../views/DashboardView/index.vue')
     },
     {
       path: '/chat',
       name: 'chat',
-      component: ChatView
+      component: () => import(/* webpackChunkName: "chat" */ '../views/ChatView.vue')
     },
     {
       path: '/about',
       name: 'about',
-      component: AboutView
+      component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
     },
     {
       path: '/settings',
       name: 'settings',
-      component: UserSettingsView
+      component: () => import(/* webpackChunkName: "settings" */ '../views/UserSettingsView.vue')
     }
   ]
 })

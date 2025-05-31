@@ -79,11 +79,13 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
 import chatResource from '../resource/chat.ts'
+// Lazy load chat components
 import ChatSidebar from '../components/chat/ChatSidebar.vue'
 import ChatMessage from '../components/chat/ChatMessage.vue'
 import WelcomeScreen from '../components/chat/WelcomeScreen.vue'
 import ChatInput from '../components/chat/ChatInput.vue'
 import { useChatStore } from '@/stores/chatStore.ts';
+// Import only the needed component from naive-ui
 import { NButton } from 'naive-ui';
 import type { SearchModelType } from '@/stores/chatStore';
 

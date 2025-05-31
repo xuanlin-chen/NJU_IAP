@@ -1,93 +1,87 @@
 <template>
   <n-message-provider>
     <div class="home-container">
-    <div class="top-actions">
-      <n-button
-        @click="
-          showAuthModal = true;
-          activeTab = 'login';
-        "
-        size="large"
-      >
-        登录
-      </n-button>
-      <n-button
-        @click="
-          showAuthModal = true;
-          activeTab = 'register';
-        "
-        size="large"
-      >
-        注册
-      </n-button>
-    </div>
-    <h1>欢迎使用南京大学信息聚合平台</h1>
-
-    <!-- 使用复用的登录/注册模态框 -->
-    <auth-modal
-      v-model:show="showAuthModal"
-      :initial-tab="activeTab"
-      @login-success="handleLoginSuccess"
-      @register-success="handleRegisterSuccess"
-    />
-
-    <p class="description">这是教育数据聚合平台的首页，提供功能导航。</p>
-    <div class="features">
-      <div class="feature" @click="navigateTo('dashboard')">
-        <div class="feature-icon">
-          <n-icon size="48">
-            <dashboard-icon />
-          </n-icon>
-        </div>
-        <h3>实时信息</h3>
-        <p>查看南京大学最新消息，支持历史消息查看</p>
+      <div class="top-actions">
+        <n-button
+          @click="
+            showAuthModal = true;
+            activeTab = 'login';
+          "
+          size="large"
+        >
+          登录
+        </n-button>
+        <n-button
+          @click="
+            showAuthModal = true;
+            activeTab = 'register';
+          "
+          size="large"
+        >
+          注册
+        </n-button>
       </div>
-      <div class="feature" @click="navigateTo('chat')">
-        <div class="feature-icon">
-          <n-icon size="48">
-            <chat-icon />
-          </n-icon>
-        </div>
-        <h3>AI互动</h3>
-        <p>提供AI助手，免去手动查找信息的烦恼</p>
-      </div>
-      <div class="feature" @click="navigateTo('about')">
-        <div class="feature-icon">
-          <n-icon size="48">
-            <book-icon />
-          </n-icon>
-        </div>
-        <h3>关于我们</h3>
-        <p>如果你有兴趣了解我们的话</p>
-      </div>
-    </div>
+      <h1>欢迎使用南京大学信息聚合平台</h1>
 
-    <div class="mascot-container">
-      <img src="../assets/xiaoxun.jpg" class="mascot-image" />
-      <img src="../assets/nju.png" class="logo-image" />
+      <!-- 使用复用的登录/注册模态框 -->
+      <auth-modal
+        v-model:show="showAuthModal"
+        :initial-tab="activeTab"
+        @login-success="handleLoginSuccess"
+        @register-success="handleRegisterSuccess"
+      />
+
+      <p class="description">这是教育数据聚合平台的首页，提供功能导航。</p>
+      <div class="features">
+        <div class="feature" @click="navigateTo('dashboard')">
+          <div class="feature-icon">
+            <n-icon size="48">
+              <dashboard-icon />
+            </n-icon>
+          </div>
+          <h3>实时信息</h3>
+          <p>查看南京大学最新消息，支持历史消息查看</p>
+        </div>
+        <div class="feature" @click="navigateTo('chat')">
+          <div class="feature-icon">
+            <n-icon size="48">
+              <chat-icon />
+            </n-icon>
+          </div>
+          <h3>AI互动</h3>
+          <p>提供AI助手，免去手动查找信息的烦恼</p>
+        </div>
+        <div class="feature" @click="navigateTo('about')">
+          <div class="feature-icon">
+            <n-icon size="48">
+              <book-icon />
+            </n-icon>
+          </div>
+          <h3>关于我们</h3>
+          <p>如果你有兴趣了解我们的话</p>
+        </div>
+      </div>
+
+      <div class="mascot-container">
+        <img src="../assets/xiaoxun.jpg" class="mascot-image" />
+        <img src="../assets/nju.png" class="logo-image" />
+      </div>
     </div>
-  </div>
   </n-message-provider>
 </template>
 
 <script setup lang="ts">
-import {
-  NIcon,
-  NButton,
-  NMessageProvider,
-  useMessage,
-} from "naive-ui";
+import { NIcon, NButton, NMessageProvider, useMessage } from "naive-ui";
 import { useRouter } from "vue-router";
-import { ref } from "vue";
+import { ref, defineAsyncComponent } from "vue";
 import { DashboardIcon, ChatIcon, BookIcon } from "../components/icons";
-import { useUserStore } from "../stores/userStore";
-import AuthModal from "../components/auth/AuthModal.vue";
+const AuthModal = defineAsyncComponent(
+  () => import("../components/auth/AuthModal.vue")
+);
 
 const router = useRouter();
-const userStore = useUserStore();
-const message = useMessage();
 const showAuthModal = ref(false);
-const activeTab = ref<'login' | 'register'>('login');
+const activeTab = ref<"login" | "register">("login");
 
 // 导航到指定路由
 const navigateTo = (route: string) => {

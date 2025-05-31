@@ -60,8 +60,10 @@ import { useRouter } from "vue-router";
 import { ArrowBackOutline as ArrowBackIcon } from "@vicons/ionicons5";
 import { useUserStore } from "@/stores/userStore";
 import UserSettings from "@/components/user/UserSettings.vue";
-import AuthModal from "@/components/auth/AuthModal.vue";
-import { ref } from "vue";
+import { ref, defineAsyncComponent } from "vue";
+const AuthModal = defineAsyncComponent(
+  () => import("@/components/auth/AuthModal.vue")
+);
 
 const router = useRouter();
 const userStore = useUserStore();

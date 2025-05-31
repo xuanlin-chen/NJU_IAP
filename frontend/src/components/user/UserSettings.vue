@@ -87,6 +87,7 @@ import {
 } from 'naive-ui';
 import { useUserStore } from '@/stores/userStore';
 import { TrashOutline as TrashIcon } from '@vicons/ionicons5';
+import dayjs from 'dayjs';
 
 const userStore = useUserStore();
 const message = useMessage();
@@ -98,8 +99,15 @@ const loadingIndices = ref<Record<number, boolean>>({});
 // 添加自定义DDL
 const handleAddDdl = async () => {
   if (!newDdl.value.trim()) return;
+  const ddlEvent = {
+    summary: {
+      title: newDdl.value,
+      time: dayjs(new Date())
+    },
+    content: newDdl.value
+  };
   
-  const result = await userStore.addCustomDdl(newDdl.value);
+  const result = await userStore.addCustomDdl(ddlEvent);
   if (result.success) {
     message.success('添加成功');
     newDdl.value = '';

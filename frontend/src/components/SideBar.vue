@@ -2,12 +2,13 @@
 import { h, ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import type { Component } from 'vue'
-import { 
-  NLayoutSider, 
-  NMenu, 
-  NIcon,
-  NButton
-} from 'naive-ui'
+// Import only the needed components from naive-ui
+import { NLayoutSider } from 'naive-ui'
+import { NMenu } from 'naive-ui'
+import { NIcon } from 'naive-ui'
+import { NButton } from 'naive-ui'
+
+// Lazy load icon components only when needed
 import { 
   BookOutline as BookIcon,
   HomeOutline as HomeIcon,

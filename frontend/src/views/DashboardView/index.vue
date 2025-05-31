@@ -84,18 +84,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, provide, watchEffect, computed } from "vue";
+import { ref, onMounted, onBeforeUnmount, provide, watchEffect, computed, defineAsyncComponent } from "vue";
 import { useRouter } from "vue-router";
-import {
-  NGrid,
-  NGridItem,
-  NSpin,
-  NNotificationProvider,
-  NModal,
-  NSpace,
-  NButton,
-  createDiscreteApi
-} from "naive-ui";
+// Import Naive UI components individually for better tree-shaking
+import { NGrid } from "naive-ui";
+import { NGridItem } from "naive-ui";
+import { NSpin } from "naive-ui";
+import { NNotificationProvider } from "naive-ui";
+import { NModal } from "naive-ui";
+import { NSpace } from "naive-ui";
+import { NButton } from "naive-ui";
+import { createDiscreteApi } from "naive-ui";
 import { debugLog } from "../../utils/debug";
 import { useDashboardData } from "../../stores/dashboardStore";
 import { useUserStore } from "../../stores/userStore";
@@ -103,12 +102,24 @@ import AccountIcon from "@/components/icons/AccountIcon.vue";
 import AccountIcon_ from "@/components/icons/AccountIcon_.vue";
 import type { DdlEvent, NewsItem } from "../../stores/dashboardStore";
 
-// 导入子组件
-import MessageSection from "./MessageSection.vue";
-import DdlSection from "./DdlSection.vue";
-import CalendarSection from "./CalendarSection.vue";
-import ModalDialogs from "./ModalDialogs.vue";
-import AuthModal from "@/components/auth/AuthModal.vue";
+// 导入子组件 - 使用defineAsyncComponent进行更高效的动态导入
+const MessageSection = defineAsyncComponent(() => 
+  import(/* webpackChunkName: "dashboard-messages" */ "./MessageSection.vue")
+);
+const DdlSection = defineAsyncComponent(() => 
+  import(/* webpackChunkName: "dashboard-ddl" */ "./DdlSection.vue")
+);
+const CalendarSection = defineAsyncComponent(() => 
+  import(/* webpackChunkName: "dashboard-calendar" */ "./CalendarSection.vue")
+);
+const ModalDialogs = defineAsyncComponent(() => 
+  import(/* webpackChunkName: "dashboard-modals" */ "./ModalDialogs.vue")
+);
+const AuthModal = defineAsyncComponent({
+  loader: () => import(/* webpackChunkName: "auth-modal" */ "@/components/auth/AuthModal.vue"),
+  delay: 200,
+  timeout: 3000
+});
 
 // 初始化router和userStore
 const router = useRouter();

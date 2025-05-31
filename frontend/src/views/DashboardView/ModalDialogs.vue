@@ -72,18 +72,17 @@
         <div class="login-hint" v-if="!userStore.isLoggedIn">
           <n-alert type="info" title="提示">
             登录后可以永久保存您的订阅设置
-            <div style="margin-top: 8px;">
+            <div style="margin-top: 8px">
               <n-button text type="primary" @click="showAuthModal = true">
                 去登录
               </n-button>
             </div>
           </n-alert>
         </div>
-        
+
         <!-- 已登录用户显示保存按钮 -->
-        <div v-if="userStore.isLoggedIn" class="form-actions">
-        </div>
-        
+        <div v-if="userStore.isLoggedIn" class="form-actions"></div>
+
         <!-- 所有用户都使用列表，但只有未登录用户显示取消订阅按钮 -->
         <n-space vertical class="account-list">
           <div
@@ -136,21 +135,21 @@ import {
 import { CloseOutline as CloseIcon } from "@vicons/ionicons5";
 import { useUserStore } from "@/stores/userStore";
 import { useDashboardStore } from "../../stores/dashboardStore";
-import { useRouter } from "vue-router";
 import dayjs from "dayjs";
-import type { DdlItem } from "../../stores/dashboardStore";
+import type { DdlEvent } from "../../stores/dashboardStore";
 import type { DateString } from "@/utils/DateString";
 import { gongzhonghao } from "@/resource/map";
-import AuthModal from "@/components/auth/AuthModal.vue";
-
+import { defineAsyncComponent } from "vue";
+const AuthModal = defineAsyncComponent(
+  () => import("@/components/auth/AuthModal.vue")
+);
 // 初始化 userStore 和 router
 const userStore = useUserStore();
-const router = useRouter();
 const showAuthModal = ref(false);
 
 // 注入共享状态，使用更明确的类型标注
 const dashboardState = inject("dashboardState") as {
-  ddlData: { value: DdlItem[] };
+  ddlData: { value: DdlEvent[] };
   selectedDate: { value: Date };
   loading: { value: boolean };
   message: {
@@ -271,13 +270,11 @@ async function submitNewDdl() {
     }
 
     // 创建新的DDL项
-    const newDdlItem: DdlItem = {
-      title: ddlForm.value.title,
-      date: dayjs(ddlForm.value.dateTimestamp),
-      time: ddlForm.value.timeTimestamp
-        ? dayjs(ddlForm.value.timeTimestamp)
-        : dayjs(new Date()),
-      source: ddlForm.value.source || "",
+    const newDdlItem: DdlEvent = {
+      summary: {
+        title: ddlForm.value.title,
+        time: dayjs(ddlForm.value.dateTimestamp),
+      },
     };
 
     // 使用store的addCustomDdl方法调用后端API
@@ -290,24 +287,24 @@ async function submitNewDdl() {
 
       // 添加成功后立即刷新当前日期的数据
       const selectedDateStr = dayjs(selectedDate.value).format("YYYY-MM-DD");
-      const newDdlDateStr = newDdlItem.date.format("YYYY-MM-DD");
+      const newDdlDateStr = newDdlItem.summary.time?.format("YYYY-MM-DD");
 
       // 直接添加新DDL到当前数据集，以实现即时显示效果
       if (selectedDateStr === newDdlDateStr) {
         // 检查是否已存在相同的DDL（防止重复）
         const exists = ddlData.value.some(
           (item) =>
-            item.title === newDdlItem.title &&
-            item.date.format("YYYY-MM-DD") === newDdlDateStr
+            item.summary.title === newDdlItem.summary.title &&
+            item.summary.time?.format("YYYY-MM-DD") === newDdlDateStr
         );
 
         if (!exists) {
           // 添加完整的DDL项目，确保时间信息正确
           ddlData.value.push({
-            title: newDdlItem.title,
-            date: newDdlItem.date,
-            time: newDdlItem.time,
-            source: newDdlItem.source,
+            summary: {
+              title: newDdlItem.summary.title,
+              time: newDdlItem.summary.time,
+            },
           });
           console.log("Added new DDL to current dashboard:", newDdlItem);
         }
@@ -315,31 +312,32 @@ async function submitNewDdl() {
 
       // 保存当前添加的DDL，以确保它不会在刷新数据时丢失
       const addedDdl = { ...newDdlItem };
-      
+
       // 后台异步刷新所有数据，确保与服务器保持同步
       // 添加小延迟，确保后端有时间处理添加的DDL
       const formattedDate = dayjs(selectedDate.value).format(
         "YYYY-MM-DD"
       ) as DateString;
-      
+
       // 延迟500毫秒再刷新数据，给后端API处理时间
       setTimeout(() => {
         dashboardStore.fetchDdlData(formattedDate).then(() => {
           // 更新本地数据，但保留刚添加的DDL
           const freshDdlData = [...dashboardStore.ddlData];
-          
+
           // 检查新添加的DDL是否已存在于刷新后的数据中
           const ddlExists = freshDdlData.some(
-            item => 
-              item.title === addedDdl.title && 
-              item.date.format("YYYY-MM-DD") === addedDdl.date.format("YYYY-MM-DD")
+            (item) =>
+              item.summary.title === addedDdl.summary.title &&
+              item.summary.time?.format("YYYY-MM-DD") ===
+                addedDdl.summary.time?.format("YYYY-MM-DD")
           );
-          
+
           // 如果不存在（服务器尚未返回），则添加到本地数据
           if (!ddlExists && selectedDateStr === newDdlDateStr) {
             freshDdlData.push(addedDdl);
           }
-          
+
           // 更新本地数据
           ddlData.value = freshDdlData;
         });
@@ -384,14 +382,14 @@ async function saveSubscriptionSettings() {
 
 // 登录成功处理
 const handleLoginSuccess = () => {
-  message.success('登录成功');
+  message.success("登录成功");
   // 刷新订阅状态，将来可以从用户设置中读取
   // 这里可以根据需要添加其他逻辑
 };
 
 // 注册成功处理
 const handleRegisterSuccess = () => {
-  message.success('注册成功');
+  message.success("注册成功");
   // 注册成功后的逻辑
 };
 
