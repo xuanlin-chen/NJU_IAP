@@ -2,8 +2,20 @@
 ## 一、项目说明
 ### 1.1 项目名称
 南京大学信息聚合平台
-
 （NJU Information Aggregation Platform）
+
+可访问47.122.71.85（服务器可能不稳定）
+也可git clone后按以下方式运行：
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
+#激活虚拟环境，不同系统和终端命令可能不同
+python backend/run.py
+#请切换终端保持后端运行
+cd frontend 
+pnpm install
+pnpm run dev
+```
 
 ### 1.2 项目简介
 本平台聚焦大学生“DDL”焦虑和信息差焦虑，致力于解决大学生所需信息分散、获取效率低的痛点，通过自动化爬虫整合校园多源信息（公众号、官网等），结合AI技术对数据智能分析，随后实现推送每日消息，AI智能检索，DDL自动提醒等交互功能，实现信息的精准定位、高效获取和智能提醒。以此践行“Easy Life”理念，用代码记录温情，用技术传递善意。
