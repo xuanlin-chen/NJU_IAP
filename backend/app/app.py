@@ -9,7 +9,7 @@ def create_app():
     app = Flask(__name__)
     
     # 启用CORS以支持跨域请求
-    CORS(app)
+    CORS(app,resources={r"/*": {"origins": "http://47.122.71.85"}})
     
     # 设置JSON编码
     app.config['JSON_AS_ASCII'] = False

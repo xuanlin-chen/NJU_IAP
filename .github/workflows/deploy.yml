@@ -1,45 +1,45 @@
-name: 前端自动部署到服务器
+# name: 前端自动部署到服务器
 
-on:
-  push:
-    branches: [ "main" ]  # 监听 main 分支的 push 事件
+# on:
+#   push:
+#     branches: [ "main" ]  # 监听 main 分支的 push 事件
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest  # 使用 GitHub 提供的 Ubuntu 环境
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest  # 使用 GitHub 提供的 Ubuntu 环境
 
-    steps:
-      # 步骤1：检出仓库代码
-      - name: Checkout code
-        uses: actions/checkout@v4
+#     steps:
+#       # 步骤1：检出仓库代码
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      # 步骤2：安装 Node.js（根据项目需求选择版本）
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 23  # 与你本地开发环境一致的 Node.js 版本
+#       # 步骤2：安装 Node.js（根据项目需求选择版本）
+#       - name: Install Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 23  # 与你本地开发环境一致的 Node.js 版本
 
-      # 步骤3：安装 pnpm（前端包管理器）
-      - name: Install pnpm
-        run: npm install -g pnpm
+#       # 步骤3：安装 pnpm（前端包管理器）
+#       - name: Install pnpm
+#         run: npm install -g pnpm
 
-      # 步骤4：安装项目依赖并构建前端（生成 dist 目录）
-      - name: Install dependencies and build
-        run: |
-          cd frontend
-          pnpm install
-          pnpm build  # 执行构建命令（与你本地构建命令一致）
+#       # 步骤4：安装项目依赖并构建前端（生成 dist 目录）
+#       - name: Install dependencies and build
+#         run: |
+#           cd frontend
+#           pnpm install
+#           pnpm build  # 执行构建命令（与你本地构建命令一致）
 
-      # 步骤5：通过 SSH 将 dist 目录同步到服务器
-      - name: Sync dist to server
-        uses: appleboy/ssh-action@v1.0.0  # 使用 SSH 行动插件
-        with:
-          host: ${{ secrets.SSH_HOST }}    # 从 Secrets 读取服务器 IP
-          username: ${{ secrets.SSH_USER }}  # 从 Secrets 读取登录用户
-          key: ${{ secrets.SSH_KEY }}        # 从 Secrets 读取 SSH 私钥
-          script: |  # 在服务器上执行的命令（按顺序）
-            bash -c 'mv /var/www/nju_iap/dist /var/www/nju_iap/dist_$(date +%s)'
-            bash -c 'rsync -avz --delete /home/runner/work/NJU_IAP/NJU_IAP/frontend/dist/ $SSH_USER@$SSH_HOST:/var/www/nju_iap/dist/'
-            bash -c 'chown -R www-data:www-data /var/www/nju_iap/dist'
-            bash -c 'chmod -R 755 /var/www/nju_iap/dist'
-            bash -c 'systemctl restart nginx'
+#       # 步骤5：通过 SSH 将 dist 目录同步到服务器
+#       - name: Sync dist to server
+#         uses: appleboy/ssh-action@v1.0.0  # 使用 SSH 行动插件
+#         with:
+#           host: ${{ secrets.SSH_HOST }}    # 从 Secrets 读取服务器 IP
+#           username: ${{ secrets.SSH_USER }}  # 从 Secrets 读取登录用户
+#           key: ${{ secrets.SSH_KEY }}        # 从 Secrets 读取 SSH 私钥
+#           script: |  # 在服务器上执行的命令（按顺序）
+#             bash -c 'mv /var/www/nju_iap/dist /var/www/nju_iap/dist_$(date +%s)'
+#             bash -c 'rsync -avz --delete /home/runner/work/NJU_IAP/NJU_IAP/frontend/dist/ $SSH_USER@$SSH_HOST:/var/www/nju_iap/dist/'
+#             bash -c 'chown -R www-data:www-data /var/www/nju_iap/dist'
+#             bash -c 'chmod -R 755 /var/www/nju_iap/dist'
+#             bash -c 'systemctl restart nginx'
