@@ -7,6 +7,8 @@ from ..services.date_query_service import generate_date_data
 from ..models.user import User
 from ..db import db
 from typing import cast
+from flask import jsonify
+from ..services.mcp_query_function import get_query_progress
 
 # 为API路由创建Blueprint
 api_bp = Blueprint("api", __name__)
@@ -179,6 +181,15 @@ def query_knowledge():
         print(f"知识查询失败: {str(e)}")
         return api_response(message="知识查询失败，请稍后重试", code=500)
 
+@api_bp.route("/query-progress/<query_id>", methods=["GET"])
+def query_progress(query_id):
+    """获取查询进度"""
+    progress_info = get_query_progress(query_id)
+    return jsonify({
+        "code": 200,
+        "data": progress_info,
+        "message": "Success"
+    })
 
 @api_bp.route("/docs", methods=["GET"])
 def api_docs():

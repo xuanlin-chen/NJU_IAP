@@ -70,7 +70,25 @@ def is_to_db(json_data):
     else:
         return False, content
 
+# 添加在文件顶部的导入部分下方
+import uuid
+
+# 全局字典，用于存储查询进度
+query_progress = {}
+
+# 修改 query_mcp 函数
 def query_mcp(query):
+    # 生成唯一查询ID
+    query_id = str(uuid.uuid4())
+    
+    # 初始化进度信息
+    query_progress[query_id] = {
+        "status": "processing",
+        "message": "正在处理您的请求...",
+        "progress": 0,
+        "completed": False
+    }
+    
     query_json = {
     "from": "user",
     "content": ""
@@ -79,15 +97,26 @@ def query_mcp(query):
     query_json_str = json.dumps(query_json)
 
     try:
+        # 更新进度
+        query_progress[query_id]["message"] = "正在与智能助手交互..."
+        query_progress[query_id]["progress"] = 10
+        
         response = call_agent(API_KEY_INTERACT, APP_ID_INTERACT, query_json_str)
     except Exception as e:
         print(f"智能助手响应失败：{e}")
+        query_progress[query_id]["status"] = "error"
+        query_progress[query_id]["message"] = f"智能助手响应失败：{e}"
+        query_progress[query_id]["completed"] = True
         return None
 
     json_response = safe_json_parse(response)
     is_go_db, content = is_to_db(json_response)
 
     if is_go_db:
+        # 更新进度
+        query_progress[query_id]["message"] = "数据库检索助手正在检索..."
+        query_progress[query_id]["progress"] = 30
+        
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # 实现AI优化用户需求的功能，现在还没做。主要是写提示词
         # if content != '':
@@ -96,38 +125,57 @@ def query_mcp(query):
         #     query_to_db = f"提问时间：{current_time}\n用户需求：{query}"
         query_to_db = f"提问时间：{current_time}\n用户需求：{query}"
         
-        print(f"数据库检索助手正在检索...")
-        print("耗时约 1 至 2 分钟，请耐心等待...")
         try:
+            # 更新进度
+            query_progress[query_id]["message"] = "耗时约 1 至 2 分钟，请耐心等待..."
+            query_progress[query_id]["progress"] = 50
+            
             search_result = call_agent(API_KEY_SEARCH, APP_ID_SEARCH, query_to_db)
         except Exception as e:
-            print(f"数据库检索助手检索失败：{e}")
+            query_progress[query_id]["status"] = "error"
+            query_progress[query_id]["message"] = f"数据库检索助手检索失败：{e}"
+            query_progress[query_id]["completed"] = True
             return None
 
-        print("数据库检索助手检索完成，智能助手正在整理数据...")
+        # 更新进度
+        query_progress[query_id]["message"] = "数据库检索助手检索完成，智能助手正在整理数据..."
+        query_progress[query_id]["progress"] = 80
+        
         search_result_to_angent = f"用户需求：{query}\n数据库返回信息：{search_result}"
 
         try:
             raw_response = call_agent(API_KEY_INTERACT, APP_ID_INTERACT, search_result_to_angent)
         except Exception as e:
-            print(f"智能助手整理数据失败：{e}")
+            query_progress[query_id]["status"] = "error"
+            query_progress[query_id]["message"] = f"智能助手整理数据失败：{e}"
+            query_progress[query_id]["completed"] = True
             return None
 
         json_response = safe_json_parse(raw_response)
         response_content = json_response['content']
-        return {"recommendation": response_content}
+        
+        # 完成进度
+        query_progress[query_id]["message"] = "处理完成"
+        query_progress[query_id]["progress"] = 100
+        query_progress[query_id]["completed"] = True
+        
+        return {"recommendation": response_content, "queryId": query_id}
     else:
-        return {"recommendation": content}
+        # 完成进度
+        query_progress[query_id]["message"] = "处理完成"
+        query_progress[query_id]["progress"] = 100
+        query_progress[query_id]["completed"] = True
+        
+        return {"recommendation": content, "queryId": query_id}
 
-'''
-if __name__ == "__main__":
-    while True:
-        query = input("在这里与智能助手对话：")
-        if query == 'exit':
-            break
-        if query == '':
-            print("输入不能为空，请重新输入")
-            continue
-        response = query_mcp(query)
-        print(response)
-'''
+# 添加新函数，用于获取查询进度
+def get_query_progress(query_id):
+    if query_id in query_progress:
+        return query_progress[query_id]
+    else:
+        return {
+            "status": "not_found",
+            "message": "查询ID不存在",
+            "progress": 0,
+            "completed": True
+        }

@@ -18,6 +18,8 @@ interface ApiResponse {
 // 查询模型类型
 export type SearchModelType = 'RAG' | 'MCP';
 
+import { useProgressStore } from './progressStore';
+
 export const useChatStore = defineStore('chat', () => {
   interface Message {
     role: string;
@@ -91,6 +93,14 @@ export const useChatStore = defineStore('chat', () => {
       isTyping.value = true;
       error.value = null;
       
+      // If MCP is used，start polling
+      const progressStore = useProgressStore();
+      let queryId = "";
+      if (currentModel.value === 'MCP') {
+        queryId = "temp-" + Date.now(); // create template ID
+        progressStore.startPolling(queryId);
+      }
+      
       // Call the knowledge query API
       const response = await fetch(api_router.knowledgeQuery(), {
         method: 'POST',
@@ -99,7 +109,7 @@ export const useChatStore = defineStore('chat', () => {
         },
         body: JSON.stringify({
           question: message,
-          model: currentModel.value  // 使用当前选择的模型
+          model: currentModel.value
         }),
       });
       
@@ -108,6 +118,13 @@ export const useChatStore = defineStore('chat', () => {
       }
       
       const result: ApiResponse = await response.json();
+      
+      // update queryId
+      if (currentModel.value === 'MCP' && result.data.queryId) {
+        progressStore.stopPolling();
+        queryId = result.data.queryId;
+        progressStore.startPolling(queryId);
+      }
       
       // Check if API returned an error
       if (result.code !== 200) {
@@ -120,6 +137,11 @@ export const useChatStore = defineStore('chat', () => {
         content: result.data.recommendation || '抱歉，我没能找到相关信息。'
       };
       messages.value.push(aiMessage);
+      
+      // 停止轮询
+      if (currentModel.value === 'MCP' && queryId) {
+        progressStore.stopPolling();
+      }
       
       // Update chat history
       if (currentChat.value) {
@@ -141,6 +163,12 @@ export const useChatStore = defineStore('chat', () => {
         role: 'system',
         content: `错误: ${error.value}`
       });
+      
+      // 确保停止轮询
+      if (currentModel.value === 'MCP') {
+        const progressStore = useProgressStore();
+        progressStore.stopPolling();
+      }
     } finally {
       isTyping.value = false;
     }

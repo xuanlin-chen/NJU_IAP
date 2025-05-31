@@ -62,7 +62,17 @@
               <!-- 正在输入提示 -->
               <transition name="fade">
                 <div v-if="chatStore.isTyping" class="ai-typing">
-                  <div class="typing-indicator">{{ chatResource.thinking }}</div>
+                  <div class="typing-indicator">
+                    <template v-if="progressStore.isPolling && chatStore.currentModel === 'MCP'">
+                      {{ progressStore.progressMessage }}
+                      <div class="progress-bar">
+                        <div class="progress-fill" :style="{ width: progressStore.progress + '%' }"></div>
+                      </div>
+                    </template>
+                    <template v-else>
+                      {{ chatResource.thinking }}
+                    </template>
+                  </div>
                 </div>
               </transition>
             </div>
@@ -88,6 +98,8 @@ import { useChatStore } from '@/stores/chatStore.ts';
 // Import only the needed component from naive-ui
 import { NButton } from 'naive-ui';
 import type { SearchModelType } from '@/stores/chatStore';
+// Show progress of MCP
+import { useProgressStore } from '@/stores/progressStore';
 
 // Define the ChatItem type
 interface ChatItem {
@@ -119,6 +131,9 @@ chatStore.chatHistory = chatStore.chatHistory.map(chat => ({
   ...chat,
   date: new Date(chat.date),
 }));
+
+// 初始化进度存储
+const progressStore = useProgressStore();
 
 // 消息容器引用
 const messagesContainer = ref<HTMLElement | null>(null)
