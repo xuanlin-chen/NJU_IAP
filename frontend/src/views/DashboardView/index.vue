@@ -61,11 +61,10 @@
 
           <!-- 右侧区域 -->
           <n-grid-item :span="4">
-            <!-- DDL提醒部分 -->
-            <DdlSection />
-            
             <!-- 日历部分 -->
             <CalendarSection />
+            <!-- DDL提醒部分 -->
+            <DdlSection />
           </n-grid-item>
         </n-grid>
       </n-spin>
@@ -102,7 +101,7 @@ import { useDashboardData } from "../../stores/dashboardStore";
 import { useUserStore } from "../../stores/userStore";
 import AccountIcon from "@/components/icons/AccountIcon.vue";
 import AccountIcon_ from "@/components/icons/AccountIcon_.vue";
-import type { DdlItem, Message } from "../../stores/dashboardStore";
+import type { DdlEvent, NewsItem } from "../../stores/dashboardStore";
 
 // 导入子组件
 import MessageSection from "./MessageSection.vue";
@@ -119,8 +118,8 @@ const userStore = useUserStore();
 const { message } = createDiscreteApi(["message", "notification"]);
 
 // 定义观测数据
-const Messages = ref<Message[]>([]);
-const ddlData = ref<DdlItem[]>([]);
+const Messages = ref<NewsItem[]>([]);
+const ddlData = ref<DdlEvent[]>([]);
 const loading = ref(true);
 const selectedDate = ref(new Date());
 let refreshData: (() => Promise<void>) | null = null;

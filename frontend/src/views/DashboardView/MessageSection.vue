@@ -19,11 +19,11 @@ import dashboardText from "../../resource/dashboard";
 import { eventTypes } from "@/resource/map";
 import type { CardItem, ItemGroup } from "../../components/BaseCard.vue";
 import BaseCard from "../../components/BaseCard.vue";
-import type { Message } from "../../stores/dashboardStore";
+import type { NewsItem } from "../../stores/dashboardStore";
 
 // 注入共享状态
 const dashboardState = inject("dashboardState") as {
-  Messages: { value: Message[] };
+  Messages: { value: NewsItem[] };
   message: {
     success: (text: string) => void;
     error: (text: string) => void;
@@ -37,25 +37,19 @@ const { Messages, message } = dashboardState;
 // 转换 Messages 为 CardItem 类型
 const formattedMessages = computed(() => {
   if (!Messages.value || Messages.value.length === 0) return [];
-  return Messages.value.map((message: Message) => {
-    // 处理 source 字段，如果是 URL 类型就转换为字符串
-    let sourceStr = "";
-    if (message.source) {
-      if (typeof message.source === "string") {
-        sourceStr = message.source;
-      } else {
-        // 是 URL 对象
-        sourceStr = message.source.href;
-      }
-    }
-
+  return Messages.value.map((message: NewsItem) => {
+    const sourceStr = message.summary?.source
+      ? typeof message.summary.source === "string"
+        ? message.summary.source
+        : String(message.summary.source)
+      : "";
     return {
-      title: message.title || "",
-      time: message.time || "",
+      title: message.summary?.title || "",
+      time: message.date || "",
       abstract: message.abstract || "",
-      type: message.type || "",
+      eventType: message.summary?.type || "", // store the type as eventType
       source: sourceStr,
-    };
+    } as CardItem;
   });
 });
 
@@ -65,7 +59,7 @@ const itemGroups = computed(() => {
 
   for (const type of eventTypes) {
     const filteredItems = formattedMessages.value.filter(
-      (item: CardItem) => item.type === type
+      (item) => item.eventType === type
     );
 
     if (filteredItems.length > 0) {
