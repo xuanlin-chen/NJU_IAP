@@ -114,11 +114,12 @@ def query_mcp(query):
             return None
 
         json_response = safe_json_parse(raw_response)
-        return json_response['content']
+        response_content = json_response['content']
+        return {"recommendation": response_content}
     else:
-        return content
+        return {"recommendation": content}
 
-
+'''
 if __name__ == "__main__":
     while True:
         query = input("在这里与智能助手对话：")
@@ -129,3 +130,4 @@ if __name__ == "__main__":
             continue
         response = query_mcp(query)
         print(response)
+'''

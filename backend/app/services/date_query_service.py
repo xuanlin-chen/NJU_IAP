@@ -238,7 +238,7 @@ def generate_ddl_by_date(target_date):
                     '截止时间': row[4]
                 }
                 
-               
+                
                 print(f"[DEBUG] 截止时间: {event['截止时间']}") # 添加调试日志
                 
                 if isinstance(event['截止时间'], datetime.datetime):

@@ -71,7 +71,7 @@ export const useChatStore = defineStore('chat', () => {
   };
 
   const askExample = () => {
-    onSendMessage("请介绍一下南京大学");
+    onSendMessage("你好，介绍一下你自己");
   };
 
   const onSendMessage = async (message: string) => {
