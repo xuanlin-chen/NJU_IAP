@@ -31,6 +31,19 @@
             >
               <span class="model-icon">{{ chatStore.currentModel === 'RAG' ? 'RAG' : 'MCP' }}</span>
             </n-button>
+            
+            <!-- 对话指南按钮 -->
+            <n-button
+              size="medium"
+              type="default"
+              @click="showGuide = true"
+              class="guide-btn"
+              :ghost="true"
+              round
+              strong
+            >
+              <span class="guide-icon">指南</span>
+            </n-button>
           </div>
         </div>
         
@@ -83,6 +96,36 @@
         <chat-input @send="chatStore.onSendMessage" />
       </div>
     </div>
+    
+    <!-- 对话指南弹出框 -->
+    <n-modal
+      v-model:show="showGuide"
+      preset="card"
+      title="对话指南"
+      style="width: 80%; max-width: 600px;"
+      :mask-closable="true"
+    >
+      <div class="guide-content">
+        <h3>欢迎使用智能检索助手</h3>
+        <p>我们提供智能 AI 检索服务，助您高效获取所需信息。</p>
+        
+        <h4>一、检索方式</h4>
+        <p>本平台采用 RAG（检索增强生成） 模式结合 MCP 模型上下文协议。RAG 可实现快速响应，MCP 则能实现精确查询。</p>
+        
+        <h4>二、MCP 查询方式说明</h4>
+        <p>默认情况下，MCP 查询仅筛选活动开始或结束时间不早于当前提问时间的活动（即您可参与的活动）。若您希望：</p>
+        <p>查看历史消息，或仅了解活动资讯（不考虑是否参与），请在提示词中明确添加"不考虑时间限制"或"不考虑消息是否过期"。</p>
+        
+        <h4>三、与 AI 助手互动</h4>
+        <p>您可与 AI 助手进行对话。当助手识别到检索需求时，将自动在知识库或数据库中检索。若助手未能识别您的检索意图，您可在提示词中直接写明"直接帮我检索 [具体信息]"。建议清晰描述检索需求，以便 AI 助手准确理解意图并返回您所需信息。</p>
+        
+        <h4>四、问题反馈与技术支持</h4>
+        <p>使用过程中，如遇 API 调用报错或有任何改进建议，欢迎随时联系：</p>
+        <p>RAG 技术支持邮箱： 241880030@smail.nju.edu.cn</p>
+        <p>MCP 技术支持邮箱： 241880484@smail.nju.edu.cn</p>
+        <p>我们将竭诚为您服务，持续优化您的检索体验😊</p>
+      </div>
+    </n-modal>
   </div>
 </template>
 
@@ -96,10 +139,13 @@ import WelcomeScreen from '../components/chat/WelcomeScreen.vue'
 import ChatInput from '../components/chat/ChatInput.vue'
 import { useChatStore } from '@/stores/chatStore.ts';
 // Import only the needed component from naive-ui
-import { NButton } from 'naive-ui';
+import { NButton, NModal } from 'naive-ui';
 import type { SearchModelType } from '@/stores/chatStore';
 // Show progress of MCP
 import { useProgressStore } from '@/stores/progressStore';
+
+// 对话指南显示状态
+const showGuide = ref(false);
 
 // Define the ChatItem type
 interface ChatItem {
@@ -229,14 +275,45 @@ onMounted(() => {
   border-width: 1.5px;
 }
 
-.model-toggle-btn:hover {
+.guide-btn {
+  position: absolute;
+  right: 16px;
+  top: 45px;
+  font-size: 14px;
+  padding: 4px 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  border-width: 1.5px;
+}
+
+.model-toggle-btn:hover, .guide-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
-.model-icon {
+.model-icon, .guide-icon {
   font-size: 16px;
   font-weight: 600;
+}
+
+.guide-content {
+  text-align: left;
+  line-height: 1.6;
+}
+
+.guide-content h3 {
+  margin-top: 0;
+  color: #2080f0;
+}
+
+.guide-content h4 {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  color: #18a058;
+}
+
+.guide-content p {
+  margin: 8px 0;
 }
 
 .chat-messages {
