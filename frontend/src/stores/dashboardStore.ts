@@ -2,14 +2,12 @@ import { defineStore } from "pinia";
 import { convertKey } from "@/utils/convert";
 import type { DateString } from "@/utils/DateString";
 import dayjs from "dayjs";
-
-type Dayjs = dayjs.Dayjs;
+import type { eventTypes } from '../resource/map';
 
 const api_router = {
 	dateQuery: (date: DateString) => `/api/date-query?date=${date}`,
 };
 
-// API response interfaces
 interface ApiResponse {
 	code: number;
 	data: ApiData;
@@ -17,55 +15,36 @@ interface ApiResponse {
 }
 
 interface ApiData {
-	date: string;
-	ddl_events: DdlEvent[];
-	news: NewsItem[];
+	ddl_events?: DdlEvent[];
+	news?: NewsItem[];
 }
 
-interface DdlEvent {
-	title: string;
-	deadline: string; // 格式预计为 "YYYY-MM-DD HH:MM"
-	source?: string; // 可能为空，需要处理
-}
-
-interface NewsItem {
-	title?: string;
-	time?: string;
-	date?: string;
-	source?: string;
-	abstract?: string;
-	type?: string;
-	summary?: {
-		keywords?: string;
-		source?: string;
-		title?: string;
-		type?: string;
+export interface DdlEvent {
+	summary: {
+		time?: dayjs.Dayjs; // 可选摘要时间
+		source?: string; // 可选摘要来源
+		type?: string; // 可选摘要类型
+		title?: string; // 可选摘要标题
 	};
 }
 
-// Output interfaces for the store
-export interface DdlItem {
-	title: string;
-	date: Dayjs; // 格式: "YYYY-MM-DD"
-	time: Dayjs; // 格式: "HH:MM" 24小时制
-	source: URL | string;
+export interface NewsItem {
+	date?: string; // 可选日期
+	summary?: {
+		title?: string; // 可选摘要标题
+		source?: string; // 可选摘要来源
+		type?: typeof eventTypes; // 可选摘要类型
+		keywords?: string; // 可选摘要关键词
+	};
+	abstract?: string; // 可选摘要内容
 }
 
-export interface Message {
-	title: string;
-	time: string;
-	source: URL | string;
-	abstract: string;
-	type: string;
-}
-
-// State interface
 interface DashboardState {
-	ddlData: DdlItem[];
-	Messages: Message[];
-	historyMessages: Message[];
-	isLoading: boolean;
-	error: string | null;
+  ddlData: DdlEvent[];
+  Messages: NewsItem[];
+  historyMessages: NewsItem[];
+  isLoading: boolean;
+  error: string | null;
 }
 
 // Dashboard Store
@@ -113,23 +92,13 @@ export const useDashboardStore = defineStore("dashboard", {
 
 				if (response.code === 200 && response.data.ddl_events) {
 					this.ddlData = response.data.ddl_events.map((event: DdlEvent) => {
-						const dateTime = dayjs(event.deadline);
-						// 处理URL，确保有效性
-						let sourceUrl: URL | string = "";
-						try {
-							// 确保source不是undefined
-							const sourceStr = event.source || "";
-							sourceUrl = sourceStr ? new URL(sourceStr) : "";
-						} catch (e) {
-							sourceUrl = event.source || "";
-							console.warn(`Invalid URL in DDL: ${event.source}`);
-						}
-
 						return {
-							title: event.title,
-							date: dateTime, // 提取日期部分
-							time: dateTime, // 提取时间部分
-							source: sourceUrl,
+							summary: {
+								time: event.summary?.time,
+								source: event.summary?.source,
+								type: event.summary?.type,
+								title: event.summary?.title, // 确保保留标题
+							},
 						};
 					});
 				}
@@ -145,31 +114,17 @@ export const useDashboardStore = defineStore("dashboard", {
 					api_router.dateQuery(date),
 				);
 
-				if (response.code === 200) {
-					console.log(`Fetched messages for date ${date}:`, response.data.news);
+				if (response.code === 200 && response.data.news) {
 					this.Messages = response.data.news.map((item: NewsItem) => {
-						// 处理URL，确保有效性
-						let sourceUrl: URL | string;
-						try {
-							// 尝试从summary获取source，如果没有则使用直接的source
-							const sourceStr = item.summary?.source || item.source || "";
-							sourceUrl = sourceStr ? new URL(sourceStr) : "";
-						} catch (e) {
-							sourceUrl = item.summary?.source || item.source || "";
-							console.warn(
-								`Invalid URL in Message: ${item.summary?.source || item.source}`,
-							);
-						}
-
 						return {
-							// 从summary获取标题，如果没有则使用直接的标题
-							title: item.summary?.title || item.title || "",
-							// 使用时间信息，提供备选
-							time: item.time || item.date || "",
-							source: sourceUrl,
-							abstract: item.abstract || "",
-							// 从summary获取类型，如果没有则使用直接的类型
-							type: item.summary?.type || item.type || "news",
+              date: item.date,
+              summary: {
+                title: item.summary?.title,
+                source: item.summary?.source,
+                type: item.summary?.type || [],
+                keywords: item.summary?.keywords,
+              },
+              abstract: item.abstract,
 						};
 					});
 				}

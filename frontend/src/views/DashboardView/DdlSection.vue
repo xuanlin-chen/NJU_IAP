@@ -7,6 +7,7 @@
       :empty-text="dashboardText.dayMessages.noMessages"
       :view-more-text="dashboardText.ddlNews.viewMore"
       :show-delete-button="true"
+      :use-simple-list="true"
       @view-more="handleViewMoreDdl"
       @delete-item="handleDeleteDdl"
     />
@@ -31,13 +32,12 @@ import dashboardText from "../../resource/dashboard";
 import dayjs from "dayjs";
 import AddIcon from "@/components/icons/AddIcon.vue";
 import type { CardItem } from "../../components/BaseCard.vue";
-import type { DdlItem } from "../../stores/dashboardStore";
-import type { DateString } from "@/utils/DateString";
+import type { DdlEvent } from "../../stores/dashboardStore";
 import { useUserStore } from "@/stores/userStore";
 
 // 注入共享状态
 const dashboardState = inject("dashboardState") as {
-  ddlData: { value: DdlItem[] };
+  ddlData: { value: DdlEvent[] };
   selectedDate: { value: Date };
   loading: { value: boolean };
   message: {
@@ -59,38 +59,20 @@ const dashboardState = inject("dashboardState") as {
 // 解构以便更容易使用
 const { ddlData, selectedDate, loading, message, showAddDdlModal, newDdl } = dashboardState;
 
-// 根据选中日期过滤 DDL 数据
-const ddlBySelectedDate = computed(() => {
-  if (!ddlData.value || ddlData.value.length === 0) return [];
-  const sd = dayjs(selectedDate.value).format("YYYY-MM-DD");
-  return ddlData.value.filter(
-    (item: DdlItem) => item.date && item.date.format("YYYY-MM-DD") === sd
-  );
-});
-
 // 格式化 DDL 数据为 CardItem 类型
 const formattedDdlItems = computed(() => {
-  if (!ddlBySelectedDate.value || ddlBySelectedDate.value.length === 0)
-    return [];
-  return ddlBySelectedDate.value.map((item) => {
-    // 处理 source 字段
-    let sourceStr = "";
-    if (item.source) {
-      if (typeof item.source === "string") {
-        sourceStr = item.source;
-      } else {
-        // 是 URL 对象
-        sourceStr = item.source.href;
-      }
-    }
-
+  if (!ddlData.value || ddlData.value.length === 0) return [];
+  console.log("Formatted DDL items:", ddlData.value);
+  return ddlData.value.map((item) => {
+    const timeStr = item.summary.time
+      ? dayjs(item.summary.time).format("YYYY-MM-DD HH:mm")
+      : "";
     return {
-      title: item.title || "",
-      date: item.date ? item.date.format("YYYY-MM-DD") : "",
-      time: item.time ? item.time.format("HH:mm") : "",
-      description: item.time ? `${item.time.format("HH:mm")}` : "",
-      source: sourceStr,
-    };
+      title: item.summary.title || "未命名DDL",
+      date: timeStr,
+      description: item.summary.source || "",
+      abstract: item.summary.title || "", // 保存完整内容以便在详情中查看
+    } as CardItem;
   });
 });
 
@@ -114,8 +96,8 @@ function handleAddDdl() {
 // 处理删除DDL项目
 async function handleDeleteDdl(item: CardItem, index: number) {
   try {
-    // 确认是否要删除
-    if (!window.confirm("确定要删除这个DDL吗？")) {
+    // 使用Naive UI的message组件进行确认
+    if (!window.confirm(`确定要删除"${item.title}"吗？`)) {
       return;
     }
 
@@ -124,8 +106,7 @@ async function handleDeleteDdl(item: CardItem, index: number) {
     // 根据标题和日期匹配
     const ddlIndex = ddlData.value.findIndex(
       (ddlItem) =>
-        ddlItem.title === item.title &&
-        ddlItem.date.format("YYYY-MM-DD") === item.date
+        ddlItem.summary.title === item.title
     );
 
     if (ddlIndex === -1) {

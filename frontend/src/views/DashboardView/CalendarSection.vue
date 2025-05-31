@@ -23,13 +23,14 @@ import dashboardText from "../../resource/dashboard";
 import { useDashboardStore } from "../../stores/dashboardStore";
 import dayjs from "dayjs";
 import type { DateString } from "@/utils/DateString";
-import type { Message } from "../../stores/dashboardStore";
+import type { NewsItem, DdlEvent } from "../../stores/dashboardStore";
 
-// 注入共享状态
+// 首先注入共享状态
 const dashboardState = inject("dashboardState") as {
   selectedDate: { value: Date };
   loading: { value: boolean };
-  Messages: { value: Message[] };
+  Messages: { value: NewsItem[] };
+  ddlData: { value: DdlEvent[] }; // 修改为与dashboardStore一致的命名
   message: {
     info: (text: string) => void;
     error: (text: string) => void;
@@ -40,7 +41,7 @@ const dashboardState = inject("dashboardState") as {
 };
 
 // 解构以便更容易使用
-const { selectedDate, loading, Messages, message, updateSelectedDate } = dashboardState;
+const { selectedDate, loading, Messages, ddlData, message, updateSelectedDate } = dashboardState;
 
 // 日期选择处理
 async function handleDateSelect(date: Date) {
@@ -52,9 +53,22 @@ async function handleDateSelect(date: Date) {
     const dashboardStore = useDashboardStore();
     const formattedDate = dayjs(date).format("YYYY-MM-DD") as DateString;
     await dashboardStore.fetchMessages(formattedDate);
-
+    await dashboardStore.fetchDdlData(formattedDate);
+    console.log(
+      `Loaded messages for date ${formattedDate}:`,
+      dashboardStore.ddlData
+    );
     // 更新 Messages
-    Messages.value = dashboardStore.Messages;
+    if (dashboardStore.Messages) {
+      Messages.value = [...dashboardStore.Messages];
+    }
+    
+    if (dashboardStore.ddlData) {
+      ddlData.value = [...dashboardStore.ddlData];
+      console.log(
+        `Loaded ${ddlData.value.length} DDL events for date ${formattedDate}`
+      );
+    }
   } catch (error) {
     console.error(
       `Failed to load messages for date ${dayjs(date).format("YYYY-MM-DD")}:`,

@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import type { DdlItem } from "./dashboardStore";
+import type { DdlEvent } from "./dashboardStore";
 
 const api_router = {
 	login: () => "/api/login",
@@ -108,7 +108,7 @@ export const useUserStore = defineStore("user", () => {
 	};
 
 	// 添加自定义DDL
-	const addCustomDdl = async (content: DdlItem) => {
+	const addCustomDdl = async (content: DdlEvent) => {
 		if (!user.value?.id) {
 			error.value = "请先登录";
 			return { success: false, error: "请先登录" };
@@ -124,15 +124,14 @@ export const useUserStore = defineStore("user", () => {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					content: content.title,
-					date: content.date.format("YYYY-MM-DD"),
+					content: content.summary.title,
+					date: content.summary.time?.format("YYYY-MM-DD"),
 				}),
 			});
 
 			const result: ApiResponse = await response.json();
 
-			// 检查API响应中的状态码，而不仅仅是HTTP状态码
-			if (response.ok && result.code === 200) {
+			if (result.code === 200) {
 				// 添加成功，更新用户信息
 				user.value = result.data;
 
@@ -169,8 +168,7 @@ export const useUserStore = defineStore("user", () => {
 
 			const result: ApiResponse = await response.json();
 
-			// 检查API响应中的状态码，而不仅仅是HTTP状态码
-			if (response.ok && result.code === 200) {
+			if (result.code === 200) {
 				// 删除成功，更新用户信息
 				user.value = result.data;
 

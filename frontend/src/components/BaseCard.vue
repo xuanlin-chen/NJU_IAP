@@ -86,6 +86,34 @@
           </n-collapse-item>
         </n-collapse>
       </div>
+      <!-- 简单列表模式 -->
+      <div v-else-if="useSimpleList && items && items.length > 0">
+        <div class="simple-list">
+          <div
+            v-for="(item, index) in items"
+            :key="index"
+            class="simple-list-item"
+          >
+            <div class="simple-item-content">
+              <div class="simple-item-title" @click.stop="handleClick(item)">
+                {{ getItemTitle(item) }}
+              </div>
+              <n-icon
+                v-if="showDeleteButton"
+                class="delete-icon"
+                @click.stop="handleDelete(item, index)"
+              >
+                <close-icon />
+              </n-icon>
+            </div>
+            <div class="simple-item-footer">
+              <span>{{ getItemDate(item) }}</span>
+              <span v-if="item.extra" class="item-extra">{{ item.extra }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <!-- 列表模式 -->
       <div v-else-if="items && items.length > 0">
         <n-collapse>
@@ -133,7 +161,9 @@ import {
   NModal,
   NButton,
   NSpace,
+  NIcon,
 } from "naive-ui";
+import { CloseOutline as CloseIcon } from "@vicons/ionicons5";
 import { marked } from "marked";
 // 在浏览器环境中使用 DOMPurify 的正确方式
 
@@ -145,7 +175,7 @@ export interface CardItem {
   title?: string;
   date?: string;
   time?: string;
-  type?: string;
+  type?: typeof EventTypes;
   abstract?: string;
   description?: string;
   source?: string | URL;
@@ -177,6 +207,7 @@ const props = defineProps<{
   isCalendarMode?: boolean;
   calendarFooterText?: string;
   showDeleteButton?: boolean;
+  useSimpleList?: boolean; // 新增属性：是否使用简单列表模式
 }>();
 
 const emit = defineEmits<{
@@ -434,5 +465,63 @@ function handleClick(item: CardItem) {
   padding: 40px 20px;
   color: var(--text-color-3);
   font-size: 14px;
+}
+
+.simple-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.simple-list-item {
+  padding: 12px;
+  background-color: var(--md-grey-50, #fafafa);
+  border-radius: 8px;
+  border: 1px solid var(--md-grey-200, #eeeeee);
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.simple-list-item:last-child {
+  margin-bottom: 0;
+}
+
+.simple-list-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background-color: var(--md-grey-100, #f5f5f5);
+}
+
+.simple-item-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.simple-item-title {
+  font-weight: 500;
+  color: var(--text-color-1);
+  flex: 1;
+  padding-right: 16px;
+  cursor: pointer;
+}
+
+.delete-icon {
+  color: var(--error-color, #d03050);
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.delete-icon:hover {
+  opacity: 1;
+}
+
+.simple-item-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-color-3);
 }
 </style>

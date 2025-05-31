@@ -23,6 +23,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { marked } from 'marked'
 
 const props = defineProps({
   role: {
@@ -36,13 +37,19 @@ const props = defineProps({
   }
 })
 
-// 格式化消息内容，支持简单的markdown
+// 格式化消息内容
 const formattedContent = computed(() => {
-  // 处理换行
+  // 对AI回复使用marked库进行完整的Markdown格式化
+  if (props.role === 'assistant') {
+    return marked(props.content, { 
+      gfm: true, // GitHub Flavored Markdown
+      breaks: true // 识别回车为换行
+    });
+  }
+  
+  // 用户和系统消息使用简单的格式化
   let formatted = props.content.replace(/\n/g, '<br>')
-  // 处理加粗
   formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-  // 处理列表
   formatted = formatted.replace(/- (.*?)(?=<br>|$)/g, '• $1')
   return formatted
 })
@@ -102,6 +109,47 @@ const formattedContent = computed(() => {
 
 .message-content {
   line-height: 1.6;
+}
+
+.message-content :deep(pre) {
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.message-content :deep(code) {
+  font-family: monospace;
+  background-color: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.message-content :deep(p) {
+  margin: 8px 0;
+}
+
+.message-content :deep(ul), .message-content :deep(ol) {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.message-content :deep(table) {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+}
+
+.message-content :deep(th), .message-content :deep(td) {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.message-content :deep(th) {
+  background-color: #f5f5f5;
 }
 
 .ai .message-content {
