@@ -163,9 +163,16 @@ def generate_news_by_date(target_date):
         # 修改正则表达式以匹配单竖线 |
         match = re.search(r'\|([^|]*)\|', content)
         if match:
-            abstract.append(match.group(1))
+            extracted_content=match.group(1)
         else:
-            abstract.append(content)
+            extracted_content=content
+        extracted_content = re.sub(r'(\*\*.*?\*\*)(?!\s)', r'\1 ', extracted_content)
+        # 移除"核心摘要: "前缀
+        if extracted_content.startswith("核心摘要: ##"):
+            extracted_content = extracted_content[len("核心摘要: ##"):]
+            # 检查并添加星号后的空格
+            # extracted_content = re.sub(r'(\*+)(?!\s)', r'\1 ', extracted_content)
+        abstract.append(extracted_content)
     
     # 为每条消息生成独立JSON对象
     news_list = [{
