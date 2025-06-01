@@ -97,6 +97,7 @@ export const useChatStore = defineStore('chat', () => {
       const progressStore = useProgressStore();
       let queryId = "";
       if (currentModel.value === 'MCP') {
+        progressStore.stopPolling(); // stop polling if it's running
         queryId = "temp-" + Date.now(); // create template ID
         progressStore.startPolling(queryId);
       }
@@ -123,7 +124,7 @@ export const useChatStore = defineStore('chat', () => {
       if (currentModel.value === 'MCP' && result.data.queryId) {
         progressStore.stopPolling();
         queryId = result.data.queryId;
-        progressStore.startPolling(queryId);
+        progressStore.startPolling(queryId, false);
       }
       
       // Check if API returned an error
@@ -138,7 +139,7 @@ export const useChatStore = defineStore('chat', () => {
       };
       messages.value.push(aiMessage);
       
-      // 停止轮询
+      // stop polling
       if (currentModel.value === 'MCP' && queryId) {
         progressStore.stopPolling();
       }
@@ -164,7 +165,7 @@ export const useChatStore = defineStore('chat', () => {
         content: `错误: ${error.value}`
       });
       
-      // 确保停止轮询
+      // ensure polling is stopped
       if (currentModel.value === 'MCP') {
         const progressStore = useProgressStore();
         progressStore.stopPolling();

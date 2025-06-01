@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from dashscope import Application
 from datetime import datetime
+import uuid
 import json
 import re
 import os
@@ -70,13 +71,9 @@ def is_to_db(json_data):
     else:
         return False, content
 
-# 添加在文件顶部的导入部分下方
-import uuid
-
 # 全局字典，用于存储查询进度
 query_progress = {}
 
-# 修改 query_mcp 函数
 def query_mcp(query):
     # 生成唯一查询ID
     query_id = str(uuid.uuid4())
@@ -114,7 +111,7 @@ def query_mcp(query):
 
     if is_go_db:
         # 更新进度
-        query_progress[query_id]["message"] = "数据库检索助手正在检索..."
+        query_progress[query_id]["message"] = "数据库检索助手正在检索，耗时约 1 至 2 分钟，请耐心等待..."
         query_progress[query_id]["progress"] = 30
         
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -126,10 +123,6 @@ def query_mcp(query):
         query_to_db = f"提问时间：{current_time}\n用户需求：{query}"
         
         try:
-            # 更新进度
-            query_progress[query_id]["message"] = "耗时约 1 至 2 分钟，请耐心等待..."
-            query_progress[query_id]["progress"] = 50
-            
             search_result = call_agent(API_KEY_SEARCH, APP_ID_SEARCH, query_to_db)
         except Exception as e:
             query_progress[query_id]["status"] = "error"
@@ -138,7 +131,7 @@ def query_mcp(query):
             return None
 
         # 更新进度
-        query_progress[query_id]["message"] = "数据库检索助手检索完成，智能助手正在整理数据..."
+        query_progress[query_id]["message"] = "数据库检索助手检索完成，智能助手正在整理返回数据..."
         query_progress[query_id]["progress"] = 80
         
         search_result_to_angent = f"用户需求：{query}\n数据库返回信息：{search_result}"
@@ -168,7 +161,7 @@ def query_mcp(query):
         
         return {"recommendation": content, "queryId": query_id}
 
-# 添加新函数，用于获取查询进度
+# 用于获取查询进度
 def get_query_progress(query_id):
     if query_id in query_progress:
         return query_progress[query_id]

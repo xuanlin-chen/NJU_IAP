@@ -28,16 +28,20 @@ export const useProgressStore = defineStore("progress", () => {
     const pollingInterval = ref<number | null>(null);
 
   // 开始轮询
-    const startPolling = (queryId: string) => {
+    const startPolling = (queryId: string, resetProgress: boolean = true) => {
         if (isPolling.value) return;
         
         isPolling.value = true;
         completed.value = false;
-        progressMessage.value = "正在处理您的请求...";
-        progress.value = 0;
+        
+        if (resetProgress) {
+            progressMessage.value = "正在处理您的请求...";
+            progress.value = 0;
+        }
+
         error.value = null;
         
-        // 设置轮询间隔（每2秒查询一次）
+        // 设置轮询间隔
         pollingInterval.value = window.setInterval(() => {
             checkProgress(queryId);
         }, 1000);
