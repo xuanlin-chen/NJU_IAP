@@ -1,6 +1,6 @@
 export default {
   title: "南大知识助手",
-  welcomeMessage: "您好！我是南京大学知识库助手，可以回答您关于南大的各类问题！",
+  welcomeMessage: "您好！我是南京大学知识库助手，可以检索您关于南大的各类校园消息！",
   placeholder: "输入您的问题...",
   send: "发送",
   clearChat: "清空对话",

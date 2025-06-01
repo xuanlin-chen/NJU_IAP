@@ -158,25 +158,23 @@ def query_by_date():
 
 
 @api_bp.route("/knowledge/query", methods=["POST"])
-def query_knowledge():
-    """知识库问答接口"""
+def knowledge_query():
+    """知识库问答"""
+    data = request.get_json()
+    
+    if not data or not data.get("question"):
+        return api_response(message="问题不能为空", code=400)
+    
+    question = data.get("question")
+    model = data.get("model", "RAG")  # 默认使用RAG模型
+    
     try:
-        # 从请求体中获取问题和查询模型
-        data = request.get_json()
-        if not data or "question" not in data:
-            return api_response(message="问题不能为空", code=400)
-
-        question = data["question"]
-        model = data.get("model", "RAG")
-
-        # 调用查询服务
         result = query_by_question(question, model)
-
         # 如果返回结果包含错误信息
         if "code" in result and result["code"] != HTTPStatus.OK:
             return api_response(result, message=result["message"], code=result["code"])
-
-        return api_response(result, message="查询成功")
+            # 这里直接返回queryId，不等待处理完成
+        return api_response(data=result)
     except Exception as e:
         print(f"知识查询失败: {str(e)}")
         return api_response(message="知识查询失败，请稍后重试", code=500)

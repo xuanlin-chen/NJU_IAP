@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from dashscope import Application
 from datetime import datetime
+import threading
 import uuid
 import json
 import re
@@ -74,21 +75,11 @@ def is_to_db(json_data):
 # 全局字典，用于存储查询进度
 query_progress = {}
 
-def query_mcp(query):
-    # 生成唯一查询ID
-    query_id = str(uuid.uuid4())
-    
-    # 初始化进度信息
-    query_progress[query_id] = {
-        "status": "processing",
-        "message": "正在处理您的请求...",
-        "progress": 0,
-        "completed": False
-    }
-    
+def process_query_async(query_id, query):
+    """异步处理查询的函数"""
     query_json = {
-    "from": "user",
-    "content": ""
+        "from": "user",
+        "content": ""
     }
     query_json['content'] = query
     query_json_str = json.dumps(query_json)
@@ -104,14 +95,14 @@ def query_mcp(query):
         query_progress[query_id]["status"] = "error"
         query_progress[query_id]["message"] = f"智能助手响应失败：{e}"
         query_progress[query_id]["completed"] = True
-        return None
+        return
 
     json_response = safe_json_parse(response)
     is_go_db, content = is_to_db(json_response)
 
     if is_go_db:
         # 更新进度
-        query_progress[query_id]["message"] = "数据库检索助手正在检索，耗时约 1 至 2 分钟，请耐心等待..."
+        query_progress[query_id]["message"] = "数据库助手正在努力检索，耗时约 1 至 2 分钟🔍"
         query_progress[query_id]["progress"] = 30
         
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -128,10 +119,10 @@ def query_mcp(query):
             query_progress[query_id]["status"] = "error"
             query_progress[query_id]["message"] = f"数据库检索助手检索失败：{e}"
             query_progress[query_id]["completed"] = True
-            return None
+            return
 
         # 更新进度
-        query_progress[query_id]["message"] = "数据库检索助手检索完成，智能助手正在整理返回数据..."
+        query_progress[query_id]["message"] = "数据库助手检索完成，智能助手正在整理返回数据🤖"
         query_progress[query_id]["progress"] = 80
         
         search_result_to_angent = f"用户需求：{query}\n数据库返回信息：{search_result}"
@@ -142,7 +133,7 @@ def query_mcp(query):
             query_progress[query_id]["status"] = "error"
             query_progress[query_id]["message"] = f"智能助手整理数据失败：{e}"
             query_progress[query_id]["completed"] = True
-            return None
+            return
 
         json_response = safe_json_parse(raw_response)
         response_content = json_response['content']
@@ -151,20 +142,48 @@ def query_mcp(query):
         query_progress[query_id]["message"] = "处理完成"
         query_progress[query_id]["progress"] = 100
         query_progress[query_id]["completed"] = True
+        query_progress[query_id]["recommendation"] = response_content
         
-        return {"recommendation": response_content, "queryId": query_id}
     else:
         # 完成进度
         query_progress[query_id]["message"] = "处理完成"
         query_progress[query_id]["progress"] = 100
         query_progress[query_id]["completed"] = True
+        query_progress[query_id]["recommendation"] = content
         
-        return {"recommendation": content, "queryId": query_id}
+def query_mcp(query):
+    # 生成唯一查询ID
+    query_id = str(uuid.uuid4())
+    
+    # 初始化进度信息
+    query_progress[query_id] = {
+        "status": "processing",
+        "message": "正在处理您的请求...",
+        "progress": 0,
+        "completed": False,
+        "recommendation": "" # 添加一个字段存储最终结果
+    }
+    
+    # 启动异步线程处理查询
+    thread = threading.Thread(target=process_query_async, args=(query_id, query))
+    thread.daemon = True  # 设置为守护线程，这样主程序退出时线程也会退出
+    thread.start()
+    
+    # 立即返回查询ID，不等待处理完成
+    return {"queryId": query_id}
 
 # 用于获取查询进度
 def get_query_progress(query_id):
     if query_id in query_progress:
-        return query_progress[query_id]
+        progress_info = query_progress[query_id].copy()
+        
+        # 如果查询已完成，返回最终结果
+        if progress_info.get("completed", False):
+            # 清理不需要的进度信息，避免内存泄漏
+            if query_id in query_progress:
+                del query_progress[query_id]
+                
+        return progress_info
     else:
         return {
             "status": "not_found",

@@ -19,30 +19,16 @@
               <h2 :key="chatStore.currentChatIndex">{{ chatStore.currentChat?.title || chatResource.title }}</h2>
             </transition>
             
-            <!-- 模型切换按钮 -->
-            <n-button 
-              size="medium" 
-              :type="chatStore.currentModel === 'RAG' ? 'primary' : 'info'"
-              @click="chatStore.toggleModel"
-              class="model-toggle-btn"
-              :ghost="true"
-              round
-              strong
-            >
-              <span class="model-icon">{{ chatStore.currentModel === 'RAG' ? 'RAG' : 'MCP' }}</span>
-            </n-button>
-            
             <!-- 对话指南按钮 -->
             <n-button
               size="medium"
               type="default"
               @click="showGuide = true"
-              class="guide-btn"
-              :ghost="true"
-              round
+              class="guide-btn-header"
+              text
               strong
             >
-              <span class="guide-icon">指南</span>
+              <span class="guide-icon">AI助手交互指南</span>
             </n-button>
           </div>
         </div>
@@ -93,7 +79,22 @@
         </div>
         
         <!-- 输入区域 -->
-        <chat-input @send="chatStore.onSendMessage" />
+        <chat-input @send="chatStore.onSendMessage">
+          <!-- 添加模型切换按钮作为插槽内容 -->
+          <template #append>
+            <n-button 
+              size="medium" 
+              :type="chatStore.currentModel === 'RAG' ? 'primary' : 'info'"
+              @click="chatStore.toggleModel"
+              class="model-toggle-btn-input"
+              :ghost="true"
+              round
+              strong
+            >
+              <span class="model-icon">{{ chatStore.currentModel === 'RAG' ? 'RAG' : 'MCP' }}</span>
+            </n-button>
+          </template>
+        </chat-input>
       </div>
     </div>
     
@@ -101,7 +102,7 @@
     <n-modal
       v-model:show="showGuide"
       preset="card"
-      title="对话指南"
+      title="AI助手交互指南"
       style="width: 80%; max-width: 600px;"
       :mask-closable="true"
     >
@@ -110,19 +111,19 @@
         <p>我们提供智能 AI 检索服务，助您高效获取所需信息。</p>
         
         <h4>一、检索方式</h4>
-        <p>本平台采用 RAG（检索增强生成） 模式结合 MCP 模型上下文协议。RAG 可实现快速响应，MCP 则能实现精确查询。</p>
+        <p>本平台智能检索部分采用 RAG（检索增强生成） 和 MCP （模型上下文协议）双模式。RAG 可实现快速响应，MCP 则能实现精确查询。</p>
         
         <h4>二、MCP 查询方式说明</h4>
-        <p>默认情况下，MCP 查询仅筛选活动开始或结束时间不早于当前提问时间的活动（即您可参与的活动）。若您希望：</p>
-        <p>查看历史消息，或仅了解活动资讯（不考虑是否参与），请在提示词中明确添加"不考虑时间限制"或"不考虑消息是否过期"。</p>
+        <p>● 默认情况下，MCP 查询仅筛选活动开始或结束时间不早于当前提问时间的活动（即您可参与的活动）。若您希望查看历史消息，或仅了解活动资讯（不考虑是否参与），请在提示词中明确添加"不考虑时间限制"或"不考虑消息是否过期"。</p>
+        <p>● 智能助手有时会返回"未检索到相关信息"。可能是服务器不稳定，建议再次尝试；也可能是相关消息都已过期，此时建议在提示词末尾加上"不考虑时间限制"以检索历史信息。</p>
         
         <h4>三、与 AI 助手互动</h4>
         <p>您可与 AI 助手进行对话。当助手识别到检索需求时，将自动在知识库或数据库中检索。若助手未能识别您的检索意图，您可在提示词中直接写明"直接帮我检索 [具体信息]"。建议清晰描述检索需求，以便 AI 助手准确理解意图并返回您所需信息。</p>
         
         <h4>四、问题反馈与技术支持</h4>
         <p>使用过程中，如遇 API 调用报错或有任何改进建议，欢迎随时联系：</p>
-        <p>RAG 技术支持邮箱： 241880030@smail.nju.edu.cn</p>
-        <p>MCP 技术支持邮箱： 241880484@smail.nju.edu.cn</p>
+        <p>● RAG 技术支持邮箱： 241880030@smail.nju.edu.cn</p>
+        <p>● MCP 技术支持邮箱： 241880484@smail.nju.edu.cn</p>
         <p>我们将竭诚为您服务，持续优化您的检索体验😊</p>
       </div>
     </n-modal>
@@ -143,6 +144,9 @@ import { NButton, NModal } from 'naive-ui';
 import type { SearchModelType } from '@/stores/chatStore';
 // Show progress of MCP
 import { useProgressStore } from '@/stores/progressStore';
+
+// 初始化进度储存
+const progressStore = useProgressStore();
 
 // 对话指南显示状态
 const showGuide = ref(false);
@@ -177,9 +181,6 @@ chatStore.chatHistory = chatStore.chatHistory.map(chat => ({
   ...chat,
   date: new Date(chat.date),
 }));
-
-// 初始化进度存储
-const progressStore = useProgressStore();
 
 // 消息容器引用
 const messagesContainer = ref<HTMLElement | null>(null)
@@ -265,6 +266,7 @@ onMounted(() => {
   text-align: center;
 }
 
+/* 移除原来的模型切换按钮和指南按钮样式 */
 .model-toggle-btn {
   position: absolute;
   right: 16px;
@@ -286,7 +288,27 @@ onMounted(() => {
   border-width: 1.5px;
 }
 
-.model-toggle-btn:hover, .guide-btn:hover {
+/* 添加新的指南按钮样式 (在头部) */
+.guide-btn-header {
+  position: absolute;
+  right: 16px;
+  font-size: 14px;
+  padding: 4px 12px;
+  transition: all 0.3s ease;
+  color: #000000; /* 黑色文字 */
+}
+
+/* 添加新的模型切换按钮样式 (在输入框旁) */
+.model-toggle-btn-input {
+  margin-left: 8px;
+  font-size: 14px;
+  padding: 4px 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  border-width: 1.5px;
+}
+
+.model-toggle-btn:hover, .guide-btn:hover, .guide-btn-header:hover, .model-toggle-btn-input:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
