@@ -49,6 +49,8 @@ const formattedMessages = computed(() => {
       abstract: message.abstract || "",
       eventType: message.summary?.type || "", // store the type as eventType
       source: sourceStr,
+      keywords: message.summary?.keywords || "", // 添加关键词
+      link: sourceStr, // 添加原文链接，使用source作为链接
     } as CardItem;
   });
 });

@@ -36,20 +36,26 @@
             v-html="renderMarkdown(currentItem.abstract || '暂无摘要')"
             class="markdown-content"
           ></div>
+          
+          <!-- 显示关键词 -->
+          <div v-if="currentItem.keywords" class="item-keywords">
+            <span class="keywords-label">关键词：</span>
+            <span class="keywords-content">{{ currentItem.keywords }}</span>
+          </div>
         </div>
 
         <template #footer>
           <div class="modal-footer">
             <n-space justify="end">
               <n-button
-                v-if="currentItem?.source"
+                v-if="currentItem?.link"
                 type="primary"
                 tag="a"
                 :href="
-                  typeof currentItem?.source === 'string'
-                    ? currentItem?.source
-                    : currentItem?.source
-                    ? currentItem?.source.href
+                  typeof currentItem?.link === 'string'
+                    ? currentItem?.link
+                    : currentItem?.link
+                    ? currentItem?.link.href
                     : ''
                 "
                 target="_blank"
@@ -181,6 +187,8 @@ export interface CardItem {
   source?: string | URL;
   views?: number;
   extra?: string;
+  keywords?: string; // 添加关键词字段
+  link?: string | URL; // 添加原文链接字段
   // 使用 unknown 而不是 any
   [key: string]: unknown;
 }
@@ -393,6 +401,24 @@ function handleClick(item: CardItem) {
   background-color: var(--code-color);
   border-radius: 4px;
   font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+}
+
+.item-keywords {
+  margin-top: 16px;
+  padding: 8px 12px;
+  background-color: rgba(var(--primary-color-rgb), 0.05);
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.keywords-label {
+  font-weight: 600;
+  color: var(--text-color-2);
+  margin-right: 8px;
+}
+
+.keywords-content {
+  color: var(--primary-color);
 }
 
 .markdown-content pre {
