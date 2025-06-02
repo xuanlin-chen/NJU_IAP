@@ -269,11 +269,26 @@ async function submitNewDdl() {
       return;
     }
 
-    // 创建新的DDL项
+    // 创建新的DDL项，合并日期和时间
+    let dateTime = dayjs(ddlForm.value.dateTimestamp);
+    
+    // 如果有时间，则合并日期和时间
+    if (ddlForm.value.timeTimestamp) {
+      const timeObj = dayjs(ddlForm.value.timeTimestamp);
+      // 从时间对象中提取小时和分钟，并设置到日期对象中
+      dateTime = dateTime
+        .hour(timeObj.hour())
+        .minute(timeObj.minute())
+        .second(0);
+    } else {
+      // 如果没有设置时间，默认设置为00:00:00
+      dateTime = dateTime.hour(0).minute(0).second(0);
+    }
+    
     const newDdlItem: DdlEvent = {
       summary: {
         title: ddlForm.value.title,
-        time: dayjs(ddlForm.value.dateTimestamp),
+        time: dateTime,
       },
     };
 
@@ -299,14 +314,14 @@ async function submitNewDdl() {
         );
 
         if (!exists) {
-          // 添加完整的DDL项目，确保时间信息正确
-          ddlData.value.push({
+          // 添加完整的DDL项目，确保时间信息正确，添加到数组开头而不是末尾
+          ddlData.value.unshift({
             summary: {
               title: newDdlItem.summary.title,
               time: newDdlItem.summary.time,
             },
           });
-          console.log("Added new DDL to current dashboard:", newDdlItem);
+          console.log("Added new DDL to current dashboard at the beginning:", newDdlItem);
         }
       }
 
@@ -333,9 +348,9 @@ async function submitNewDdl() {
                 addedDdl.summary.time?.format("YYYY-MM-DD")
           );
 
-          // 如果不存在（服务器尚未返回），则添加到本地数据
+          // 如果不存在（服务器尚未返回），则添加到本地数据的开头
           if (!ddlExists && selectedDateStr === newDdlDateStr) {
-            freshDdlData.push(addedDdl);
+            freshDdlData.unshift(addedDdl);
           }
 
           // 更新本地数据

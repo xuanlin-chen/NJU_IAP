@@ -54,6 +54,7 @@ def login():
 
     try:
         session["user_id"] = user.id  # 在会话中设置用户ID
+        session.permanent = True  # 设置会话为永久会话
         db.session.commit()
         return api_response(data=user.to_dict(), message="登录成功")
     except Exception as e:

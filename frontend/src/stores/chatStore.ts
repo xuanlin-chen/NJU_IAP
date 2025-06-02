@@ -117,6 +117,7 @@ export const useChatStore = defineStore('chat', () => {
               headers: {
                   'Content-Type': 'application/json',
               },
+              credentials: 'include',
               body: JSON.stringify({
                   question: message,
                   model: currentModel.value

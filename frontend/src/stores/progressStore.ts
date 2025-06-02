@@ -59,7 +59,9 @@ export const useProgressStore = defineStore("progress", () => {
     // 检查进度
     const checkProgress = async (queryId: string) => {
         try {
-            const response = await fetch(api_router.queryProgress(queryId));
+            const response = await fetch(api_router.queryProgress(queryId), {
+                credentials: 'include'
+            });
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -97,6 +99,20 @@ export const useProgressStore = defineStore("progress", () => {
         }
     };
 
+    // 获取查询进度
+    const getQueryProgress = async (queryId: string) => {
+        try {
+            const response = await fetch(api_router.queryProgress(queryId), {
+                credentials: 'include'
+            });
+            const result: ApiResponse = await response.json();
+            return result;
+        } catch (error) {
+            console.error('获取查询进度失败:', error);
+            throw error;
+        }
+    };
+
     return {
         isPolling,
         progressMessage,
@@ -105,5 +121,6 @@ export const useProgressStore = defineStore("progress", () => {
         completed,
         startPolling,
         stopPolling,
+        getQueryProgress,
     };
     });
