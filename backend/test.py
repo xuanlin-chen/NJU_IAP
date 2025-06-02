@@ -56,7 +56,7 @@ def test_generate_ddl_events():
         
         # 验证数据结构
         if len(result) > 0:
-            print(result[0])
+            print(result)
             
         print("DDL事件生成测试通过！")
         return True
@@ -189,9 +189,9 @@ if __name__ == "__main__":
         # test_database_connection()
         # test_fetch_data()
         # test_generate_daily_news()
-        # test_generate_ddl_events()
+        test_generate_ddl_events()
         # test_date_query_service()
         # test_user_database_connection()
         # test_user_model_methods()
-        test_query_service()  # 添加查询服务测试
+        # test_query_service()  # 添加查询服务测试
         

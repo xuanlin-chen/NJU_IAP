@@ -223,7 +223,7 @@ def generate_ddl_by_date(target_date):
         query = text(f"""
             SELECT 类型, 标题, 原文信息, 原文链接, {', '.join(fields)} 
             FROM {table_name} 
-            WHERE 发布日期 = :target_date
+            WHERE DATE({fields[0]}) = :target_date
             AND ({' OR '.join([f'{f} IS NOT NULL' for f in fields])})
         """)
         
