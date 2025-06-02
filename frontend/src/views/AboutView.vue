@@ -4,7 +4,17 @@
       <div class="about-content">
         <div class="about-section">
           <h2>{{ homeText.about.mission.title }}</h2>
-          <p>{{ homeText.about.mission.content }}</p>
+          <p>{{ homeText.about.mission.content_1 }}</p>
+          <h4>{{ homeText.about.mission.content_2 }}</h4>
+          <p>{{ homeText.about.mission.content_3 }}</p>
+          <p>{{ homeText.about.mission.content_4 }}</p>
+          <p>{{ homeText.about.mission.content_5 }}</p>
+          <p>{{ homeText.about.mission.content_6 }}</p>
+          <h4>{{ homeText.about.mission.content_7 }}</h4>
+          <p>{{ homeText.about.mission.content_8 }}</p>
+          <p>{{ homeText.about.mission.content_9 }}</p>
+          <p>{{ homeText.about.mission.content_10 }}</p>
+          <p>{{ homeText.about.mission.content_11 }}</p>
         </div>
         
         <div class="about-section">
