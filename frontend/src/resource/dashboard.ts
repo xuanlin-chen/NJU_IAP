@@ -9,7 +9,7 @@ export default {
     all: "全部数据"
   },
   ddlNews: {
-    title: "ddl提醒",
+    title: "DDL提醒",
     viewMore: "查看更多"
   },
   dayMessages: {

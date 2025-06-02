@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-
 // API路由
 const api_router = {
     queryProgress: (queryId: string) => `/api/query-progress/${queryId}`,
@@ -14,6 +13,7 @@ interface ApiResponse {
         message: string;
         progress: number;
         completed: boolean;
+        recommendation?: string;
     };
     message: string;
     errors?: string;
@@ -123,4 +123,4 @@ export const useProgressStore = defineStore("progress", () => {
         stopPolling,
         getQueryProgress,
     };
-    });
+});

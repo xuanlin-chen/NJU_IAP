@@ -90,6 +90,17 @@ export const useChatStore = defineStore('chat', () => {
           };
           messages.value.push(aiMessage);
           isTyping.value = false;
+          
+          // 添加：更新聊天历史
+          if (currentChat.value) {
+              // 保存消息到聊天历史
+              currentChat.value.messages = [...messages.value];
+              currentChat.value.date = new Date();
+              
+              // 更新聊天历史
+              chatHistory.value[currentChatIndex.value] = currentChat.value;
+              localStorage.setItem('chatHistory', JSON.stringify(chatHistory.value));
+          }
       }
   }) as EventListener);
   
