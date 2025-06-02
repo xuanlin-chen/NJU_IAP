@@ -1,5 +1,5 @@
 <template>
-  <div style="position: relative">
+  <div style="position: relative" class="ddl-section">
     <base-card
       :title="dashboardText.ddlNews.title"
       :items="formattedDdlItems"
@@ -10,14 +10,16 @@
       :use-simple-list="true"
       @view-more="handleViewMoreDdl"
       @delete-item="handleDeleteDdl"
+      class="ddl-card"
     />
 
     <!-- 添加浮动按钮用于添加DDL -->
     <n-float-button
-      type="default"
+      type="primary"
       position="absolute"
       style="right: 16px; top: 16px"
       @click="handleAddDdl"
+      class="add-ddl-button"
     >
       <AddIcon />
     </n-float-button>
@@ -135,5 +137,67 @@ async function handleDeleteDdl(item: CardItem, index: number) {
 </script>
 
 <style scoped>
-/* DDL部分的特定样式 */
+.ddl-section {
+  transition: all 0.3s ease;
+}
+
+.ddl-card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ddl-section:hover {
+  transform: translateY(-2px);
+}
+
+.add-ddl-button {
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(128, 82, 218, 0.2);
+}
+
+.add-ddl-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(128, 82, 218, 0.3);
+}
+
+/* 自定义DDL项目样式 */
+:deep(.simple-list-item) {
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  border-left: 3px solid #8052da;
+  background-color: rgba(245, 245, 250, 0.5);
+}
+
+:deep(.simple-list-item:hover) {
+  background-color: rgba(245, 245, 250, 0.9);
+  transform: translateX(2px);
+}
+
+:deep(.simple-item-title) {
+  font-weight: 500;
+  color: #333;
+  transition: color 0.2s ease;
+}
+
+:deep(.simple-item-title:hover) {
+  color: #8052da;
+  text-decoration: none;
+}
+
+:deep(.simple-item-footer) {
+  color: #888;
+  font-size: 12px;
+}
+
+:deep(.delete-icon) {
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+:deep(.delete-icon:hover) {
+  opacity: 1;
+  color: #ff4d4f;
+  transform: scale(1.1);
+}
 </style>

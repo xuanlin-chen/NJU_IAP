@@ -63,15 +63,15 @@ const currentYear = ref(props.value.getFullYear());
 const selectedDate = ref(new Date(props.value));
 
 // 星期名称
-const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 
 // 获取当前月份和年份的显示文本
 const currentMonthYear = computed(() => {
   const monthNames = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 
-    'July', 'Aug', 'Sept', 'Oct','Nov', 'Dec'
+    '1月', '2月', '3月', '4月', '5月', '6月', 
+    '7月', '8月', '9月', '10月','11月', '12月'
   ];
-  return `${monthNames[currentMonth.value]} ${currentYear.value}`;
+  return `${currentYear.value}年 ${monthNames[currentMonth.value]}`;
 });
 
 // 获取日历网格数据
@@ -131,7 +131,7 @@ const isDisabled = (date: Date) => {
 
 // 选择日期
 const selectDate = (day: { date: Date, isCurrentMonth: boolean, isToday: boolean }) => {
-  if (isDisabled(day.date)) return;
+  // if (isDisabled(day.date)) return;
   
   selectedDate.value = new Date(day.date);
   emit('update:value', selectedDate.value);
@@ -168,16 +168,17 @@ onMounted(() => {
 .simple-calendar {
   width: 100%;
   background-color: white;
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   padding: 0 5px;
 }
 
@@ -186,66 +187,87 @@ onMounted(() => {
   border: none;
   cursor: pointer;
   font-size: 18px;
-  color: #666;
-  padding: 0 8px;
+  color: #8052da;
+  padding: 5px 10px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover {
+  background-color: rgba(128, 82, 218, 0.1);
+  transform: scale(1.1);
 }
 
 .month-year {
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
 }
 
 .weekday-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: #666;
   border-bottom: 1px solid #eee;
-  padding-bottom: 5px;
-  margin-bottom: 5px;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(6, 1fr);
-  gap: 2px;
+  gap: 4px;
 }
 
 .calendar-day {
-  height: 28px;
-  width: 28px;
+  height: 32px;
+  width: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
   border-radius: 50%;
-  margin: 1px auto;
+  margin: 2px auto;
+  transition: all 0.2s ease;
+}
+
+.calendar-day:hover:not(.disabled):not(.selected) {
+  background-color: rgba(128, 82, 218, 0.1);
 }
 
 .other-month {
   color: #ccc;
 }
 
+.today:not(.selected) {
+  border: 1px solid #8052da;
+  color: #8052da;
+  font-weight: 600;
+}
+
 .selected {
   background-color: #8052da;
   color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(128, 82, 218, 0.4);
 }
 
 .disabled {
   color: #ddd;
-  cursor: not-allowed;
+  /* cursor: not-allowed;*/
 }
 
 /* 滑动条样式 */
 .calendar-slider {
-  margin-top: 10px;
-  padding-top: 5px;
+  margin-top: 15px;
+  padding-top: 8px;
   position: relative;
-  height: 20px;
+  height: 24px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -255,7 +277,7 @@ onMounted(() => {
   width: 80%;
   height: 4px;
   background-color: #e0e0e0;
-  border-radius: 2px;
+  border-radius: 4px;
   position: relative;
 }
 
@@ -264,11 +286,18 @@ onMounted(() => {
   top: 50%;
   left: 30%;
   transform: translate(-50%, -50%);
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   background-color: #8052da;
   border-radius: 50%;
   cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.slider-handle:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 2px 6px rgba(128, 82, 218, 0.4);
 }
 
 .slider-buttons {
@@ -283,16 +312,21 @@ onMounted(() => {
   background: none;
   border: none;
   font-size: 14px;
-  color: #999;
+  color: #8052da;
   cursor: pointer;
   padding: 0 5px;
+  transition: all 0.2s ease;
+}
+
+.slider-nav-btn:hover {
+  transform: scale(1.1);
 }
 
 @media (max-width: 480px) {
   .calendar-day {
-    height: 24px;
-    width: 24px;
-    font-size: 11px;
+    height: 28px;
+    width: 28px;
+    font-size: 12px;
   }
 }
 </style>

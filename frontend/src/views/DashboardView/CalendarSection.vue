@@ -3,7 +3,8 @@
   <base-card
     :title="dashboardText.calendar.title"
     :is-calendar-mode="true"
-    calendar-footer-text="点击查看 DDL"
+    calendar-footer-text=""
+    class="calendar-section"
   >
     <template #calendar>
       <SimpleCalendar
@@ -82,20 +83,42 @@ async function handleDateSelect(date: Date) {
 </script>
 
 <style scoped>
+.calendar-section {
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.calendar-section:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
 .calendar-card {
   margin-top: 20px;
   width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .calendar-container {
   display: flex;
   flex-direction: column;
+  padding: 8px;
 }
 
 .calendar-footer {
-  margin-top: 10px;
+  margin-top: 12px;
   text-align: center;
-  font-size: 12px;
-  color: #999999;
+  font-size: 13px;
+  font-weight: 500;
+  color: #8052da;
+  padding: 8px 0;
+  border-top: 1px dashed #eaeaea;
+  transition: color 0.3s ease;
+}
+
+.calendar-footer:hover {
+  color: #6039b0;
 }
 </style>
