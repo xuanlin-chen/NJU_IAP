@@ -171,7 +171,7 @@ const chatStore = useChatStore() as {
   startNewChat: () => void;
   selectChat: (index: number) => void;
   deleteChat: (index: number) => void;
-  askExample: () => void;
+  askExample: (question: string) => void;
   onSendMessage: (message: string) => void;
   toggleModel: () => void;
 };

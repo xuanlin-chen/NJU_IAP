@@ -40,11 +40,11 @@ export interface NewsItem {
 }
 
 interface DashboardState {
-  ddlData: DdlEvent[];
-  Messages: NewsItem[];
-  historyMessages: NewsItem[];
-  isLoading: boolean;
-  error: string | null;
+	ddlData: DdlEvent[];
+	Messages: NewsItem[];
+	historyMessages: NewsItem[];
+	isLoading: boolean;
+	error: string | null;
 }
 
 // Dashboard Store
@@ -117,17 +117,17 @@ export const useDashboardStore = defineStore("dashboard", {
 				if (response.code === 200 && response.data.news) {
 					this.Messages = response.data.news.map((item: NewsItem) => {
 						return {
-              date: item.date,
-              summary: {
-                title: item.summary?.title,
-                source: item.summary?.source,
-                type: item.summary?.type || [],
-                keywords: item.summary?.keywords,
-              },
-              abstract: item.abstract,
-						};
-					});
-				}
+				date: item.date,
+				summary: {
+					title: item.summary?.title,
+					source: item.summary?.source,
+					type: item.summary?.type || [],
+					keywords: item.summary?.keywords,
+				},
+				abstract: item.abstract,
+							};
+						});
+					}
 			} catch (error) {
 				console.error(`Failed to fetch messages for date ${date}:`, error);
 			}

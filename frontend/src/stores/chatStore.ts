@@ -75,8 +75,8 @@ export const useChatStore = defineStore('chat', () => {
     messages.value = currentChat.value ? [...currentChat.value.messages] : [];
   };
 
-  const askExample = () => {
-    onSendMessage("你好呀，介绍一下你自己吧！");
+  const askExample = (question: string) => {
+    onSendMessage(question);
   };
 
   // 在setup函数中添加事件监听
