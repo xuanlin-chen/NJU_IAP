@@ -4,17 +4,19 @@
       <div class="about-content">
         <div class="about-section">
           <h2>{{ homeText.about.mission.title }}</h2>
-          <p>{{ homeText.about.mission.content_1 }}</p>
-          <h4>{{ homeText.about.mission.content_2 }}</h4>
-          <p>{{ homeText.about.mission.content_3 }}</p>
-          <p>{{ homeText.about.mission.content_4 }}</p>
-          <p>{{ homeText.about.mission.content_5 }}</p>
-          <p>{{ homeText.about.mission.content_6 }}</p>
-          <h4>{{ homeText.about.mission.content_7 }}</h4>
-          <p>{{ homeText.about.mission.content_8 }}</p>
-          <p>{{ homeText.about.mission.content_9 }}</p>
-          <p>{{ homeText.about.mission.content_10 }}</p>
-          <p>{{ homeText.about.mission.content_11 }}</p>
+          <div class="mission-block">
+            <p>{{ homeText.about.mission.content_1 }}</p>
+            <h4>{{ homeText.about.mission.content_2 }}</h4>
+            <p>{{ homeText.about.mission.content_3 }}</p>
+            <p>{{ homeText.about.mission.content_4 }}</p>
+            <p>{{ homeText.about.mission.content_5 }}</p>
+            <p>{{ homeText.about.mission.content_6 }}</p>
+            <h4>{{ homeText.about.mission.content_7 }}</h4>
+            <p>{{ homeText.about.mission.content_8 }}</p>
+            <p>{{ homeText.about.mission.content_9 }}</p>
+            <p>{{ homeText.about.mission.content_10 }}</p>
+            <p>{{ homeText.about.mission.content_11 }}</p>
+          </div>
         </div>
         
         <div class="about-section">
@@ -53,9 +55,8 @@
         
         <div class="about-section">
           <h2>{{ homeText.about.team.title }}</h2>
-          <p>{{ homeText.about.team.content }}</p>
-          <div class="team-info">
-
+          <div class="team-content">
+            <p>{{ homeText.about.team.content }}</p>
           </div>
         </div>
         
@@ -97,29 +98,35 @@ import { InfoCircleIcon, ShieldIcon, CheckCircleIcon, TargetIcon, EmailIcon, Pho
 .about-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
 }
 
 .about-card {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+  transition: transform 0.3s ease;
 }
 
-.about-content {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
+.about-card:hover {
+  transform: translateY(-5px);
 }
 
 .about-section {
-  margin-bottom: 10px;
+  margin-bottom: 50px;
+  animation: fadeInUp 0.6s ease-out;
 }
 
 .about-section h2 {
-  font-size: 1.8rem;
-  color: #333;
-  margin-bottom: 20px;
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 30px;
   position: relative;
-  padding-bottom: 10px;
+  padding-bottom: 15px;
+  font-weight: 600;
 }
 
 .about-section h2:after {
@@ -127,79 +134,154 @@ import { InfoCircleIcon, ShieldIcon, CheckCircleIcon, TargetIcon, EmailIcon, Pho
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 60px;
-  height: 3px;
-  background-color: #2080f0;
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #2080f0, #42b883);
+  border-radius: 2px;
 }
 
 .tech-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 30px;
   margin-top: 30px;
 }
 
+/* 响应式布局调整 */
+@media (min-width: 1200px) {
+  .tech-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .tech-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .tech-item {
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  background-color: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   text-align: center;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: all 0.4s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .tech-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .tech-item h3 {
-  margin: 15px 0 10px;
-  color: #333;
+  margin: 20px 0 15px;
+  color: #2c3e50;
+  font-size: 1.4rem;
+  font-weight: 600;
 }
 
 .tech-item p {
-  font-size: 0.9rem;
-  color: #666;
+  font-size: 1rem;
+  color: #5c6c7c;
+  line-height: 1.6;
+  margin-bottom: 15px;
 }
 
-.team-info {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 30px;
-  flex-wrap: wrap;
+.mission-block {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin: 20px 0;
 }
 
-.team-stat {
-  text-align: center;
-  padding: 0 20px;
+.mission-block h4 {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  margin: 20px 0 15px;
+  font-weight: 600;
 }
 
-.stat-number {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #2080f0;
+.mission-block p {
+  margin-bottom: 12px;
 }
 
-.stat-label {
-  color: #666;
-  margin-top: 5px;
+.team-content {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin: 20px 0;
 }
 
 .contact-info {
-  margin-top: 20px;
+  margin-top: 30px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .contact-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
+  padding: 10px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
-.contact-item span {
-  color: #333;
+.contact-item:hover {
+  background: rgba(32, 128, 240, 0.1);
+  transform: translateX(5px);
+}
+
+.contact-item span, .contact-item a {
+  color: #2c3e50;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.contact-item a:hover {
+  color: #2080f0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .about-container {
+    padding: 20px 15px;
+  }
+  
+  .tech-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  
+  .about-section h2 {
+    font-size: 1.6rem;
+  }
+  
+  .tech-item {
+    padding: 20px;
+  }
 }
 </style>
+
+<!-- 修改team部分 -->
