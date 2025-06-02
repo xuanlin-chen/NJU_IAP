@@ -104,9 +104,26 @@ export const useUserStore = defineStore("user", () => {
 	};
 
 	// 登出方法
-	const logout = () => {
-		user.value = null;
-		isLoggedIn.value = false;
+	const logout = async () => {
+		try {
+			const response = await fetch('/api/logout', {
+				method: 'POST',
+				credentials: 'include'
+			});
+			
+			// 无论后端响应如何，都清除前端状态
+			user.value = null;
+			isLoggedIn.value = false;
+			
+			if (!response.ok) {
+				throw new Error('登出失败');
+			}
+		} catch (e) {
+			console.error('登出失败:', e);
+			// 即使发生错误，也确保清除前端状态
+			user.value = null;
+			isLoggedIn.value = false;
+		}
 	};
 
 	// 添加自定义DDL
