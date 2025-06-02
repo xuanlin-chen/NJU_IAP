@@ -66,11 +66,7 @@ html, body, #app {
   color: #333333;
   width: 100%;
   min-height: 100vh;
-  /* 添加左边距，为顶部菜单按钮留出空间 */
-  padding-left: 60px;
-  padding-right: 0;
-  padding-top: 0;
-  padding-bottom: 0;
+  padding: 0;
   overflow: hidden; /* 防止内容溢出 */
 }
 

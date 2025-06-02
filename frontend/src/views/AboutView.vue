@@ -69,12 +69,7 @@
               </n-icon>
               <span>{{ homeText.about.contact.email }}</span>
             </div>
-            <div class="contact-item">
-              <n-icon>
-                <PhoneIcon />
-              </n-icon>
-              <span>{{ homeText.about.contact.phone }}</span>
-            </div>
+            
             <div class="contact-item">
               <n-icon>
                 <LocationIcon />
@@ -91,7 +86,7 @@
 <script setup lang="ts">
 import { NCard, NIcon } from 'naive-ui'
 import homeText from '../resource/home'
-import { InfoCircleIcon, ShieldIcon, CheckCircleIcon, TargetIcon, EmailIcon, PhoneIcon, LocationIcon } from '../components/icons'
+import { InfoCircleIcon, ShieldIcon, CheckCircleIcon, TargetIcon, EmailIcon, LocationIcon } from '../components/icons'
 </script>
 
 <style scoped>

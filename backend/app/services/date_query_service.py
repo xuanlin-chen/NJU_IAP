@@ -60,15 +60,17 @@ def generate_date_data(target_date_str):
             user = User.query.get(user_id)
             if user and user.custom_ddls:
                 for ddl in user.custom_ddls:
-                    ddl_date = datetime.datetime.strptime(ddl['date'], '%Y-%m-%d').date()
+                    ddl_date = datetime.datetime.strptime(ddl['date'].split('T')[0], '%Y-%m-%d').date()
                     # 检查DDL日期是否在target_date及其后5天内
                     if target_date <= ddl_date <= target_date + datetime.timedelta(days=5):
+                        # 将前端传入的日期时间字符串 'YYYY-MM-DDTHH:MM:SS' 转换为 'YYYY-MM-DD HH:MM:SS'
+                        formatted_ddl_time = ddl['date'].replace('T', ' ')
                         user_ddls.append({
-                            'date': ddl['date'],
+                            'date': ddl['date'].split('T')[0],
                             'summary': {
                                 '类型': '用户自定义',
                                 '标题': ddl['content'],
-                                '截止时间': ddl['date'] # 自定义DDL没有具体时间，暂时用日期代替
+                                '截止时间': formatted_ddl_time # 使用转换后的日期时间字符串
                             }
                         })
 

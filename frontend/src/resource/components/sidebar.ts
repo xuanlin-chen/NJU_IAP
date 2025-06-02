@@ -14,6 +14,6 @@ export default {
   },
   footer: {
     version: "版本",
-    copyright: "© 2025 教育数据平台"
+    copyright: "© 2025 南大信息聚合平台"
   }
 }

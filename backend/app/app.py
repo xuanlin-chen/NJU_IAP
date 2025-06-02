@@ -17,7 +17,7 @@ def create_app():
     app.config['SECRET_KEY'] = 'your_secret_key_here' # 生产环境中请使用复杂且保密的密钥
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' # 增加CSRF保护
     app.config['SESSION_COOKIE_SECURE'] = True # 仅通过HTTPS发送Cookie
-    
+    app.config['PERMANENT_SESSION_LIFETIME'] = 3600 # 会话有效期为1小时
     # 加载配置
     from app.settings import SQLALCHEMY_DATABASE_URI, USER_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI

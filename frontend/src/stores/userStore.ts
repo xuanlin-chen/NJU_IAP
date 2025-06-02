@@ -44,6 +44,7 @@ export const useUserStore = defineStore("user", () => {
 				headers: {
 					"Content-Type": "application/json",
 				},
+				credentials: 'include',
 				body: JSON.stringify({ username, password }),
 			});
 
@@ -78,6 +79,7 @@ export const useUserStore = defineStore("user", () => {
 				headers: {
 					"Content-Type": "application/json",
 				},
+				credentials: 'include',
 				body: JSON.stringify({ username, password }),
 			});
 
@@ -123,9 +125,10 @@ export const useUserStore = defineStore("user", () => {
 				headers: {
 					"Content-Type": "application/json",
 				},
+				credentials: 'include',
 				body: JSON.stringify({
 					content: content.summary.title,
-					date: content.summary.time?.format("YYYY-MM-DD"),
+					date: content.summary.time?.format("YYYY-MM-DD HH:mm:ss"),
 				}),
 			});
 
@@ -164,6 +167,7 @@ export const useUserStore = defineStore("user", () => {
 		try {
 			const response = await fetch(api_router.removeCustomDdl(index), {
 				method: "DELETE",
+				credentials: 'include',
 			});
 
 			const result: ApiResponse = await response.json();
@@ -204,6 +208,7 @@ export const useUserStore = defineStore("user", () => {
 				headers: {
 					"Content-Type": "application/json",
 				},
+				credentials: 'include',
 				body: JSON.stringify({ accounts }),
 			});
 

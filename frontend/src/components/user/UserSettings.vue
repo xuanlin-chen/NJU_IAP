@@ -8,17 +8,26 @@
       
       <!-- 添加新DDL -->
       <div class="add-ddl">
-        <n-input 
-          v-model:value="newDdl" 
-          type="text" 
+        <n-input
+          v-model:value="newDdlContent"
+          type="text"
           placeholder="输入新的DDL内容"
           :disabled="userStore.loading"
+          class="ddl-content-input"
         />
-        <n-button 
-          @click="handleAddDdl" 
-          type="primary" 
+        <n-date-picker
+          v-model:value="newDdlTime"
+          type="datetime"
+          clearable
+          placeholder="选择DDL日期和时间"
+          :disabled="userStore.loading"
+          class="ddl-time-picker"
+        />
+        <n-button
+          @click="handleAddDdl"
+          type="primary"
           :loading="userStore.loading"
-          :disabled="!newDdl"
+          :disabled="!newDdlContent || !newDdlTime"
         >
           添加
         </n-button>
@@ -83,7 +92,8 @@ import {
   NListItem, 
   NIcon,
   NTransfer,
-  useMessage
+  useMessage,
+  NDatePicker // Add NDatePicker import
 } from 'naive-ui';
 import { useUserStore } from '@/stores/userStore';
 import { TrashOutline as TrashIcon } from '@vicons/ionicons5';
@@ -93,24 +103,27 @@ const userStore = useUserStore();
 const message = useMessage();
 
 // DDL部分
-const newDdl = ref('');
+const newDdlContent = ref('');
+const newDdlTime = ref<number | null>(null); // Store timestamp
 const loadingIndices = ref<Record<number, boolean>>({});
 
 // 添加自定义DDL
 const handleAddDdl = async () => {
-  if (!newDdl.value.trim()) return;
+  if (!newDdlContent.value.trim() || !newDdlTime.value) return;
+
   const ddlEvent = {
     summary: {
-      title: newDdl.value,
-      time: dayjs(new Date())
+      title: newDdlContent.value,
+      time: dayjs(newDdlTime.value) // Convert timestamp to dayjs object
     },
-    content: newDdl.value
+    content: newDdlContent.value // Keep content for now, though it might be redundant
   };
   
   const result = await userStore.addCustomDdl(ddlEvent);
   if (result.success) {
     message.success('添加成功');
-    newDdl.value = '';
+    newDdlContent.value = '';
+    newDdlTime.value = null; // Clear selected time
   } else {
     message.error(result.error || '添加失败');
   }
@@ -209,8 +222,16 @@ h3 {
 
 .add-ddl {
   display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.ddl-content-input {
+  flex-grow: 1;
+}
+
+.ddl-time-picker {
+  width: 200px; /* Adjust width as needed */
 }
 
 .ddl-list {

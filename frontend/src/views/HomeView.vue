@@ -40,7 +40,7 @@
           <h1 class="main-title">南京大学信息聚合平台</h1>
           <p class="subtitle">汇聚校园资讯，智能推送，尽在掌握</p>
           <div class="cta-buttons">
-            <n-button type="primary" size="large" class="cta-button" @click="navigateTo('chat')">
+            <n-button type="primary" size="large" class="cta-button" @click="navigateTo('dashboard')">
               <template #icon>
                 <n-icon><dashboard-icon /></n-icon>
               </template>

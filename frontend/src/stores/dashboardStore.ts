@@ -66,7 +66,9 @@ export const useDashboardStore = defineStore("dashboard", {
 				this.isLoading = true;
 				this.error = null;
 
-				const response = await fetch(url);
+				const response = await fetch(url, {
+					credentials: 'include'
+				});
 				if (!response.ok) {
 					throw new Error(`HTTP error! status: ${response.status}`);
 				}

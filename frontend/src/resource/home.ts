@@ -71,7 +71,6 @@ export default {
     contact: {
       title: "联系我们",
       email: "241880625@smail.nju.edu.cn",
-      phone: "18059410101",
       address: "https://github.com/xuanlin-chen/NJU_IAP"
     }
   }
