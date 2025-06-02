@@ -14,23 +14,29 @@
           <img src="../assets/nju.png" class="nav-logo" alt="南京大学logo" />
           <span class="logo-text">NJU-IAP</span>
         </div>
-        <div class="auth-buttons">
-          <n-button
-            @click="showAuthModal = true; activeTab = 'login';"
-            quaternary
-            size="medium"
-            class="login-btn"
-          >
-            登录
-          </n-button>
-          <n-button
-            @click="showAuthModal = true; activeTab = 'register';"
-            type="primary"
-            size="medium"
-            class="register-btn"
-          >
-            注册
-          </n-button>
+        <div class="nav-right">
+          <div class="auth-buttons" v-if="!userStore.isLoggedIn">
+            <n-button
+              @click="showAuthModal = true; activeTab = 'login';"
+              quaternary
+              size="medium"
+              class="login-btn"
+            >
+              登录
+            </n-button>
+            <n-button
+              @click="showAuthModal = true; activeTab = 'register';"
+              type="primary"
+              size="medium"
+              class="register-btn"
+            >
+              注册
+            </n-button>
+          </div>
+          <div class="user-avatar" @click="showUserModal = true">
+            <AccountIcon v-if="!userStore.isLoggedIn" />
+            <AccountIcon_ v-else />
+          </div>
         </div>
       </div>
 
@@ -109,22 +115,124 @@
         @login-success="handleLoginSuccess"
         @register-success="handleRegisterSuccess"
       />
+
+      <!-- 用户选项模态框 -->
+      <n-modal
+        v-model:show="showUserModal"
+        style="width: 300px"
+        preset="card"
+        :title="userStore.isLoggedIn ? '用户选项' : '请登录'"
+        size="small"
+        :bordered="false"
+        :segmented="true"
+        :auto-focus="false"
+        transform-origin="center"
+      >
+        <!-- 用户信息区域 -->
+        <div class="user-modal-header">
+          <div class="user-avatar">
+            <AccountIcon v-if="!userStore.isLoggedIn" />
+            <AccountIcon_ v-else />
+          </div>
+          <div class="user-info">
+            <div class="user-name">{{ userStore.isLoggedIn ? userStore.user?.username : '未登录' }}</div>
+            <div class="user-status">{{ userStore.isLoggedIn ? '在线' : '点击登录以使用完整功能' }}</div>
+          </div>
+        </div>
+        
+        <!-- 分割线 -->
+        <div class="user-modal-divider"></div>
+        
+        <!-- 菜单选项 -->
+        <n-space vertical class="user-modal-options">
+          <n-button 
+            v-for="option in dropdownOptions" 
+            :key="option.key" 
+            @click="handleModalOption(option.key)"
+            class="user-option-button"
+            text
+            size="large"
+          >
+            {{ option.label }}
+          </n-button>
+        </n-space>
+      </n-modal>
     </div>
   </n-message-provider>
 </template>
 
 <script setup lang="ts">
-import { NIcon, NButton, NMessageProvider } from "naive-ui";
+import { NIcon, NButton, NMessageProvider, NModal, NSpace } from "naive-ui";
 import { useRouter } from "vue-router";
-import { ref, defineAsyncComponent, onMounted } from "vue";
+import { ref, defineAsyncComponent, onMounted, computed } from "vue";
 import { DashboardIcon, ChatIcon, BookIcon } from "../components/icons";
+import { useUserStore } from "../stores/userStore";
+import AccountIcon from "../components/icons/AccountIcon.vue";
+import AccountIcon_ from "../components/icons/AccountIcon_.vue";
+
 const AuthModal = defineAsyncComponent(
   () => import("../components/auth/AuthModal.vue")
 );
 
 const router = useRouter();
+const userStore = useUserStore();
 const showAuthModal = ref(false);
+const showUserModal = ref(false);
 const activeTab = ref<"login" | "register">("login");
+
+// 下拉菜单选项
+const dropdownOptions = computed(() => {
+  const commonOptions = [
+    {
+      label: "退订消息",
+      key: "unsubscribe",
+    }
+  ];
+  
+  // 根据登录状态返回不同选项
+  const loginOptions = userStore.isLoggedIn 
+    ? [
+        {
+          label: "个人设置",
+          key: "settings",
+        },
+        {
+          label: "退出登录",
+          key: "logout",
+        }
+      ]
+    : [
+        {
+          label: "登录/注册",
+          key: "login",
+        }
+      ];
+      
+  return [...loginOptions, ...commonOptions];
+});
+
+// 处理模态框选项选择
+const handleModalOption = (key: string) => {
+  switch (key) {
+    case 'login':
+      showUserModal.value = false;
+      showAuthModal.value = true;
+      activeTab.value = 'login';
+      break;
+    case 'settings':
+      router.push('/settings');
+      showUserModal.value = false;
+      break;
+    case 'logout':
+      userStore.logout();
+      showUserModal.value = false;
+      break;
+    case 'unsubscribe':
+      // 处理退订消息逻辑
+      showUserModal.value = false;
+      break;
+  }
+};
 
 // 导航到指定路由
 const navigateTo = (route: string) => {
@@ -141,8 +249,25 @@ const handleRegisterSuccess = () => {
   router.push("/dashboard"); // 认证成功后跳转到仪表盘页面
 };
 
-// 页面加载时的动画效果
+// 检查用户登录状态
+const checkLoginStatus = async () => {
+  try {
+    const response = await fetch('/api/check-login', {
+      credentials: 'include'
+    });
+    const result = await response.json();
+    if (response.ok && result.code === 200) {
+      userStore.user = result.data;
+      userStore.isLoggedIn = true;
+    }
+  } catch (error) {
+    console.error('检查登录状态失败:', error);
+  }
+};
+
+// 页面加载时检查登录状态
 onMounted(() => {
+  checkLoginStatus();
   document.querySelector('.home-container')?.classList.add('loaded');
 });
 </script>
@@ -248,9 +373,25 @@ onMounted(() => {
   margin-right: 40px;
 }
 
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .auth-buttons {
   display: flex;
   gap: 16px;
+  margin-right: 20px;
+}
+
+.user-avatar {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.user-avatar:hover {
+  transform: scale(1.05);
 }
 
 .login-btn:hover, .register-btn:hover {
@@ -474,24 +615,24 @@ onMounted(() => {
     text-align: center;
     padding: 20px 20px 60px;
   }
-  
+
   .hero-content {
     max-width: 100%;
     margin-bottom: 40px;
   }
-  
+
   .cta-buttons {
     justify-content: center;
   }
-  
+
   .main-title {
     font-size: 2.8rem;
   }
-  
+
   .subtitle {
     font-size: 1.3rem;
   }
-  
+
   .features-section {
     padding: 60px 20px;
   }
@@ -501,44 +642,88 @@ onMounted(() => {
   .nav-bar {
     padding: 15px 20px;
   }
-  
+
   .logo-text {
     font-size: 1.2rem;
   }
-  
+
   .nav-logo {
     height: 30px;
   }
-  
+
   .main-title {
     font-size: 2.2rem;
   }
-  
+
   .subtitle {
     font-size: 1.1rem;
     margin-bottom: 30px;
   }
-  
+
   .cta-buttons {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .section-title {
     font-size: 2rem;
     margin-bottom: 40px;
   }
-  
+
   .feature {
     padding: 30px 20px;
   }
-  
+
   .feature h3 {
     font-size: 1.5rem;
   }
-  
+
   .feature p {
     font-size: 1rem;
   }
 }
+
+.user-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.user-status {
+  font-size: 14px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.user-modal-divider {
+  height: 1px;
+  background-color: #eee;
+  margin: 16px 0;
+}
+
+.user-modal-options {
+  width: 100%;
+}
+
+.user-option-button {
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+}
+
+.user-option-button:hover {
+  background-color: #f5f5f5;
+}
 </style>
+

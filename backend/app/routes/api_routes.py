@@ -190,6 +190,22 @@ def query_progress(query_id):
         "message": "Success"
     })
 
+@api_bp.route("/check-login", methods=["GET"])
+def check_login():
+    if "user_id" in session:
+        user = User.query.get(session["user_id"])
+        if user:
+            return api_response(data=user.to_dict(), message="已登录")
+    return api_response(message="未登录", code=401)
+
+@api_bp.route("/logout", methods=["POST"])
+def logout():
+    try:
+        session.clear()  # 清除所有会话数据
+        return api_response(message="登出成功")
+    except Exception as e:
+        return api_response(message="登出失败", code=500, errors=str(e))
+
 @api_bp.route("/docs", methods=["GET"])
 def api_docs():
     """返回API文档"""
