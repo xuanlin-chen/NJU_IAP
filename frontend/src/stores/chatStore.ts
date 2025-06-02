@@ -20,6 +20,9 @@ export type SearchModelType = 'RAG' | 'MCP';
 
 import { useProgressStore } from './progressStore';
 
+// 初始化进度存储 
+const progressStore = useProgressStore();
+
 export const useChatStore = defineStore('chat', () => {
   interface Message {
     role: string;
@@ -73,106 +76,114 @@ export const useChatStore = defineStore('chat', () => {
   };
 
   const askExample = () => {
-    onSendMessage("你好，介绍一下你自己");
+    onSendMessage("你好呀，介绍一下你自己吧！");
   };
 
+  // 在setup函数中添加事件监听
+  window.addEventListener('mcp-result-ready', ((event: CustomEvent) => {
+      const { recommendation } = event.detail;
+      if (recommendation && messages.value.length > 0) {
+          // 添加AI响应到聊天
+          const aiMessage = { 
+              role: 'assistant', 
+              content: recommendation
+          };
+          messages.value.push(aiMessage);
+          isTyping.value = false;
+      }
+  }) as EventListener);
+  
+  // 修改onSendMessage函数
   const onSendMessage = async (message: string) => {
-    if (!message.trim()) return;
-    
-    // Add user message to the chat
-    const userMessage = { role: 'user', content: message };
-    messages.value.push(userMessage);
-    
-    // Update chat history
-    if (currentChat.value) {
-      currentChat.value.messages = [...messages.value];
-    }
-    
-    try {
-      // Show typing indicator
+      if (!message.trim()) return;
+      
+      // 添加用户消息到聊天
+      messages.value.push({ role: 'user', content: message });
       isTyping.value = true;
       error.value = null;
       
-      // If MCP is used，start polling
-      const progressStore = useProgressStore();
+      // 如果是MCP模型，先停止之前的轮询
       let queryId = "";
       if (currentModel.value === 'MCP') {
-        progressStore.stopPolling(); // stop polling if it's running
-        queryId = "temp-" + Date.now(); // create template ID
-        progressStore.startPolling(queryId);
+          progressStore.stopPolling();
+          queryId = "temp-" + Date.now(); // create template ID
+          progressStore.startPolling(queryId);
       }
       
-      // Call the knowledge query API
-      const response = await fetch(api_router.knowledgeQuery(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question: message,
-          model: currentModel.value
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result: ApiResponse = await response.json();
-      
-      // update queryId
-      if (currentModel.value === 'MCP' && result.data.queryId) {
-        progressStore.stopPolling();
-        queryId = result.data.queryId;
-        progressStore.startPolling(queryId, false);
-      }
-      
-      // Check if API returned an error
-      if (result.code !== 200) {
-        throw new Error(result.message || 'API请求失败');
-      }
-      
-      // Add AI response to the chat
-      const aiMessage = { 
-        role: 'assistant', 
-        content: result.data.recommendation || '抱歉，我没能找到相关信息。'
-      };
-      messages.value.push(aiMessage);
-      
-      // stop polling
-      if (currentModel.value === 'MCP' && queryId) {
-        progressStore.stopPolling();
-      }
-      
-      // Update chat history
-      if (currentChat.value) {
-        // Update chat title based on first user message if this is the first message
-        if (currentChat.value.messages.length === 0) {
-          currentChat.value.title = message.length > 20 
-            ? `${message.substring(0, 20)}...` 
-            : message;
+      try {
+          // Call the knowledge query API
+          const response = await fetch(api_router.knowledgeQuery(), {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  question: message,
+                  model: currentModel.value
+              }),
+          });
+          
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const result: ApiResponse = await response.json();
+          
+          // 更新queryId
+          if (currentModel.value === 'MCP' && result.data.queryId) {
+              progressStore.stopPolling(true);
+              queryId = result.data.queryId;
+              progressStore.startPolling(queryId, false, true);
+              
+              // 对于MCP模型，我们不立即添加AI响应，而是等待轮询完成
+              // 响应将通过事件监听器添加
+              return;
+          }
+          
+          // 检查API是否返回错误
+          if (result.code !== 200) {
+              throw new Error(result.message || 'API请求失败');
+          }
+          
+          // 对于RAG模型，立即添加AI响应到聊天
+          if (currentModel.value === 'RAG') {
+              const aiMessage = { 
+                  role: 'assistant', 
+                  content: result.data.recommendation || '抱歉，我没能找到相关信息。'
+              };
+              messages.value.push(aiMessage);
+          }
+          
+          // 更新聊天历史
+          if (currentChat.value) {
+              // 更新聊天标题（如果是第一条消息）
+              if (currentChat.value.messages.length === 0) {
+                  currentChat.value.title = message.length > 20 
+                      ? `${message.substring(0, 20)}...` 
+                      : message;
+              }
+              
+              // 保存消息到聊天历史
+              currentChat.value.messages = [...messages.value];
+              currentChat.value.date = new Date();
+              
+              // 更新聊天历史
+              chatHistory.value[currentChatIndex.value] = currentChat.value;
+              localStorage.setItem('chatHistory', JSON.stringify(chatHistory.value));
+          }
+      } catch (e) {
+          error.value = e instanceof Error ? e.message : '发送消息失败，请稍后重试';
+          console.error('Error sending message:', e);
+          
+          // 停止轮询
+          if (currentModel.value === 'MCP' && queryId) {
+              progressStore.stopPolling();
+          }
+      } finally {
+        if (currentModel.value !== 'MCP' || error.value) {
+          isTyping.value = false;
         }
-        currentChat.value.messages = [...messages.value];
       }
-      
-    } catch (e) {
-      console.error('消息发送失败:', e);
-      error.value = e instanceof Error ? e.message : '消息发送失败，请稍后重试';
-      
-      // Add error message
-      messages.value.push({
-        role: 'system',
-        content: `错误: ${error.value}`
-      });
-      
-      // ensure polling is stopped
-      if (currentModel.value === 'MCP') {
-        const progressStore = useProgressStore();
-        progressStore.stopPolling();
-      }
-    } finally {
-      isTyping.value = false;
-    }
   };
 
   const toggleModel = () => {

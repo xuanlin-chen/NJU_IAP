@@ -31,7 +31,7 @@
         @register-success="handleRegisterSuccess"
       />
 
-      <p class="description">这是教育数据聚合平台的首页，提供功能导航。</p>
+      <p class="description"></p>
       <div class="features">
         <div class="feature" @click="navigateTo('dashboard')">
           <div class="feature-icon">

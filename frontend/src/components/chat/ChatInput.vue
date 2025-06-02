@@ -20,6 +20,8 @@
             >
               {{ chatResource.send }}
             </n-button>
+            <!-- 添加插槽 -->
+            <slot name="append"></slot>
           </div>
         </div>
         <div class="chat-footer">
@@ -124,6 +126,8 @@ function sendMessage() {
 
 .input-actions {
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
 }
 
 .button-active {
