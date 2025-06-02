@@ -99,7 +99,7 @@
           <img src="../assets/nju.png" class="footer-logo-img" alt="南京大学logo" />
           <span>南京大学信息聚合平台</span>
         </div>
-        <p class="copyright">© {{ new Date().getFullYear() }} NJU-IAP 团队 保留所有权利</p>
+        <p class="copyright">© {{ new Date().getFullYear() }} NJU-IAP ACA团队 保留所有权利</p>
       </div>
 
       <!-- 登录/注册模态框 -->
