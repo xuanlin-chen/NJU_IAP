@@ -1,11 +1,10 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-// API路由
+
 const api_router = {
     queryProgress: (queryId: string) => `/api/query-progress/${queryId}`,
 };
 
-// API响应接口
 interface ApiResponse {
     code: number;
     data: {
@@ -27,7 +26,6 @@ export const useProgressStore = defineStore("progress", () => {
     const completed = ref(false);
     const pollingInterval = ref<number | null>(null);
 
-  // 开始轮询
     const startPolling = (queryId: string, resetProgress: boolean = true, keepRun = false) => {
         if (isPolling.value && !keepRun) return;
         
@@ -41,13 +39,11 @@ export const useProgressStore = defineStore("progress", () => {
 
         error.value = null;
         
-        // 设置轮询间隔
         pollingInterval.value = window.setInterval(() => {
             checkProgress(queryId);
         }, 1000);
     };
 
-  // 停止轮询
     const stopPolling = (keepRun: boolean = false) => {
         if (pollingInterval.value) {
             window.clearInterval(pollingInterval.value);
@@ -56,7 +52,6 @@ export const useProgressStore = defineStore("progress", () => {
             isPolling.value = keepRun;
     };
 
-    // 检查进度
     const checkProgress = async (queryId: string) => {
         try {
             const response = await fetch(api_router.queryProgress(queryId), {
@@ -69,24 +64,22 @@ export const useProgressStore = defineStore("progress", () => {
             
             const result: ApiResponse = await response.json();
             
-            // 检查API响应
             if (result.code !== 200) {
                 throw new Error(result.message || "获取进度信息失败");
             }
             
-            // 更新进度信息
             progressMessage.value = result.data.message || "处理中...";
             progress.value = result.data.progress || 0;
             
-            // 如果完成，停止轮询并更新聊天消息
+            // 如果检索完成，停止轮询并更新聊天消息
             if (result.data.completed) {
                 completed.value = true;
                 stopPolling();
                 
-                // 如果有推荐结果，更新到聊天消息
+                // 如果有返回结果，更新到聊天消息
                 if (result.data.recommendation) {
                     // 这里需要访问chatStore来更新消息
-                    // 可以通过事件总线或其他方式通知chatStore
+                    // 选择通过事件总线或其他方式通知chatStore
                     const event = new CustomEvent('mcp-result-ready', { 
                         detail: { recommendation: result.data.recommendation }
                     });
@@ -99,7 +92,6 @@ export const useProgressStore = defineStore("progress", () => {
         }
     };
 
-    // 获取查询进度
     const getQueryProgress = async (queryId: string) => {
         try {
             const response = await fetch(api_router.queryProgress(queryId), {

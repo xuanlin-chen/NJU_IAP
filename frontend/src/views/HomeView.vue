@@ -231,7 +231,7 @@ onMounted(() => {
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 70px;
+  gap: 50px;
   border: 1px;
 }
 

@@ -99,7 +99,7 @@ export const useDashboardStore = defineStore("dashboard", {
 								time: event.summary?.time,
 								source: event.summary?.source,
 								type: event.summary?.type,
-								title: event.summary?.title, // 确保保留标题
+								title: event.summary?.title,
 							},
 						};
 					});
