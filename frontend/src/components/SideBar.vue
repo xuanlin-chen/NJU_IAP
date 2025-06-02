@@ -223,7 +223,7 @@ const toggleSidebar = () => {
 /* 响应式调整 */
 @media (min-width: 768px) {
   .sidebar-toggle {
-    left: 250px;
+    left: 350px; /* 调整按钮位置到侧边栏右侧 */
   }
 }
 </style>
