@@ -6,8 +6,8 @@ API_RAG = os.getenv("DASHSCOPE_API_KEY_RAG")
 
 def query_rag(question: str):
     config = {
-        # 'api_key': "sk-abf733f33ea64dcd9362d96bcfb77b6f",
-        'api_key': API_RAG,
+        'api_key': "sk-abf733f33ea64dcd9362d96bcfb77b6f",
+        # 'api_key': API_RAG,
         'app_id': '7c8a24304e1f4f4e943d4472904294de'
     }
         
