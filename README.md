@@ -5,7 +5,7 @@
 （NJU Information Aggregation Platform）
 
 可访问47.122.71.85
-
+（当天最新消息可能无法及时更新，需一天结束后进行总爬取，但未来的DDL是可显示的）
 也可本地运行，git clone后按以下方式运行，但为保护数据库，api等隐私，本地只显示静态页面，无数据：
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
