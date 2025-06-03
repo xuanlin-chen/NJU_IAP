@@ -5,8 +5,9 @@
 （NJU Information Aggregation Platform）
 
 可访问47.122.71.85
+6月3日：服务器目前正在出现问题，正在调试ing，抱歉了
 
-也可本地运行，git clone后按以下方式运行：
+也可本地运行，git clone后按以下方式运行，但为保护数据库，api等隐私，本地只：
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
