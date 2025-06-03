@@ -20,9 +20,6 @@ export type SearchModelType = 'RAG' | 'MCP';
 
 import { useProgressStore } from './progressStore';
 
-// 初始化进度存储 
-const progressStore = useProgressStore();
-
 export const useChatStore = defineStore('chat', () => {
   interface Message {
     role: string;
@@ -36,18 +33,44 @@ export const useChatStore = defineStore('chat', () => {
     date: Date;
   }
 
-  const chatHistory = ref<Chat[]>([
-    { id: '1', title: 'Chat 1', messages: [], date: new Date() },
-    { id: '2', title: 'Chat 2', messages: [], date: new Date() },
-  ]);
+  // 从 localStorage 加载聊天历史，如果没有则使用默认值
+  const loadChatHistory = (): Chat[] => {
+    try {
+      const savedHistory = localStorage.getItem('chatHistory');
+      if (savedHistory) {
+        const parsed = JSON.parse(savedHistory);
+        return parsed.map((chat: any) => ({
+          ...chat,
+          date: new Date(chat.date)
+        }));
+      }
+    } catch (e) {
+      console.error('Error loading chat history:', e);
+    }
+    return [
+      { id: '1', title: '新对话', messages: [], date: new Date() }
+    ];
+  };
+
+  const chatHistory = ref<Chat[]>(loadChatHistory());
   const currentChatIndex = ref(0);
   const currentModel = ref<SearchModelType>('RAG');
-
-  const currentChat = computed(() => chatHistory.value[currentChatIndex.value]);
-
   const messages = ref<Array<{ role: string; content: string }>>([]);
   const isTyping = ref(false);
   const error = ref<string | null>(null);
+
+  // 使用 computed 属性来获取当前聊天
+  const currentChat = computed(() => {
+    return chatHistory.value[currentChatIndex.value] || null;
+  });
+
+  // 初始化进度存储
+  const progressStore = useProgressStore();
+
+  // 初始化时加载当前聊天的消息
+  if (currentChat.value) {
+    messages.value = [...currentChat.value.messages];
+  }
 
   const startNewChat = () => {
     chatHistory.value.push({

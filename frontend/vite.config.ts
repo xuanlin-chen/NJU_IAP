@@ -21,9 +21,20 @@ export default defineConfig({
 		},
 	},
 	build: {
-    chunkSizeWarningLimit: 700,
+		chunkSizeWarningLimit: 700,
+		assetsDir: 'assets',
+		sourcemap: true,
+		minify: 'terser',
+		terserOptions: {
+			compress: {
+				drop_console: false,
+			},
+		},
 		rollupOptions: {
 			output: {
+				assetFileNames: 'assets/[name]-[hash][extname]',
+				chunkFileNames: 'assets/[name]-[hash].js',
+				entryFileNames: 'assets/[name]-[hash].js',
 				manualChunks: (id) => {
 					// Create a chunk for core libraries
 					if (id.includes('node_modules/vue/') || 

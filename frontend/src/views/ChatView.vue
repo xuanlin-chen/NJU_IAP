@@ -156,31 +156,26 @@ interface ChatItem {
   id: string;
   title: string;
   messages: { role: string; content: string }[];
-  date: Date; // Change 'date' to Date type
+  date: Date;
 }
 
-// Ensure chatStore.chatHistory is typed correctly
-const chatStore = useChatStore() as {
-  chatHistory: ChatItem[];
-  messages: { role: string; content: string }[];
-  currentChatIndex: number;
-  currentChat: ChatItem | null;
-  currentModel: SearchModelType;
-  isTyping: boolean;
-  error: string | null;
-  startNewChat: () => void;
-  selectChat: (index: number) => void;
-  deleteChat: (index: number) => void;
-  askExample: (question: string) => void;
-  onSendMessage: (message: string) => void;
-  toggleModel: () => void;
-};
+// 确保 chatStore 在组件挂载前正确初始化
+const chatStore = useChatStore();
 
-// Convert chatHistory dates to Date objects
-chatStore.chatHistory = chatStore.chatHistory.map(chat => ({
-  ...chat,
-  date: new Date(chat.date),
-}));
+// 在 onMounted 中处理日期转换和初始化
+onMounted(() => {
+  // 确保 chatHistory 存在
+  if (chatStore.chatHistory && chatStore.chatHistory.length > 0) {
+    // Convert chatHistory dates to Date objects
+    chatStore.chatHistory = chatStore.chatHistory.map(chat => ({
+      ...chat,
+      date: new Date(chat.date),
+    }));
+  } else {
+    // 如果没有聊天历史，创建一个新的
+    chatStore.startNewChat();
+  }
+});
 
 // 消息容器引用
 const messagesContainer = ref<HTMLElement | null>(null)
