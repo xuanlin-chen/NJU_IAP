@@ -5,7 +5,6 @@
 （NJU Information Aggregation Platform）
 
 可访问47.122.71.85
-6月3日：服务器目前正在出现问题，正在调试ing，抱歉了
 
 也可本地运行，git clone后按以下方式运行，但为保护数据库，api等隐私，本地只显示静态页面，无数据：
 ```bash
