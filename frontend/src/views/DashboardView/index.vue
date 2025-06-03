@@ -3,8 +3,26 @@
     <div>
       <n-spin :show="loading">
         <n-grid :cols="12" :x-gap="16" :y-gap="16" class="dashboard-grid">
-          <!-- 用户头像 -->
+          <!-- 左侧区域 -->
           <n-grid-item :span="1">
+            <!-- 占位，保持布局平衡 -->
+          </n-grid-item>
+          
+          <!-- 消息区域 -->
+          <n-grid-item :span="5">
+            <MessageSection />
+          </n-grid-item>
+
+          <!-- 右侧区域 -->
+          <n-grid-item :span="4">
+            <!-- 日历部分 -->
+            <CalendarSection />
+            <!-- DDL提醒部分 -->
+            <DdlSection />
+          </n-grid-item>
+
+          <!-- 用户头像 - 移到右上角 -->
+          <n-grid-item :span="1" style="position: absolute; top: 1px; right: 8px; width: 150px;">
             <div class="user-avatar-wrapper" @click="showUserModal = true">
               <!-- 根据登录状态动态切换图标 -->
               <AccountIcon v-if="!userStore.isLoggedIn" />
@@ -52,19 +70,6 @@
                 </n-button>
               </n-space>
             </n-modal>
-          </n-grid-item>
-          
-          <!-- 左侧区域 -->
-          <n-grid-item :span="5">
-            <MessageSection />
-          </n-grid-item>
-
-          <!-- 右侧区域 -->
-          <n-grid-item :span="4">
-            <!-- 日历部分 -->
-            <CalendarSection />
-            <!-- DDL提醒部分 -->
-            <DdlSection />
           </n-grid-item>
         </n-grid>
       </n-spin>
@@ -266,6 +271,16 @@ provide("subscriptionStatus", subscriptionStatus);
 // 在组件挂载时异步加载数据
 onMounted(async () => {
   try {
+    // 检查登录状态
+    const response = await fetch('/api/check-login', {
+      credentials: 'include'
+    });
+    const result = await response.json();
+    if (response.ok && result.code === 200) {
+      userStore.user = result.data;
+      userStore.isLoggedIn = true;
+    }
+
     // 异步获取数据
     const dashboardData = await useDashboardData();
     
@@ -273,9 +288,6 @@ onMounted(async () => {
     ddlData.value = dashboardData.ddlData;
     Messages.value = dashboardData.Messages;
     refreshData = dashboardData.refreshData;
-    
-    // 不需要更新 dashboardState，因为它已经引用了正确的响应式对象
-    // dashboardState 中的引用在初始化时已经建立，不需要再赋值
     
     // 确认订阅状态已经初始化
     debugLog('组件挂载后的订阅状态', { 

@@ -125,7 +125,7 @@ const toggleSidebar = () => {
         @update:value="handleMenuSelect"
       />
       <div v-if="!sidebarStore.collapsed" class="footer">
-        <div class="version">{{ sidebarText.footer.version }} 1.0.0</div>
+        <div class="version">{{ sidebarText.footer.version }} 2.0.0</div>
         <div class="copyright">{{ sidebarText.footer.copyright }}</div>
       </div>
     </n-layout-sider>
