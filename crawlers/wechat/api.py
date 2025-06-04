@@ -50,7 +50,7 @@ def page(account_name, num=6):                #要请求的文章页数
             'fakeid': fad,
             'type': '9',
             'query': '',
-            'token': '1097274957',
+            'token': '196188915',
             'lang': 'zh_CN',
             'f': 'json',
             'ajax': '1',
